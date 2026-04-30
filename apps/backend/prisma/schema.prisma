@@ -1,0 +1,1055 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+model Company {
+  id        String  @id @default(uuid())
+  name      String
+  legalName String?
+  logoUrl   String?
+  taxNumber String?
+  address   String?
+  phone     String?
+  email     String?
+
+  defaultCurrency              String? @default("KWD")
+  defaultQuotationValidityDays Int?    @default(30)
+  quotationPrefix              String? @default("QT")
+  invoicePrefix                String? @default("INV")
+  authorizedSignatureUrl       String?
+  companyStampUrl              String?
+  footerText                   String?
+  
+  brandColor                   String? @default("#3B82F6") // Blue by default
+  smtpHost                     String?
+  smtpPort                     Int?
+  smtpUser                     String?
+  smtpPass                     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branches      Branch[]
+  users         User[]
+  customers     Customer[]
+  leads         Lead[]
+  bankAccounts  BankAccount[]
+  quotations    Quotation[]
+  invoices      Invoice[]
+  notifications Notification[]
+  systemSetting SystemSetting?
+}
+
+model Branch {
+  id        String   @id @default(uuid())
+  companyId String
+  name      String
+  code      String   @unique
+  address   String?
+  phone     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  users      User[]
+  customers  Customer[]
+  leads      Lead[]
+  quotations Quotation[]
+  invoices   Invoice[]
+}
+
+model User {
+  id           String     @id @default(uuid())
+  companyId    String
+  branchId     String?
+  name         String
+  email        String     @unique
+  phone        String?
+  passwordHash String
+  status       UserStatus @default(ACTIVE)
+  lastLoginAt  DateTime?
+  refreshToken String?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  branch             Branch?             @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  roles              UserRole[]
+  auditLogs          AuditLog[]          @relation("AuditLogActor")
+  leads              Lead[]              @relation("LeadAssignee")
+  followUps          FollowUp[]          @relation("FollowUpCompleter")
+  timeline           CustomerTimeline[]
+  createdQuotations  Quotation[]         @relation("QuotationCreator")
+  approvalRequests   QuotationApproval[] @relation("ApprovalRequester")
+  approvals          QuotationApproval[] @relation("ApprovalApprover")
+  generatedDocuments Document[]          @relation("DocumentGenerator")
+  createdInvoices    Invoice[]           @relation("InvoiceCreator")
+  receivedPayments   Payment[]           @relation("PaymentReceiver")
+  notifications      Notification[]      @relation("UserNotifications")
+  aiActionLogs       AiActionLog[]
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique // e.g. "Super Admin"
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  action      String   @unique // e.g. "customers.view"
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roles RolePermission[]
+}
+
+model UserRole {
+  userId String
+  roleId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@id([userId, roleId])
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  actorId    String?
+  action     String // e.g. "CREATE", "UPDATE", "DELETE", "LOGIN"
+  module     String // e.g. "Users", "Auth", "Quotations"
+  entityType String // e.g. "User"
+  entityId   String? // ID of the entity affected
+  oldValue   Json?
+  newValue   Json?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation("AuditLogActor", fields: [actorId], references: [id], onDelete: SetNull)
+}
+
+model AppSetting {
+  key         String   @id
+  value       Json
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Attachment {
+  id           String   @id @default(uuid())
+  fileName     String
+  fileUrl      String
+  mimeType     String
+  size         Int
+  uploadedById String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Document {
+  id            String   @id @default(uuid())
+  type          String // e.g. "QUOTATION", "INVOICE"
+  referenceId   String // ID of the associated entity
+  status        String   @default("DRAFT")
+  pdfUrl        String?
+  fileHash      String?
+  fileSizeBytes Int?
+  generatedById String?
+  metadata      Json?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  generatedBy   User?                  @relation("DocumentGenerator", fields: [generatedById], references: [id], onDelete: SetNull)
+  verifications DocumentVerification[]
+}
+
+model DocumentVerification {
+  id         String    @id @default(uuid())
+  documentId String
+  token      String    @unique
+  verifiedAt DateTime?
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+}
+
+enum CustomerType {
+  INDIVIDUAL
+  COMPANY
+  GOVERNMENT
+  CONTRACTOR
+  CONSULTANT
+  RESELLER
+  EXISTING_CLIENT
+  PROSPECT
+}
+
+enum LeadSource {
+  WEBSITE
+  WHATSAPP
+  PHONE_CALL
+  EMAIL
+  INSTAGRAM
+  FACEBOOK
+  REFERRAL
+  EXISTING_CUSTOMER
+  WALK_IN
+  TENDER
+  PARTNER
+  DIRECT_SALES
+  OTHER
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  REQUIREMENT_COLLECTED
+  SITE_VISIT_SCHEDULED
+  SITE_VISITED
+  QUOTATION_IN_PROGRESS
+  QUOTATION_SENT
+  UNDER_NEGOTIATION
+  WON
+  LOST
+  ON_HOLD
+  CANCELLED
+}
+
+enum FollowUpType {
+  CALL
+  WHATSAPP
+  EMAIL
+  MEETING
+  SITE_VISIT
+  INTERNAL_NOTE
+}
+
+model Customer {
+  id                      String       @id @default(uuid())
+  customerCode            String       @unique
+  customerType            CustomerType
+  displayName             String
+  legalName               String?
+  civilIdOrRegistrationNo String?
+  taxNumber               String?
+  industryType            String?
+  category                String?
+
+  email    String?
+  phone    String?
+  whatsapp String?
+  website  String?
+
+  addressLine1  String?
+  addressLine2  String?
+  area          String?
+  city          String?
+  country       String?
+  googleMapsUrl String?
+
+  preferredLanguage String?
+  status            String  @default("ACTIVE")
+  notes             String?
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+  branchId  String?
+  branch    Branch? @relation(fields: [branchId], references: [id])
+
+  contacts   Contact[]
+  leads      Lead[]
+  timeline   CustomerTimeline[]
+  quotations Quotation[]
+  invoices   Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Contact {
+  id         String   @id @default(uuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  name        String
+  designation String?
+  department  String?
+  email       String?
+  phone       String?
+  whatsapp    String?
+  isPrimary   Boolean @default(false)
+  notes       String?
+
+  leads      Lead[]
+  quotations Quotation[]
+  invoices   Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Lead {
+  id            String   @id @default(uuid())
+  enquiryNumber String   @unique
+  customerId    String
+  customer      Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  contactId     String?
+  contact       Contact? @relation(fields: [contactId], references: [id])
+
+  enquiryDate   DateTime   @default(now())
+  serviceTypeId String? // Placeholder
+  source        LeadSource
+
+  assignedToUserId String?
+  assignedTo       User?   @relation("LeadAssignee", fields: [assignedToUserId], references: [id])
+
+  priority            String    @default("MEDIUM")
+  expectedBudget      Float?
+  expectedClosingDate DateTime?
+
+  siteVisitRequired Boolean   @default(false)
+  siteVisitDate     DateTime?
+
+  projectTitle       String
+  requirementSummary String?
+  location           String?
+
+  status LeadStatus @default(NEW)
+  notes  String?
+
+  followUps  FollowUp[]
+  quotations Quotation[]
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id])
+  branchId  String?
+  branch    Branch? @relation(fields: [branchId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FollowUp {
+  id     String @id @default(uuid())
+  leadId String
+  lead   Lead   @relation(fields: [leadId], references: [id], onDelete: Cascade)
+
+  followUpDate     DateTime
+  followUpType     FollowUpType
+  notes            String?
+  nextAction       String?
+  nextFollowUpDate DateTime?
+
+  completedByUserId String?
+  completedBy       User?     @relation("FollowUpCompleter", fields: [completedByUserId], references: [id])
+  completedAt       DateTime?
+  reminderStatus    String    @default("PENDING") // PENDING, SENT, CANCELLED
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CustomerTimeline {
+  id         String   @id @default(uuid())
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  title       String
+  description String?
+  action      String // e.g. CUSTOMER_CREATED, LEAD_ADDED
+
+  entityType String? // e.g. LEAD, FOLLOW_UP
+  entityId   String?
+
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+}
+
+model BankAccount {
+  id        String  @id @default(uuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  bankName      String
+  accountName   String
+  accountNumber String
+  iban          String?
+  swiftCode     String?
+  branch        String?
+  currency      String  @default("KWD")
+  isDefault     Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ServiceType {
+  id                         String  @id @default(uuid())
+  name                       String
+  slug                       String  @unique
+  description                String?
+  defaultQuotationTemplateId String?
+  defaultTerms               Json?
+  visualTheme                String?
+  isActive                   Boolean @default(true)
+
+  products       Product[]
+  serviceItems   ServiceItem[]
+  categories     ProductCategory[]
+  termsTemplates TermsTemplate[]
+  quotations     Quotation[]
+  invoices       Invoice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductCategory {
+  id          String  @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean @default(true)
+
+  serviceTypeId String
+  serviceType   ServiceType @relation(fields: [serviceTypeId], references: [id], onDelete: Restrict)
+
+  parentId String?
+  parent   ProductCategory?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children ProductCategory[] @relation("CategoryHierarchy")
+
+  products Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id                     String  @id @default(uuid())
+  productCode            String  @unique
+  productName            String
+  brand                  String?
+  modelNumber            String?
+  shortDescription       String?
+  detailedDescription    String?
+  technicalSpecification String?
+
+  categoryId String
+  category   ProductCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  serviceTypeId String
+  serviceType   ServiceType @relation(fields: [serviceTypeId], references: [id], onDelete: Restrict)
+
+  unit                String @default("pcs")
+  costPrice           Float  @default(0)
+  sellingPrice        Float  @default(0)
+  minimumSellingPrice Float  @default(0)
+  currency            String @default("KWD")
+
+  taxable Boolean @default(true)
+  taxRate Float   @default(0)
+
+  warrantyPeriod      String?
+  productImage        String?
+  datasheetAttachment String?
+
+  installationNotes String?
+  internalNotes     String?
+
+  isActive Boolean @default(true)
+
+  quotationItems QuotationItem[]
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  invoiceItems InvoiceItem[]
+}
+
+model ServiceItem {
+  id          String  @id @default(uuid())
+  serviceCode String  @unique
+  serviceName String
+  category    String?
+  description String?
+  unit        String  @default("hrs")
+
+  defaultPrice Float @default(0)
+  minimumPrice Float @default(0)
+
+  estimatedDuration        Float?
+  scopeDescription         String?
+  deliverables             String?
+  exclusions               String?
+  warrantyOrSupportDetails String?
+
+  serviceTypeId String
+  serviceType   ServiceType @relation(fields: [serviceTypeId], references: [id], onDelete: Restrict)
+
+  isActive Boolean @default(true)
+
+  quotationItems QuotationItem[]
+
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  invoiceItems InvoiceItem[]
+}
+
+model TermsCategory {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+  isActive    Boolean @default(true)
+
+  templates      TermsTemplate[]
+  quotationTerms QuotationTerm[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model TermsTemplate {
+  id        String  @id @default(uuid())
+  title     String
+  content   String
+  sortOrder Int     @default(0)
+  isDefault Boolean @default(false)
+  isActive  Boolean @default(true)
+
+  categoryId String
+  category   TermsCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  serviceTypeId String?
+  serviceType   ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QuotationTemplate {
+  id          String  @id @default(uuid())
+  name        String  @unique
+  description String?
+
+  coverPageStyle             String?
+  sectionOrder               Json?
+  defaultServiceIntroduction String?
+  defaultScopeSections       Json?
+  defaultTermsCategories     Json?
+  defaultCommercialLayout    String?
+  defaultAcceptancePage      Json?
+  qrVerificationPlacement    String? @default("LAST_PAGE")
+
+  isActive Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quotations Quotation[]
+}
+
+enum QuotationStatus {
+  DRAFT
+  PENDING_REVIEW
+  PENDING_APPROVAL
+  APPROVED
+  SENT_TO_CUSTOMER
+  VIEWED_BY_CUSTOMER
+  UNDER_NEGOTIATION
+  REVISED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+  CONVERTED_TO_INVOICE
+  CANCELLED
+}
+
+enum ItemType {
+  PRODUCT
+  SERVICE
+  CUSTOM
+  SECTION_HEADING
+  OPTIONAL_ITEM
+  DISCOUNT_LINE
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FLAT_AMOUNT
+}
+
+model Quotation {
+  id              String @id @default(uuid())
+  quotationNumber String
+  revisionNumber  Int    @default(0)
+
+  isLocked          Boolean     @default(false)
+  parentQuotationId String?
+  parentQuotation   Quotation?  @relation("QuotationHistory", fields: [parentQuotationId], references: [id])
+  childQuotations   Quotation[] @relation("QuotationHistory")
+
+  sentAt          DateTime?
+  viewedAt        DateTime?
+  acceptedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  branchId  String?
+  branch    Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  contactId  String?
+  contact    Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  leadId     String?
+  lead       Lead?    @relation(fields: [leadId], references: [id], onDelete: SetNull)
+
+  serviceTypeId       String
+  serviceType         ServiceType        @relation(fields: [serviceTypeId], references: [id], onDelete: Restrict)
+  quotationTemplateId String?
+  quotationTemplate   QuotationTemplate? @relation(fields: [quotationTemplateId], references: [id], onDelete: SetNull)
+
+  projectTitle       String?
+  projectLocation    String?
+  requirementSummary String?
+  proposedSolution   String?
+  scopeSummary       String?
+
+  issueDate  DateTime        @default(now())
+  validUntil DateTime?
+  currency   String          @default("KWD")
+  status     QuotationStatus @default(DRAFT)
+
+  subtotal       Float         @default(0)
+  discountType   DiscountType?
+  discountValue  Float?        @default(0)
+  discountAmount Float         @default(0)
+  taxAmount      Float         @default(0)
+  grandTotal     Float         @default(0)
+  totalCost      Float         @default(0)
+  grossMargin    Float         @default(0)
+  amountInWords  String?
+  internalNotes  String?
+
+  items  QuotationItem[]
+  scopes QuotationScope[]
+  terms  QuotationTerm[]
+
+  createdById String?
+  createdBy   User?   @relation("QuotationCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  approvals   QuotationApproval[]
+  shares      QuotationShare[]
+  acceptances QuotationAcceptance[]
+  rejections  QuotationRejection[]
+  invoices    Invoice[]
+
+  @@unique([quotationNumber, revisionNumber])
+}
+
+model QuotationItem {
+  id          String    @id @default(uuid())
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  itemType      ItemType
+  productId     String?
+  product       Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+  serviceItemId String?
+  serviceItem   ServiceItem? @relation(fields: [serviceItemId], references: [id], onDelete: SetNull)
+
+  sectionTitle String?
+  description  String?
+  image        String?
+
+  quantity  Float  @default(1)
+  unit      String @default("pcs")
+  unitPrice Float  @default(0)
+
+  discountType   DiscountType?
+  discountValue  Float?        @default(0)
+  discountAmount Float         @default(0)
+
+  taxRate   Float @default(0)
+  taxAmount Float @default(0)
+  lineTotal Float @default(0)
+  unitCost  Float @default(0)
+  margin    Float @default(0)
+
+  warranty     String?
+  deliveryTime String?
+  remarks      String?
+  isOptional   Boolean @default(false)
+  sortOrder    Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QuotationScope {
+  id          String    @id @default(uuid())
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  sectionTitle String
+  content      String
+  isHidden     Boolean @default(false)
+  sortOrder    Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QuotationTerm {
+  id          String    @id @default(uuid())
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  categoryId String?
+  category   TermsCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+
+  content   String
+  sortOrder Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model QuotationApproval {
+  id             String    @id @default(uuid())
+  quotationId    String
+  quotation      Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  revisionNumber Int
+
+  requestedByUserId String
+  requestedBy       User   @relation("ApprovalRequester", fields: [requestedByUserId], references: [id])
+
+  approverUserId String?
+  approver       User?   @relation("ApprovalApprover", fields: [approverUserId], references: [id])
+
+  status   String  @default("PENDING") // PENDING, APPROVED, REJECTED
+  comments String?
+
+  requestedAt DateTime  @default(now())
+  approvedAt  DateTime?
+  rejectedAt  DateTime?
+}
+
+model QuotationShare {
+  id          String    @id @default(uuid())
+  quotationId String
+  quotation   Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+
+  token          String @unique
+  recipientEmail String
+
+  sentAt        DateTime  @default(now())
+  viewedAt      DateTime?
+  firstViewedAt DateTime?
+  lastViewedAt  DateTime?
+  ipAddress     String?
+  userAgent     String?
+  downloadCount Int       @default(0)
+  expiresAt     DateTime?
+}
+
+enum InvoiceType {
+  DIRECT
+  QUOTATION
+  ADVANCE_PAYMENT
+  MILESTONE
+  FINAL
+  PROFORMA
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  SENT
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+  CANCELLED
+  REFUNDED
+  WRITTEN_OFF
+}
+
+enum PaymentStatus {
+  UNPAID
+  PARTIALLY_PAID
+  PAID
+  OVERDUE
+}
+
+enum PaymentMethod {
+  CASH
+  KNET
+  BANK_TRANSFER
+  CHEQUE
+  ONLINE_LINK
+  OTHER
+}
+
+model Invoice {
+  id            String      @id @default(uuid())
+  invoiceNumber String?     @unique
+  invoiceType   InvoiceType @default(DIRECT)
+
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  branchId  String?
+  branch    Branch? @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  contactId  String?
+  contact    Contact? @relation(fields: [contactId], references: [id], onDelete: SetNull)
+
+  quotationId       String?
+  quotation         Quotation? @relation(fields: [quotationId], references: [id], onDelete: SetNull)
+  quotationRevision Int?
+
+  serviceTypeId String?
+  serviceType   ServiceType? @relation(fields: [serviceTypeId], references: [id], onDelete: SetNull)
+
+  invoiceDate DateTime  @default(now())
+  dueDate     DateTime?
+  currency    String    @default("KWD")
+
+  subtotal       Float         @default(0)
+  discountType   DiscountType?
+  discountValue  Float?        @default(0)
+  discountAmount Float         @default(0)
+  taxAmount      Float         @default(0)
+  grandTotal     Float         @default(0)
+
+  paidAmount    Float @default(0)
+  balanceAmount Float @default(0)
+
+  paymentStatus PaymentStatus @default(UNPAID)
+  invoiceStatus InvoiceStatus @default(DRAFT)
+
+  notes String?
+  terms String?
+
+  createdById String?
+  createdBy   User?   @relation("InvoiceCreator", fields: [createdById], references: [id], onDelete: SetNull)
+
+  items    InvoiceItem[]
+  payments Payment[]
+  shares   InvoiceShare[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InvoiceItem {
+  id        String  @id @default(uuid())
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  itemType      ItemType
+  productId     String?
+  product       Product?     @relation(fields: [productId], references: [id], onDelete: SetNull)
+  serviceItemId String?
+  serviceItem   ServiceItem? @relation(fields: [serviceItemId], references: [id], onDelete: SetNull)
+
+  description String
+  quantity    Float  @default(1)
+  unit        String @default("pcs")
+  unitPrice   Float  @default(0)
+
+  discountType   DiscountType?
+  discountValue  Float?        @default(0)
+  discountAmount Float         @default(0)
+
+  taxRate   Float @default(0)
+  taxAmount Float @default(0)
+  lineTotal Float @default(0)
+
+  sortOrder Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Payment {
+  id        String  @id @default(uuid())
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  paymentDate     DateTime      @default(now())
+  amount          Float
+  paymentMethod   PaymentMethod
+  referenceNumber String?
+  notes           String?
+  attachmentUrl   String?
+  isVerified      Boolean       @default(true) // For customer portal uploads
+  verifiedAt      DateTime?
+
+  receivedByUserId String?
+  receivedBy       User?   @relation("PaymentReceiver", fields: [receivedByUserId], references: [id], onDelete: SetNull)
+
+  receipt PaymentReceipt?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model PaymentReceipt {
+  id        String  @id @default(uuid())
+  paymentId String  @unique
+  payment   Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+
+  receiptNumber String   @unique
+  generatedAt   DateTime @default(now())
+}
+
+model QuotationAcceptance {
+  id             String    @id @default(uuid())
+  quotationId    String
+  quotation      Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  revisionNumber Int
+
+  acceptedByName       String
+  designation          String?
+  email                String?
+  phone                String?
+  digitalSignatureData String? @db.Text
+  acceptanceNote       String?
+  ipAddress            String?
+  userAgent            String?
+
+  acceptedAt DateTime @default(now())
+}
+
+model QuotationRejection {
+  id             String    @id @default(uuid())
+  quotationId    String
+  quotation      Quotation @relation(fields: [quotationId], references: [id], onDelete: Cascade)
+  revisionNumber Int
+
+  rejectedByName String
+  reason         String?
+  note           String?
+  ipAddress      String?
+  userAgent      String?
+
+  rejectedAt DateTime @default(now())
+}
+
+model InvoiceShare {
+  id        String  @id @default(uuid())
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  token          String @unique
+  recipientEmail String
+
+  sentAt        DateTime  @default(now())
+  viewedAt      DateTime?
+  firstViewedAt DateTime?
+  lastViewedAt  DateTime?
+  ipAddress     String?
+  userAgent     String?
+  downloadCount Int       @default(0)
+  expiresAt     DateTime?
+}
+
+enum NotificationType {
+  LEAD
+  QUOTATION
+  INVOICE
+  PAYMENT
+  GENERAL
+}
+
+model Notification {
+  id        String  @id @default(uuid())
+  companyId String
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  userId    String?
+  user      User?   @relation("UserNotifications", fields: [userId], references: [id], onDelete: Cascade)
+
+  title       String
+  message     String
+  type        NotificationType @default(GENERAL)
+  referenceId String? // ID of the related quotation, invoice, or lead
+
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model SystemSetting {
+  id        String  @id @default(uuid())
+  companyId String  @unique
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  configData Json // Stores companyProfile, taxRate, discountThresholds, currency, validityDays, etc.
+
+  updatedAt DateTime @updatedAt
+}
+
+model AiPromptTemplate {
+  id          String  @id @default(uuid())
+  key         String  @unique // e.g. "GENERATE_INTRODUCTION", "SUGGEST_TERMS"
+  name        String
+  description String?
+  promptText  String  @db.Text
+  isActive    Boolean @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AiActionLog {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  actionType String // e.g. "QUOTATION_ASSIST"
+  promptUsed String? @db.Text
+  response   String? @db.Text
+  tokenCount Int?
+
+  createdAt DateTime @default(now())
+}
+
+// We will add settings below directly in the Company schema using sed instead.

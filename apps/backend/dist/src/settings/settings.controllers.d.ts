@@ -1,0 +1,182 @@
+import { CompanySettingsService, BankAccountsService, QuotationTemplatesService } from './settings.services';
+export declare class SettingsController {
+    private readonly service;
+    constructor(service: CompanySettingsService);
+    getCompany(req: any): Promise<{
+        bankAccounts: {
+            id: string;
+            createdAt: Date;
+            updatedAt: Date;
+            companyId: string;
+            branch: string | null;
+            currency: string;
+            isDefault: boolean;
+            bankName: string;
+            accountName: string;
+            accountNumber: string;
+            iban: string | null;
+            swiftCode: string | null;
+        }[];
+    } & {
+        id: string;
+        name: string;
+        legalName: string | null;
+        logoUrl: string | null;
+        taxNumber: string | null;
+        address: string | null;
+        phone: string | null;
+        email: string | null;
+        defaultCurrency: string | null;
+        defaultQuotationValidityDays: number | null;
+        quotationPrefix: string | null;
+        invoicePrefix: string | null;
+        authorizedSignatureUrl: string | null;
+        companyStampUrl: string | null;
+        footerText: string | null;
+        brandColor: string | null;
+        smtpHost: string | null;
+        smtpPort: number | null;
+        smtpUser: string | null;
+        smtpPass: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+    updateCompany(req: any, body: any): Promise<{
+        id: string;
+        name: string;
+        legalName: string | null;
+        logoUrl: string | null;
+        taxNumber: string | null;
+        address: string | null;
+        phone: string | null;
+        email: string | null;
+        defaultCurrency: string | null;
+        defaultQuotationValidityDays: number | null;
+        quotationPrefix: string | null;
+        invoicePrefix: string | null;
+        authorizedSignatureUrl: string | null;
+        companyStampUrl: string | null;
+        footerText: string | null;
+        brandColor: string | null;
+        smtpHost: string | null;
+        smtpPort: number | null;
+        smtpUser: string | null;
+        smtpPass: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
+}
+export declare class BanksController {
+    private readonly service;
+    constructor(service: BankAccountsService);
+    create(req: any, body: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        companyId: string;
+        branch: string | null;
+        currency: string;
+        isDefault: boolean;
+        bankName: string;
+        accountName: string;
+        accountNumber: string;
+        iban: string | null;
+        swiftCode: string | null;
+    }>;
+    update(id: string, body: any): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        companyId: string;
+        branch: string | null;
+        currency: string;
+        isDefault: boolean;
+        bankName: string;
+        accountName: string;
+        accountNumber: string;
+        iban: string | null;
+        swiftCode: string | null;
+    }>;
+    remove(id: string): Promise<{
+        id: string;
+        createdAt: Date;
+        updatedAt: Date;
+        companyId: string;
+        branch: string | null;
+        currency: string;
+        isDefault: boolean;
+        bankName: string;
+        accountName: string;
+        accountNumber: string;
+        iban: string | null;
+        swiftCode: string | null;
+    }>;
+}
+export declare class TemplatesController {
+    private readonly service;
+    constructor(service: QuotationTemplatesService);
+    findAll(): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        description: string | null;
+        coverPageStyle: string | null;
+        sectionOrder: import("@prisma/client/runtime/client").JsonValue | null;
+        defaultServiceIntroduction: string | null;
+        defaultScopeSections: import("@prisma/client/runtime/client").JsonValue | null;
+        defaultTermsCategories: import("@prisma/client/runtime/client").JsonValue | null;
+        defaultCommercialLayout: string | null;
+        defaultAcceptancePage: import("@prisma/client/runtime/client").JsonValue | null;
+        qrVerificationPlacement: string | null;
+        isActive: boolean;
+    }[]>;
+    findOne(id: string): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        description: string | null;
+        coverPageStyle: string | null;
+        sectionOrder: import("@prisma/client/runtime/client").JsonValue | null;
+        defaultServiceIntroduction: string | null;
+        defaultScopeSections: import("@prisma/client/runtime/client").JsonValue | null;
+        defaultTermsCategories: import("@prisma/client/runtime/client").JsonValue | null;
+        defaultCommercialLayout: string | null;
+        defaultAcceptancePage: import("@prisma/client/runtime/client").JsonValue | null;
+        qrVerificationPlacement: string | null;
+        isActive: boolean;
+    }>;
+    create(body: any): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        description: string | null;
+        coverPageStyle: string | null;
+        sectionOrder: import("@prisma/client/runtime/client").JsonValue | null;
+        defaultServiceIntroduction: string | null;
+        defaultScopeSections: import("@prisma/client/runtime/client").JsonValue | null;
+        defaultTermsCategories: import("@prisma/client/runtime/client").JsonValue | null;
+        defaultCommercialLayout: string | null;
+        defaultAcceptancePage: import("@prisma/client/runtime/client").JsonValue | null;
+        qrVerificationPlacement: string | null;
+        isActive: boolean;
+    }>;
+    update(id: string, body: any): Promise<{
+        id: string;
+        name: string;
+        createdAt: Date;
+        updatedAt: Date;
+        description: string | null;
+        coverPageStyle: string | null;
+        sectionOrder: import("@prisma/client/runtime/client").JsonValue | null;
+        defaultServiceIntroduction: string | null;
+        defaultScopeSections: import("@prisma/client/runtime/client").JsonValue | null;
+        defaultTermsCategories: import("@prisma/client/runtime/client").JsonValue | null;
+        defaultCommercialLayout: string | null;
+        defaultAcceptancePage: import("@prisma/client/runtime/client").JsonValue | null;
+        qrVerificationPlacement: string | null;
+        isActive: boolean;
+    }>;
+}
