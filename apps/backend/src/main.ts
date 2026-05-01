@@ -8,6 +8,8 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Security Hardening
+  const httpAdapter = app.getHttpAdapter().getInstance();
+  httpAdapter.set('trust proxy', 1);
   app.use(helmet());
   app.enableCors({
     origin: '*', // For production, this should be restricted
