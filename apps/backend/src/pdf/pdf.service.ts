@@ -23,7 +23,7 @@ export class PdfService {
     };
 
     const routeSegment = SERVICE_TEMPLATE_ROUTES[templateId] || templateId;
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:4201';
     // Remove docId, just use the queryId (quotationId or invoiceId)
     const renderUrl = `${baseUrl}/render-pdf/${routeSegment}?${idParamName}=${queryId}`;
 
