@@ -164,7 +164,7 @@ function transformQuotation(q: any, docId: string) {
     proposalReference: q.quotationNumber || docId,
     revisionNumber: String(q.revisionNumber ?? 0),
     projectLocation: q.projectLocation || "",
-    items: q.items || [],
+    items: (q.items || []).map((i: any) => ({ ...i, brand: i.product?.brand || "" })),
     subtotal: q.subtotal || 0,
     discount: q.discountAmount || 0,
     tax: q.taxAmount || 0,

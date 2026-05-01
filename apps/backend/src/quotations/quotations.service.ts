@@ -111,7 +111,10 @@ export class QuotationsService {
         serviceType: true,
         company: true,
         branch: true,
-        items: { orderBy: { sortOrder: 'asc' } },
+        items: { 
+          orderBy: { sortOrder: 'asc' },
+          include: { product: true, serviceItem: true }
+        },
         scopes: { orderBy: { sortOrder: 'asc' } },
         terms: { orderBy: { sortOrder: 'asc' }, include: { category: true } },
         approvals: {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { api } from "@/lib/axios";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -29,7 +29,8 @@ const STEPS = [
   "Review",
 ];
 
-export default function CreateQuotationWizard() {
+export default function EditQuotationWizard({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const [step, setStep] = useState(0);
   const router = useRouter();
   const { user } = useAuthStore();
@@ -86,19 +87,42 @@ export default function CreateQuotationWizard() {
 
   async function fetchData() {
     try {
-      const [custRes, servRes, prodRes, servItemRes, termsRes] =
+      const [custRes, servRes, prodRes, servItemRes, termsRes, quoteRes] =
         await Promise.all([
           api.get("/customers"),
           api.get("/catalog/service-types"),
           api.get("/catalog/products"),
           api.get("/catalog/service-items"),
           api.get("/terms/templates"),
+          api.get(`/quotations/${id}`),
         ]);
       setCustomers(custRes.data);
       setServiceTypes(servRes.data);
       setProducts(prodRes.data);
       setServiceItems(servItemRes.data);
       setTermsTemplates(termsRes.data);
+      
+      const q = quoteRes.data;
+      setFormData({
+        customerId: q.customerId || "",
+        serviceTypeId: q.serviceTypeId || "",
+        projectTitle: q.projectTitle || "",
+        projectLocation: q.projectLocation || "",
+        items: q.items?.map((i: any) => ({
+          itemType: i.itemType,
+          productId: i.productId,
+          sectionTitle: i.sectionTitle,
+          description: i.description,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+          taxRate: i.taxRate,
+          image: i.image,
+          brand: i.product?.brand,
+        })) || [],
+        scopes: q.scopes || [],
+        terms: q.terms || [],
+        scopeSummary: q.scopeSummary || "",
+      });
     } catch (e) {
       console.error("Failed to load initial data", e);
     }
@@ -119,8 +143,7 @@ export default function CreateQuotationWizard() {
   async function handleSaveDraft() {
     setIsSaving(true);
     try {
-      const { data: quotation } = await api.post("/quotations", {
-        companyId: user?.companyId,
+      await api.patch(`/quotations/${id}`, {
         customerId: formData.customerId,
         serviceTypeId: formData.serviceTypeId,
         projectTitle: formData.projectTitle,
@@ -128,9 +151,7 @@ export default function CreateQuotationWizard() {
         scopeSummary: formData.scopeSummary,
       });
 
-      if (formData.items.length > 0) {
-        await api.post(`/quotations/${quotation.id}/items`, formData.items);
-      }
+      await api.post(`/quotations/${id}/items`, formData.items);
 
       if (formData.terms.length > 0) {
         const payload = formData.terms.map((t: any, idx: number) => ({
@@ -138,10 +159,12 @@ export default function CreateQuotationWizard() {
           content: t.content,
           sortOrder: idx,
         }));
-        await api.post(`/quotations/${quotation.id}/terms`, payload);
+        await api.post(`/quotations/${id}/terms`, payload);
+      } else {
+        await api.post(`/quotations/${id}/terms`, []);
       }
 
-      router.push(`/dashboard/quotations/${quotation.id}`);
+      router.push(`/dashboard/quotations/${id}`);
     } catch (e) {
       console.error(e);
       alert("Failed to save quotation");
@@ -690,7 +713,7 @@ export default function CreateQuotationWizard() {
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-gray-800 tracking-tight">
-          Create Quotation
+          Edit Quotation
         </h1>
       </div>
 
@@ -748,7 +771,7 @@ export default function CreateQuotationWizard() {
               disabled={isSaving}
               className="bg-green-600 hover:bg-green-700"
             >
-              {isSaving ? "Saving..." : "Save as Draft"}{" "}
+              {isSaving ? "Saving..." : "Save Changes"}{" "}
               <Save className="w-4 h-4 ml-2" />
             </Button>
           )}

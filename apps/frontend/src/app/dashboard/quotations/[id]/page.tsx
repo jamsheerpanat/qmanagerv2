@@ -303,7 +303,7 @@ export default function QuotationDetailPage({
             (quotation.status === "DRAFT" ||
               quotation.status === "REVISED") && (
               <>
-                <Button variant="outline">
+                <Button variant="outline" onClick={() => router.push(`/dashboard/quotations/${id}/edit`)}>
                   <Edit className="w-4 h-4 mr-2" /> Edit
                 </Button>
                 <Button
