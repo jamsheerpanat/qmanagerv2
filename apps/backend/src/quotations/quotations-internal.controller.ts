@@ -1,4 +1,10 @@
-import { Controller, Get, Param, Headers, ForbiddenException } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Headers,
+  ForbiddenException,
+} from '@nestjs/common';
 import { QuotationsService } from './quotations.service';
 
 /**

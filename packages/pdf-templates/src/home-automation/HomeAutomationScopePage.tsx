@@ -1,43 +1,168 @@
 import React from "react";
 
 const InnerPageHeader = ({ pageTitle }: { pageTitle?: string }) => (
-  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "2px solid #e2e8f0", paddingBottom: "8px", marginBottom: "20px" }}>
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      borderBottom: "2px solid #e2e8f0",
+      paddingBottom: "8px",
+      marginBottom: "20px",
+    }}
+  >
     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-      <div style={{ width: "28px", height: "28px", borderRadius: "7px", background: "linear-gradient(135deg, #1a56db, #3b82f6)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "12px", fontWeight: "900" }}>O</div>
+      <div
+        style={{
+          width: "28px",
+          height: "28px",
+          borderRadius: "7px",
+          background: "linear-gradient(135deg, #1a56db, #3b82f6)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          fontSize: "12px",
+          fontWeight: "900",
+        }}
+      >
+        O
+      </div>
       <div>
-        <div style={{ fontSize: "9px", fontWeight: "700", color: "#1e3a5f", letterSpacing: "1px" }}>OCTONICS INNOVATIONS</div>
-        {pageTitle && <div style={{ fontSize: "7px", color: "#64748b", letterSpacing: "1px", textTransform: "uppercase" }}>{pageTitle}</div>}
+        <div
+          style={{
+            fontSize: "9px",
+            fontWeight: "700",
+            color: "#1e3a5f",
+            letterSpacing: "1px",
+          }}
+        >
+          OCTONICS INNOVATIONS
+        </div>
+        {pageTitle && (
+          <div
+            style={{
+              fontSize: "7px",
+              color: "#64748b",
+              letterSpacing: "1px",
+              textTransform: "uppercase",
+            }}
+          >
+            {pageTitle}
+          </div>
+        )}
       </div>
     </div>
     <div style={{ textAlign: "right" }}>
-      <div style={{ fontSize: "7px", color: "#94a3b8", letterSpacing: "1px" }}>SMART HOME AUTOMATION PROPOSAL</div>
-      <div style={{ fontSize: "7px", color: "#3b82f6", marginTop: "1px" }}>Confidential Document</div>
+      <div style={{ fontSize: "7px", color: "#94a3b8", letterSpacing: "1px" }}>
+        SMART HOME AUTOMATION PROPOSAL
+      </div>
+      <div style={{ fontSize: "7px", color: "#3b82f6", marginTop: "1px" }}>
+        Confidential Document
+      </div>
     </div>
   </div>
 );
 
 const InnerPageFooter = ({ pageNum }: { pageNum?: number }) => (
-  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderTop: "1px solid #e2e8f0", paddingTop: "8px", marginTop: "auto" }}>
-    <span style={{ fontSize: "7px", color: "#94a3b8" }}>Octonics Innovations — Smart Home Automation Proposal</span>
+  <div
+    style={{
+      display: "flex",
+      justifyContent: "space-between",
+      alignItems: "center",
+      borderTop: "1px solid #e2e8f0",
+      paddingTop: "8px",
+      marginTop: "auto",
+    }}
+  >
+    <span style={{ fontSize: "7px", color: "#94a3b8" }}>
+      Octonics Innovations — Smart Home Automation Proposal
+    </span>
     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-      <div style={{ width: "20px", height: "2px", background: "#1a56db", borderRadius: "1px" }} />
-      {pageNum && <span style={{ fontSize: "8px", color: "#1a56db", fontWeight: "600" }}>{pageNum}</span>}
+      <div
+        style={{
+          width: "20px",
+          height: "2px",
+          background: "#1a56db",
+          borderRadius: "1px",
+        }}
+      />
+      {pageNum && (
+        <span style={{ fontSize: "8px", color: "#1a56db", fontWeight: "600" }}>
+          {pageNum}
+        </span>
+      )}
     </div>
   </div>
 );
 
-const ScopeSection = ({ number, title, intro, features }: { number: string; title: string; intro: string; features: string[] }) => (
+const ScopeSection = ({
+  number,
+  title,
+  intro,
+  features,
+}: {
+  number: string;
+  title: string;
+  intro: string;
+  features: string[];
+}) => (
   <div style={{ marginBottom: "12px", breakInside: "avoid" as any }}>
     <div style={{ display: "flex", gap: "10px", alignItems: "flex-start" }}>
-      <div style={{ minWidth: "26px", height: "26px", borderRadius: "6px", background: "linear-gradient(135deg,#1a56db,#3b82f6)", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: "10px", fontWeight: "800" }}>
+      <div
+        style={{
+          minWidth: "26px",
+          height: "26px",
+          borderRadius: "6px",
+          background: "linear-gradient(135deg,#1a56db,#3b82f6)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          fontSize: "10px",
+          fontWeight: "800",
+        }}
+      >
         {number}
       </div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: "700", fontSize: "9.5px", color: "#0f172a", marginBottom: "3px", fontFamily: "'Montserrat', sans-serif", letterSpacing: "0.3px" }}>{title}</div>
-        <p style={{ fontSize: "8.5px", color: "#475569", lineHeight: "1.5", marginBottom: "5px" }}>{intro}</p>
+        <div
+          style={{
+            fontWeight: "700",
+            fontSize: "9.5px",
+            color: "#0f172a",
+            marginBottom: "3px",
+            fontFamily: "'Montserrat', sans-serif",
+            letterSpacing: "0.3px",
+          }}
+        >
+          {title}
+        </div>
+        <p
+          style={{
+            fontSize: "8.5px",
+            color: "#475569",
+            lineHeight: "1.5",
+            marginBottom: "5px",
+          }}
+        >
+          {intro}
+        </p>
         <div style={{ display: "flex", flexWrap: "wrap" as any, gap: "3px" }}>
           {features.map((f, i) => (
-            <span key={i} style={{ fontSize: "7.5px", color: "#334155", background: "#f1f5f9", padding: "2px 7px", borderRadius: "3px", border: "1px solid #e2e8f0" }}>• {f}</span>
+            <span
+              key={i}
+              style={{
+                fontSize: "7.5px",
+                color: "#334155",
+                background: "#f1f5f9",
+                padding: "2px 7px",
+                borderRadius: "3px",
+                border: "1px solid #e2e8f0",
+              }}
+            >
+              • {f}
+            </span>
           ))}
         </div>
       </div>
@@ -48,46 +173,141 @@ const ScopeSection = ({ number, title, intro, features }: { number: string; titl
 
 const SCOPES = [
   {
-    number: "1",
     title: "LIGHTING AUTOMATION",
-    intro: "Control individual lights, lighting groups, dimming circuits, decorative lighting, outdoor lighting, and complete room scenes from wall keypads, touch panels, and mobile applications.",
-    features: ["ON/OFF control", "Dimming control", "Room-wise control", "Scene-based lighting", "Motion-based automation", "Outdoor & landscape lighting", "Schedule-based operation", "Centralized all-off control"],
+    intro:
+      "Control individual lights, lighting groups, dimming circuits, decorative lighting, outdoor lighting, and complete room scenes from wall keypads, touch panels, and mobile applications.",
+    features: [
+      "ON/OFF control",
+      "Dimming control",
+      "Room-wise control",
+      "Scene-based lighting",
+      "Motion-based automation",
+      "Outdoor & landscape lighting",
+      "Schedule-based operation",
+      "Centralized all-off control",
+    ],
+    keywords: ["light", "dimm", "dali", "illumination", "lamp"],
   },
   {
-    number: "2",
     title: "CURTAIN & BLIND AUTOMATION",
-    intro: "Motorized curtains and blinds integrated into the automation system for smooth control from keypads, apps, schedules, and lifestyle scenes.",
-    features: ["Open / Close / Stop control", "Sheer curtain control", "Blackout curtain control", "Scene-based operation", "Sunrise & sunset scheduling", "Group control"],
+    intro:
+      "Motorized curtains and blinds integrated into the automation system for smooth control from keypads, apps, schedules, and lifestyle scenes.",
+    features: [
+      "Open / Close / Stop control",
+      "Sheer curtain control",
+      "Blackout curtain control",
+      "Scene-based operation",
+      "Sunrise & sunset scheduling",
+      "Group control",
+    ],
+    keywords: ["curtain", "blind", "motor", "shade", "shutter"],
   },
   {
-    number: "3",
     title: "SMART KEYPADS & TOUCH PANELS",
-    intro: "Elegant wall-mounted keypads and touch panels provide a premium control experience. Each button can be programmed for lights, curtains, AC, scenes, and other functions.",
-    features: ["Multi-button programmable keypads", "Custom button functions", "Scene activation", "Status feedback", "Premium finish options", "Touch panel dashboard"],
+    intro:
+      "Elegant wall-mounted keypads and touch panels provide a premium control experience. Each button can be programmed for lights, curtains, AC, scenes, and other functions.",
+    features: [
+      "Multi-button programmable keypads",
+      "Custom button functions",
+      "Scene activation",
+      "Status feedback",
+      "Premium finish options",
+      "Touch panel dashboard",
+    ],
+    keywords: [
+      "keypad",
+      "touch panel",
+      "interface",
+      "push button",
+      "push-button",
+      "touch screen",
+    ],
   },
   {
-    number: "4",
     title: "HVAC & AC CONTROL",
-    intro: "Air conditioning control provides comfortable and efficient climate management across rooms and zones with full integration into the smart home system.",
-    features: ["AC ON/OFF control", "Temperature adjustment", "Mode selection", "Fan speed control", "Zone-wise control", "Schedule-based operation", "Away mode energy saving"],
+    intro:
+      "Air conditioning control provides comfortable and efficient climate management across rooms and zones with full integration into the smart home system.",
+    features: [
+      "AC ON/OFF control",
+      "Temperature adjustment",
+      "Mode selection",
+      "Fan speed control",
+      "Zone-wise control",
+      "Schedule-based operation",
+      "Away mode energy saving",
+    ],
+    keywords: [
+      "hvac",
+      "ac ",
+      "air condition",
+      "coolmaster",
+      "thermostat",
+      "climate",
+    ],
   },
   {
-    number: "5",
     title: "SMART SCENES",
-    intro: "Smart scenes combine multiple actions into a single command — one button adjusts lights, closes curtains, sets AC temperature, and prepares the room for a specific mood.",
-    features: ["Welcome Home", "Good Morning", "Relax Mode", "Dinner Mode", "Movie Mode", "Prayer Mode", "Sleep Mode", "Away Mode", "All Off"],
+    intro:
+      "Smart scenes combine multiple actions into a single command — one button adjusts lights, closes curtains, sets AC temperature, and prepares the room for a specific mood.",
+    features: [
+      "Welcome Home",
+      "Good Morning",
+      "Relax Mode",
+      "Dinner Mode",
+      "Movie Mode",
+      "Prayer Mode",
+      "Sleep Mode",
+      "Away Mode",
+      "All Off",
+    ],
+    keywords: ["scene", "program", "logic", "automation"],
   },
   {
-    number: "6",
     title: "SECURITY & ACCESS INTEGRATION",
-    intro: "Selected security and access systems integrated to enhance safety and convenience throughout the property.",
-    features: ["Video door phone integration", "Main gate/door control", "CCTV viewing integration", "Motion sensor alerts", "Away mode activation", "Panic/emergency scene"],
+    intro:
+      "Selected security and access systems integrated to enhance safety and convenience throughout the property.",
+    features: [
+      "Video door phone integration",
+      "Main gate/door control",
+      "CCTV viewing integration",
+      "Motion sensor alerts",
+      "Away mode activation",
+      "Panic/emergency scene",
+    ],
+    keywords: [
+      "security",
+      "access",
+      "cctv",
+      "intercom",
+      "door",
+      "camera",
+      "lock",
+      "alarm",
+    ],
   },
   {
-    number: "7",
     title: "VISUALIZATION & MOBILE CONTROL",
-    intro: "A customized user interface for mobile, tablet, or wall-mounted control screens allowing easy operation of the full home automation system.",
-    features: ["Room-wise control interface", "Lighting dashboard", "Curtain dashboard", "AC control page", "Scene control", "Remote access", "User-friendly design"],
+    intro:
+      "A customized user interface for mobile, tablet, or wall-mounted control screens allowing easy operation of the full home automation system.",
+    features: [
+      "Room-wise control interface",
+      "Lighting dashboard",
+      "Curtain dashboard",
+      "AC control page",
+      "Scene control",
+      "Remote access",
+      "User-friendly design",
+    ],
+    keywords: [
+      "mobile",
+      "app",
+      "visual",
+      "dashboard",
+      "rti",
+      "remote",
+      "tablet",
+      "smart device",
+    ],
   },
 ];
 
@@ -103,56 +323,182 @@ const DELIVERABLES = [
   "System handover documentation",
 ];
 
-export const HomeAutomationScopePage = () => (
-  <div className="pdf-page" style={{ fontFamily: "'Inter', 'Montserrat', sans-serif", background: "#f8fafc" }}>
-    <div style={{ padding: "14mm 16mm", height: "297mm", display: "flex", flexDirection: "column" }}>
-      <InnerPageHeader pageTitle="Scope, Features & Deliverables" />
+export const HomeAutomationScopePage = ({ items = [] }: { items?: any[] }) => {
+  let activeScopes = SCOPES;
 
-      <div style={{ marginBottom: "10px" }}>
-        <span style={{ fontSize: "7px", fontWeight: "700", letterSpacing: "2px", color: "#3b82f6", textTransform: "uppercase", background: "#eff6ff", padding: "3px 10px", borderRadius: "4px" }}>
-          Page 2 — Proposed Scope
-        </span>
-      </div>
+  if (items && items.length > 0) {
+    const combinedText = items
+      .map((i) => `${i.sectionTitle || ""} ${i.description || ""}`)
+      .join(" ")
+      .toLowerCase();
 
-      <h2 style={{ fontSize: "18px", fontWeight: "800", color: "#0f172a", lineHeight: "1.2", letterSpacing: "-0.3px", fontFamily: "'Montserrat', sans-serif", marginBottom: "4px" }}>
-        PROPOSED HOME<br /><span style={{ color: "#1a56db" }}>AUTOMATION SCOPE</span>
-      </h2>
-      <div style={{ width: "50px", height: "3px", background: "linear-gradient(90deg,#1a56db,#60a5fa)", borderRadius: "2px", marginBottom: "8px" }} />
+    activeScopes = SCOPES.filter((scope) => {
+      // If any of the scope's keywords are found in the combined text of the items
+      return scope.keywords.some((kw) => combinedText.includes(kw));
+    });
 
-      <p style={{ fontSize: "9px", color: "#64748b", marginBottom: "14px" }}>
-        The proposed smart home automation solution can include the following systems based on the selected project scope and approved quotation items.
-      </p>
+    // Fallback if filtering removes everything (shouldn't happen with valid items, but just in case)
+    if (activeScopes.length === 0) {
+      activeScopes = SCOPES;
+    }
+  }
 
-      {/* Scope sections - two column layout */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px", flex: 1 }}>
-        <div>
-          {SCOPES.slice(0, 4).map((s) => (
-            <ScopeSection key={s.number} {...s} />
-          ))}
+  // Assign sequential numbers after filtering
+  const numberedScopes = activeScopes.map((scope, index) => ({
+    ...scope,
+    number: String(index + 1),
+  }));
+
+  const halfIndex = Math.ceil(numberedScopes.length / 2);
+  const leftColumnScopes = numberedScopes.slice(0, halfIndex);
+  const rightColumnScopes = numberedScopes.slice(halfIndex);
+
+  return (
+    <div
+      className="pdf-page"
+      style={{
+        fontFamily: "'Inter', 'Montserrat', sans-serif",
+        background: "#f8fafc",
+      }}
+    >
+      <div
+        style={{
+          padding: "14mm 16mm",
+          height: "297mm",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <InnerPageHeader pageTitle="Scope, Features & Deliverables" />
+
+        <div style={{ marginBottom: "10px" }}>
+          <span
+            style={{
+              fontSize: "7px",
+              fontWeight: "700",
+              letterSpacing: "2px",
+              color: "#3b82f6",
+              textTransform: "uppercase",
+              background: "#eff6ff",
+              padding: "3px 10px",
+              borderRadius: "4px",
+            }}
+          >
+            Page 2 — Proposed Scope
+          </span>
         </div>
-        <div>
-          {SCOPES.slice(4).map((s) => (
-            <ScopeSection key={s.number} {...s} />
-          ))}
 
-          {/* Deliverables */}
-          <div style={{ background: "linear-gradient(135deg,#0f172a,#1e3a5f)", borderRadius: "10px", padding: "12px", marginTop: "4px" }}>
-            <div style={{ color: "#60a5fa", fontSize: "8px", fontWeight: "700", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "8px" }}>
-              📦 Deliverables
-            </div>
-            <div style={{ display: "flex", flexWrap: "wrap" as any, gap: "4px" }}>
-              {DELIVERABLES.map((d, i) => (
-                <div key={i} style={{ display: "flex", alignItems: "center", gap: "4px", width: "100%" }}>
-                  <div style={{ width: "4px", height: "4px", borderRadius: "50%", background: "#3b82f6", flexShrink: 0 }} />
-                  <span style={{ fontSize: "8px", color: "#cbd5e1", lineHeight: "1.4" }}>{d}</span>
-                </div>
-              ))}
+        <h2
+          style={{
+            fontSize: "18px",
+            fontWeight: "800",
+            color: "#0f172a",
+            lineHeight: "1.2",
+            letterSpacing: "-0.3px",
+            fontFamily: "'Montserrat', sans-serif",
+            marginBottom: "4px",
+          }}
+        >
+          PROPOSED HOME
+          <br />
+          <span style={{ color: "#1a56db" }}>AUTOMATION SCOPE</span>
+        </h2>
+        <div
+          style={{
+            width: "50px",
+            height: "3px",
+            background: "linear-gradient(90deg,#1a56db,#60a5fa)",
+            borderRadius: "2px",
+            marginBottom: "8px",
+          }}
+        />
+
+        <p style={{ fontSize: "9px", color: "#64748b", marginBottom: "14px" }}>
+          The proposed smart home automation solution can include the following
+          systems based on the selected project scope and approved quotation
+          items.
+        </p>
+
+        {/* Scope sections - two column layout */}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "0 16px",
+            flex: 1,
+          }}
+        >
+          <div>
+            {leftColumnScopes.map((s) => (
+              <ScopeSection key={s.number} {...s} />
+            ))}
+          </div>
+          <div>
+            {rightColumnScopes.map((s) => (
+              <ScopeSection key={s.number} {...s} />
+            ))}
+
+            {/* Deliverables */}
+            <div
+              style={{
+                background: "linear-gradient(135deg,#0f172a,#1e3a5f)",
+                borderRadius: "10px",
+                padding: "12px",
+                marginTop: "4px",
+              }}
+            >
+              <div
+                style={{
+                  color: "#60a5fa",
+                  fontSize: "8px",
+                  fontWeight: "700",
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                  marginBottom: "8px",
+                }}
+              >
+                📦 Deliverables
+              </div>
+              <div
+                style={{ display: "flex", flexWrap: "wrap" as any, gap: "4px" }}
+              >
+                {DELIVERABLES.map((d, i) => (
+                  <div
+                    key={i}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      width: "100%",
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "4px",
+                        height: "4px",
+                        borderRadius: "50%",
+                        background: "#3b82f6",
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span
+                      style={{
+                        fontSize: "8px",
+                        color: "#cbd5e1",
+                        lineHeight: "1.4",
+                      }}
+                    >
+                      {d}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <InnerPageFooter pageNum={2} />
+        <InnerPageFooter pageNum={2} />
+      </div>
     </div>
-  </div>
-);
+  );
+};

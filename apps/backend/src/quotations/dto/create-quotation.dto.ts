@@ -1,6 +1,13 @@
 import { Type } from 'class-transformer';
-import { 
-  IsString, IsOptional, IsUUID, IsNumber, IsEnum, IsBoolean, IsArray, ValidateNested 
+import {
+  IsString,
+  IsOptional,
+  IsUUID,
+  IsNumber,
+  IsEnum,
+  IsBoolean,
+  IsArray,
+  ValidateNested,
 } from 'class-validator';
 import { QuotationStatus, ItemType, DiscountType } from '@prisma/client';
 

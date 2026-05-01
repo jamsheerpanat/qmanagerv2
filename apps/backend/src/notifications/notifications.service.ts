@@ -26,8 +26,8 @@ export class NotificationsService {
         companyId,
         OR: [
           { userId },
-          { userId: null } // Optional: broadcast to all admins in the company
-        ]
+          { userId: null }, // Optional: broadcast to all admins in the company
+        ],
       },
       orderBy: { createdAt: 'desc' },
       take: 50,
@@ -39,8 +39,8 @@ export class NotificationsService {
       where: {
         companyId,
         isRead: false,
-        OR: [{ userId }, { userId: null }]
-      }
+        OR: [{ userId }, { userId: null }],
+      },
     });
   }
 

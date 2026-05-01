@@ -14,11 +14,7 @@ export default function CatalogProductsPage() {
   const [search, setSearch] = useState("");
   const router = useRouter();
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
-  const fetchProducts = async () => {
+  async function fetchProducts() {
     try {
       const { data } = await api.get("/catalog/products");
       setProducts(data);
@@ -26,6 +22,11 @@ export default function CatalogProductsPage() {
       console.error(e);
     }
   };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
 
   const filtered = products.filter(
     (p: any) =>
@@ -79,21 +80,38 @@ export default function CatalogProductsPage() {
                 >
                   <td className="px-6 py-4">
                     {p.productImage ? (
-                      <img src={p.productImage} alt={p.productName} className="w-10 h-10 object-cover rounded-md border bg-white" />
+                      <img
+                        src={p.productImage}
+                        alt={p.productName}
+                        className="w-10 h-10 object-cover rounded-md border bg-white"
+                      />
                     ) : (
-                      <div className="w-10 h-10 bg-gray-100 rounded-md border flex items-center justify-center text-gray-400 text-xs">No Img</div>
+                      <div className="w-10 h-10 bg-gray-100 rounded-md border flex items-center justify-center text-gray-400 text-xs">
+                        No Img
+                      </div>
                     )}
                   </td>
                   <td className="px-6 py-4 font-medium text-blue-600">
                     {p.productCode}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="font-medium text-gray-900">{p.productName}</div>
-                    <div className="text-xs text-gray-500 mt-1 max-w-[200px] truncate" title={p.shortDescription}>{p.shortDescription || "No description"}</div>
+                    <div className="font-medium text-gray-900">
+                      {p.productName}
+                    </div>
+                    <div
+                      className="text-xs text-gray-500 mt-1 max-w-[200px] truncate"
+                      title={p.shortDescription}
+                    >
+                      {p.shortDescription || "No description"}
+                    </div>
                   </td>
                   <td className="px-6 py-4">{p.brand || "-"}</td>
-                  <td className="px-6 py-4 text-gray-500">{p.category?.name || "-"}</td>
-                  <td className="px-6 py-4 font-semibold">{p.sellingPrice} KWD</td>
+                  <td className="px-6 py-4 text-gray-500">
+                    {p.category?.name || "-"}
+                  </td>
+                  <td className="px-6 py-4 font-semibold">
+                    {p.sellingPrice} KWD
+                  </td>
                   <td className="px-6 py-4 text-gray-500">{p.unit}</td>
                   <td className="px-6 py-4">
                     <Badge variant={p.isActive ? "default" : "secondary"}>

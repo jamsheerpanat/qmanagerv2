@@ -17,12 +17,7 @@ export default function CustomerProfilePage({
   const [timeline, setTimeline] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState("overview");
 
-  useEffect(() => {
-    fetchCustomer();
-    fetchTimeline();
-  }, [id]);
-
-  const fetchCustomer = async () => {
+  async function fetchCustomer() {
     try {
       const { data } = await api.get(`/customers/${id}`);
       setCustomer(data);
@@ -31,7 +26,13 @@ export default function CustomerProfilePage({
     }
   };
 
-  const fetchTimeline = async () => {
+  useEffect(() => {
+    fetchCustomer();
+    fetchTimeline();
+  }, [id]);
+
+
+  async function fetchTimeline() {
     try {
       const { data } = await api.get(`/customers/${id}/timeline`);
       setTimeline(data);

@@ -35,11 +35,7 @@ export default function TermsMasterPage() {
     isActive: true,
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  async function fetchData() {
     try {
       const [catRes, tempRes] = await Promise.all([
         api.get("/terms/categories"),
@@ -54,7 +50,12 @@ export default function TermsMasterPage() {
     }
   };
 
-  const handleSaveCategory = async () => {
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+
+  async function handleSaveCategory() {
     try {
       if (catForm.id) {
         await api.patch(`/terms/categories/${catForm.id}`, catForm);
@@ -68,7 +69,7 @@ export default function TermsMasterPage() {
     }
   };
 
-  const handleSaveTemplate = async () => {
+  async function handleSaveTemplate() {
     try {
       if (tmplForm.id) {
         await api.patch(`/terms/templates/${tmplForm.id}`, tmplForm);
@@ -115,7 +116,9 @@ export default function TermsMasterPage() {
   };
 
   if (loading)
-    return <div className="p-8 text-center text-gray-500">Loading T&C Master...</div>;
+    return (
+      <div className="p-8 text-center text-gray-500">Loading T&C Master...</div>
+    );
 
   return (
     <div className="space-y-6">
@@ -224,14 +227,18 @@ export default function TermsMasterPage() {
       <Dialog open={showCatModal} onOpenChange={setShowCatModal}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{catForm.id ? "Edit Category" : "Add Category"}</DialogTitle>
+            <DialogTitle>
+              {catForm.id ? "Edit Category" : "Add Category"}
+            </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
               <label className="text-sm font-medium">Category Name</label>
               <Input
                 value={catForm.name}
-                onChange={(e) => setCatForm({ ...catForm, name: e.target.value })}
+                onChange={(e) =>
+                  setCatForm({ ...catForm, name: e.target.value })
+                }
                 placeholder="e.g. Payment Terms"
                 className="mt-1"
               />
@@ -289,7 +296,9 @@ export default function TermsMasterPage() {
                     setTmplForm({ ...tmplForm, categoryId: e.target.value })
                   }
                 >
-                  <option value="" disabled>Select Category</option>
+                  <option value="" disabled>
+                    Select Category
+                  </option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.name}

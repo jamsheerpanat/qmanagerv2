@@ -5,7 +5,7 @@ QManager v2 is a next-generation Commercial Management platform designed to hand
 ## Core Features
 
 1. **Lead Management**: Track potential sales, map them to sources, and manage the sales funnel.
-2. **Quotation Engine**: 
+2. **Quotation Engine**:
    - Multi-service support (Smart Home, IT, CCTV).
    - Approval workflows (Threshold-based triggers).
    - Revision tracking and version control.

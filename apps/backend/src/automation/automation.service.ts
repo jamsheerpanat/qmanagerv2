@@ -10,26 +10,28 @@ export class AutomationService {
 
   constructor(
     private prisma: PrismaService,
-    private notificationsService: NotificationsService
+    private notificationsService: NotificationsService,
   ) {}
 
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   async handleDailyExpirations() {
     this.logger.log('Running daily quotation expiration job...');
     const now = new Date();
-    
+
     // Find quotations that have a validUntil date strictly before now and are still in a pre-accepted state
     const expiredQuotations = await this.prisma.quotation.findMany({
       where: {
         validUntil: { lt: now },
-        status: { in: ['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'SENT_TO_CUSTOMER'] }
-      }
+        status: {
+          in: ['DRAFT', 'PENDING_APPROVAL', 'APPROVED', 'SENT_TO_CUSTOMER'],
+        },
+      },
     });
 
     for (const q of expiredQuotations) {
       await this.prisma.quotation.update({
         where: { id: q.id },
-        data: { status: 'EXPIRED' }
+        data: { status: 'EXPIRED' },
       });
 
       await this.notificationsService.createNotification({
@@ -40,7 +42,7 @@ export class AutomationService {
         referenceId: q.id,
       });
     }
-    
+
     this.logger.log(`Expired ${expiredQuotations.length} quotations.`);
   }
 
@@ -53,17 +55,17 @@ export class AutomationService {
       where: {
         dueDate: { lt: now },
         invoiceStatus: { in: ['ISSUED', 'SENT', 'PARTIALLY_PAID'] },
-        balanceAmount: { gt: 0 }
-      }
+        balanceAmount: { gt: 0 },
+      },
     });
 
     for (const inv of overdueInvoices) {
       await this.prisma.invoice.update({
         where: { id: inv.id },
-        data: { 
+        data: {
           invoiceStatus: 'OVERDUE',
-          paymentStatus: 'OVERDUE' 
-        }
+          paymentStatus: 'OVERDUE',
+        },
       });
 
       await this.notificationsService.createNotification({

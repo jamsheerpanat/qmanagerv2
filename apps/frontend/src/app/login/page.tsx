@@ -56,8 +56,12 @@ export default function LoginPage() {
   return (
     <div className="flex h-screen w-full items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">Q-Manager v2</CardTitle>
+        <CardHeader className="flex flex-col items-center gap-2">
+          <img
+            src="/qmanager-logo.jpeg"
+            alt="Q-Manager Logo"
+            className="h-12 w-auto object-contain"
+          />
           <CardDescription>
             Enter your credentials to access the admin portal
           </CardDescription>
@@ -95,14 +99,14 @@ export default function LoginPage() {
             </Button>
 
             <div className="pt-4 border-t mt-4 text-center">
-              <Button 
-                variant="outline" 
-                type="button" 
+              <Button
+                variant="outline"
+                type="button"
                 className="w-full border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
                 onClick={() => {
                   onSubmit({
                     email: "superadmin@qmanager.local",
-                    password: "Admin@123"
+                    password: "Admin@123",
                   });
                 }}
               >

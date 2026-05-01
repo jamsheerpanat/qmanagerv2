@@ -1,1 +1,9 @@
 node_modules
+MobileApp/
+.turbo/
+dist/
+*.log
+*.sql
+lint_output.txt
+.DS_Store
+apps/backend/dist/

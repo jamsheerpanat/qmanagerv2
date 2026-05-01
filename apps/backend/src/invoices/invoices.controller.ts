@@ -1,6 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Req, UseGuards, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Req,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
-import { CreateInvoiceDto, RecordPaymentDto, InvoiceItemDto } from './dto/create-invoice.dto';
+import {
+  CreateInvoiceDto,
+  RecordPaymentDto,
+  InvoiceItemDto,
+} from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
@@ -22,9 +36,13 @@ export class InvoicesController {
   createFromQuotation(
     @Param('quotationId') quotationId: string,
     @Body('invoiceType') type: InvoiceType,
-    @Req() req: any
+    @Req() req: any,
   ) {
-    return this.invoicesService.createFromQuotation(quotationId, type || InvoiceType.QUOTATION, req.user.id);
+    return this.invoicesService.createFromQuotation(
+      quotationId,
+      type || InvoiceType.QUOTATION,
+      req.user.id,
+    );
   }
 
   @RequirePermissions('invoices.view')
@@ -59,7 +77,11 @@ export class InvoicesController {
 
   @RequirePermissions('invoices.record_payment')
   @Post(':id/payments')
-  recordPayment(@Param('id') id: string, @Body() dto: RecordPaymentDto, @Req() req: any) {
+  recordPayment(
+    @Param('id') id: string,
+    @Body() dto: RecordPaymentDto,
+    @Req() req: any,
+  ) {
     return this.invoicesService.recordPayment(id, dto, req.user.id);
   }
 

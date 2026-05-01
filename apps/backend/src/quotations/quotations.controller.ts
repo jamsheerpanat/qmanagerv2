@@ -1,6 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+  Query,
+} from '@nestjs/common';
 import { QuotationsService } from './quotations.service';
-import { CreateQuotationDto, QuotationItemDto, QuotationScopeDto, QuotationTermDto } from './dto/create-quotation.dto';
+import {
+  CreateQuotationDto,
+  QuotationItemDto,
+  QuotationScopeDto,
+  QuotationTermDto,
+} from './dto/create-quotation.dto';
 import { UpdateQuotationDto } from './dto/update-quotation.dto';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -20,7 +36,13 @@ export class QuotationsController {
   @RequirePermissions('quotations.view')
   @Get()
   findAll(@Req() req: any, @Query() query: any) {
-    const { companyId } = req.user;
+    const { companyId, id, permissions } = req.user;
+
+    // If the user does not have view_all permission, restrict to their own quotations
+    if (!permissions || !permissions.includes('quotations.view_all')) {
+      query.createdById = id;
+    }
+
     return this.quotationsService.findAll(companyId, query);
   }
 
@@ -32,7 +54,10 @@ export class QuotationsController {
 
   @RequirePermissions('quotations.update')
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateQuotationDto: UpdateQuotationDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateQuotationDto: UpdateQuotationDto,
+  ) {
     return this.quotationsService.update(id, updateQuotationDto);
   }
 
@@ -50,7 +75,10 @@ export class QuotationsController {
 
   @RequirePermissions('quotations.update')
   @Patch(':id/scope')
-  replaceScopes(@Param('id') id: string, @Body() scopesDto: QuotationScopeDto[]) {
+  replaceScopes(
+    @Param('id') id: string,
+    @Body() scopesDto: QuotationScopeDto[],
+  ) {
     return this.quotationsService.replaceScopes(id, scopesDto);
   }
 
@@ -68,13 +96,21 @@ export class QuotationsController {
 
   @RequirePermissions('quotations.approve')
   @Post(':id/approve')
-  approve(@Param('id') id: string, @Req() req: any, @Body('comments') comments: string) {
+  approve(
+    @Param('id') id: string,
+    @Req() req: any,
+    @Body('comments') comments: string,
+  ) {
     return this.quotationsService.approve(id, req.user?.id, comments);
   }
 
   @RequirePermissions('quotations.approve')
   @Post(':id/reject')
-  reject(@Param('id') id: string, @Req() req: any, @Body('comments') comments: string) {
+  reject(
+    @Param('id') id: string,
+    @Req() req: any,
+    @Body('comments') comments: string,
+  ) {
     return this.quotationsService.reject(id, req.user?.id, comments);
   }
 
@@ -92,7 +128,11 @@ export class QuotationsController {
 
   @RequirePermissions('quotations.send')
   @Post(':id/send')
-  sendQuotation(@Param('id') id: string, @Body('recipientEmail') email: string, @Req() req: any) {
+  sendQuotation(
+    @Param('id') id: string,
+    @Body('recipientEmail') email: string,
+    @Req() req: any,
+  ) {
     return this.quotationsService.sendQuotation(id, email, req.user?.id);
   }
 

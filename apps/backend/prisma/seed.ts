@@ -268,17 +268,37 @@ async function main() {
 
   // 10. Seed Customers
   const customersList = [
-    { name: 'Acme Corporation', email: 'contact@acmecorp.com', industryType: 'Technology' },
-    { name: 'Global Logistics LLC', email: 'procurement@globallog.com', industryType: 'Logistics' },
-    { name: 'Skyline Real Estate', email: 'info@skylinere.com', industryType: 'Real Estate' },
-    { name: 'TechNova Solutions', email: 'sales@technova.com', industryType: 'IT Services' },
-    { name: 'Retail Giants', email: 'vendor-management@retailgiants.com', industryType: 'Retail' }
+    {
+      name: 'Acme Corporation',
+      email: 'contact@acmecorp.com',
+      industryType: 'Technology',
+    },
+    {
+      name: 'Global Logistics LLC',
+      email: 'procurement@globallog.com',
+      industryType: 'Logistics',
+    },
+    {
+      name: 'Skyline Real Estate',
+      email: 'info@skylinere.com',
+      industryType: 'Real Estate',
+    },
+    {
+      name: 'TechNova Solutions',
+      email: 'sales@technova.com',
+      industryType: 'IT Services',
+    },
+    {
+      name: 'Retail Giants',
+      email: 'vendor-management@retailgiants.com',
+      industryType: 'Retail',
+    },
   ];
 
   const customersMap = new Map<string, any>();
   for (let i = 0; i < customersList.length; i++) {
     const c = customersList[i];
-    const customerCode = `CUST-00${i+1}`;
+    const customerCode = `CUST-00${i + 1}`;
     const cust = await prisma.customer.upsert({
       where: { customerCode },
       update: {},
@@ -290,33 +310,43 @@ async function main() {
         email: c.email,
         phone: `+1 555-010${i}`,
         industryType: c.industryType,
-        customerCode
-      }
+        customerCode,
+      },
     });
     customersMap.set(c.name, cust);
   }
 
   // 11. Seed Product Categories
-  const smartHomeST = await prisma.serviceType.findFirst({ where: { slug: 'smart-home-automation' }});
-  const swDevST = await prisma.serviceType.findFirst({ where: { slug: 'software-development' }});
-  const itInfraST = await prisma.serviceType.findFirst({ where: { slug: 'it-infrastructure' }});
-  const cctvST = await prisma.serviceType.findFirst({ where: { slug: 'cctv-access-control' }});
+  const smartHomeST = await prisma.serviceType.findFirst({
+    where: { slug: 'smart-home-automation' },
+  });
+  const swDevST = await prisma.serviceType.findFirst({
+    where: { slug: 'software-development' },
+  });
+  const itInfraST = await prisma.serviceType.findFirst({
+    where: { slug: 'it-infrastructure' },
+  });
+  const cctvST = await prisma.serviceType.findFirst({
+    where: { slug: 'cctv-access-control' },
+  });
 
   const productCats = [
     { name: 'Smart Home Devices', stId: smartHomeST?.id },
     { name: 'Network Switches', stId: itInfraST?.id },
     { name: 'CCTV Cameras', stId: cctvST?.id },
     { name: 'Software Licenses', stId: swDevST?.id },
-    { name: 'Consulting Hours', stId: swDevST?.id }
+    { name: 'Consulting Hours', stId: swDevST?.id },
   ];
-  
+
   const pCatsMap = new Map<string, any>();
   for (const pc of productCats) {
     if (!pc.stId) continue;
-    let cat = await prisma.productCategory.findFirst({ where: { name: pc.name, serviceTypeId: pc.stId } });
+    let cat = await prisma.productCategory.findFirst({
+      where: { name: pc.name, serviceTypeId: pc.stId },
+    });
     if (!cat) {
       cat = await prisma.productCategory.create({
-        data: { name: pc.name, serviceTypeId: pc.stId, isActive: true }
+        data: { name: pc.name, serviceTypeId: pc.stId, isActive: true },
       });
     }
     pCatsMap.set(pc.name, cat);
@@ -324,18 +354,54 @@ async function main() {
 
   // 12. Seed Products
   const productsList = [
-    { name: 'Smart Relay 4-Channel', code: 'SR-04', cat: 'Smart Home Devices', price: 150, cost: 90 },
-    { name: 'KNX Touch Panel', code: 'KNX-TP10', cat: 'Smart Home Devices', price: 450, cost: 300 },
-    { name: '24-Port PoE Switch', code: 'NET-24P', cat: 'Network Switches', price: 299, cost: 150 },
-    { name: '4K Dome Camera', code: 'CAM-4K', cat: 'CCTV Cameras', price: 120, cost: 65 },
-    { name: 'Enterprise ERP License', code: 'SW-ERP', cat: 'Software Licenses', price: 5000, cost: 0 },
-    { name: 'Senior Developer (Hourly)', code: 'SRV-DEV', cat: 'Consulting Hours', price: 150, cost: 50 }
+    {
+      name: 'Smart Relay 4-Channel',
+      code: 'SR-04',
+      cat: 'Smart Home Devices',
+      price: 150,
+      cost: 90,
+    },
+    {
+      name: 'KNX Touch Panel',
+      code: 'KNX-TP10',
+      cat: 'Smart Home Devices',
+      price: 450,
+      cost: 300,
+    },
+    {
+      name: '24-Port PoE Switch',
+      code: 'NET-24P',
+      cat: 'Network Switches',
+      price: 299,
+      cost: 150,
+    },
+    {
+      name: '4K Dome Camera',
+      code: 'CAM-4K',
+      cat: 'CCTV Cameras',
+      price: 120,
+      cost: 65,
+    },
+    {
+      name: 'Enterprise ERP License',
+      code: 'SW-ERP',
+      cat: 'Software Licenses',
+      price: 5000,
+      cost: 0,
+    },
+    {
+      name: 'Senior Developer (Hourly)',
+      code: 'SRV-DEV',
+      cat: 'Consulting Hours',
+      price: 150,
+      cost: 50,
+    },
   ];
 
   for (const p of productsList) {
     const cat = pCatsMap.get(p.cat);
     if (!cat) continue;
-    
+
     await prisma.product.upsert({
       where: { productCode: p.code },
       update: {},
@@ -347,7 +413,7 @@ async function main() {
         sellingPrice: p.price,
         costPrice: p.cost,
         isActive: true,
-      }
+      },
     });
   }
 
@@ -367,8 +433,8 @@ async function main() {
         expectedBudget: 15000,
         status: 'NEW',
         source: 'WEBSITE',
-        enquiryDate: new Date()
-      }
+        enquiryDate: new Date(),
+      },
     });
 
     await prisma.lead.upsert({
@@ -382,8 +448,8 @@ async function main() {
         expectedBudget: 8500,
         status: 'QUOTATION_IN_PROGRESS',
         source: 'PHONE_CALL',
-        enquiryDate: new Date()
-      }
+        enquiryDate: new Date(),
+      },
     });
   } // closing if block properly
 
@@ -393,16 +459,36 @@ async function main() {
     update: {},
     create: {
       name: 'Standard Hardware Terms',
-      isActive: true
-    }
+      isActive: true,
+    },
   });
 
   const sampleTerms = [
-    { title: "1. Scope of Work", content: "The Contractor shall provide all necessary labor, materials, tools, and equipment to complete the Integration as described in this proposal." },
-    { title: "2. Payment Terms", content: "A 50% advance payment is required upon acceptance. 40% upon delivery of equipment. 10% upon successful testing and commissioning." },
-    { title: "3. Warranty", content: "All hardware is covered by a 2-year manufacturer warranty. The Contractor provides a 1-year workmanship warranty from the date of commissioning." },
-    { title: "4. Intellectual Property", content: "All programming files, source code, and configurations remain the property of the Contractor until full payment is received." },
-    { title: "5. Limitation of Liability", content: "The Contractor shall not be liable for any indirect, incidental, special, or consequential damages arising out of the performance of this agreement." }
+    {
+      title: '1. Scope of Work',
+      content:
+        'The Contractor shall provide all necessary labor, materials, tools, and equipment to complete the Integration as described in this proposal.',
+    },
+    {
+      title: '2. Payment Terms',
+      content:
+        'A 50% advance payment is required upon acceptance. 40% upon delivery of equipment. 10% upon successful testing and commissioning.',
+    },
+    {
+      title: '3. Warranty',
+      content:
+        'All hardware is covered by a 2-year manufacturer warranty. The Contractor provides a 1-year workmanship warranty from the date of commissioning.',
+    },
+    {
+      title: '4. Intellectual Property',
+      content:
+        'All programming files, source code, and configurations remain the property of the Contractor until full payment is received.',
+    },
+    {
+      title: '5. Limitation of Liability',
+      content:
+        'The Contractor shall not be liable for any indirect, incidental, special, or consequential damages arising out of the performance of this agreement.',
+    },
   ];
 
   for (const term of sampleTerms) {
@@ -414,8 +500,8 @@ async function main() {
         id: slugId,
         title: term.title,
         content: term.content,
-        categoryId: tcCategory.id
-      }
+        categoryId: tcCategory.id,
+      },
     });
   }
 

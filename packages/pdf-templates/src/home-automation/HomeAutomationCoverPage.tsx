@@ -73,34 +73,104 @@ export const HomeAutomationCoverPage = ({
       }}
     >
       {/* Header: Logo + Company */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+        }}
+      >
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <img src="/octonics-logo.png" alt="Octonics" style={{ height: "40px", width: "auto", objectFit: "contain", filter: "brightness(0) invert(1)" }} />
+            <img
+              src="/octonics-logo.png"
+              alt="Octonics"
+              style={{
+                height: "40px",
+                width: "auto",
+                objectFit: "contain",
+                filter: "brightness(0) invert(1)",
+              }}
+            />
             <div>
-              <div style={{ color: "white", fontWeight: "700", fontSize: "14px", letterSpacing: "1px" }}>
+              <div
+                style={{
+                  color: "white",
+                  fontWeight: "700",
+                  fontSize: "14px",
+                  letterSpacing: "1px",
+                }}
+              >
                 OCTONICS
               </div>
-              <div style={{ color: "#60a5fa", fontSize: "9px", letterSpacing: "2px", textTransform: "uppercase" }}>
+              <div
+                style={{
+                  color: "#60a5fa",
+                  fontSize: "9px",
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                }}
+              >
                 INNOVATIONS
               </div>
             </div>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "4px", alignItems: "flex-end" }}>
-            <img src="/knx-partner-logo.jpg" alt="KNX" style={{ height: "22px", width: "auto", objectFit: "contain", opacity: 0.7 }} />
-            <img src="/iso-certification.gif" alt="ISO" style={{ height: "22px", width: "auto", objectFit: "contain", opacity: 0.7 }} />
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: "4px",
+              alignItems: "flex-end",
+            }}
+          >
+            <img
+              src="/knx-partner-logo.jpg"
+              alt="KNX"
+              style={{
+                height: "22px",
+                width: "auto",
+                objectFit: "contain",
+                opacity: 0.7,
+              }}
+            />
+            <img
+              src="/iso-certification.gif"
+              alt="ISO"
+              style={{
+                height: "22px",
+                width: "auto",
+                objectFit: "contain",
+                opacity: 0.7,
+              }}
+            />
           </div>
           <div style={{ textAlign: "right" }}>
-            <div style={{ color: "#94a3b8", fontSize: "8px", letterSpacing: "2px", textTransform: "uppercase" }}>
+            <div
+              style={{
+                color: "#94a3b8",
+                fontSize: "8px",
+                letterSpacing: "2px",
+                textTransform: "uppercase",
+              }}
+            >
               Reference
             </div>
-            <div style={{ color: "#60a5fa", fontSize: "12px", fontWeight: "600", marginTop: "2px" }}>
+            <div
+              style={{
+                color: "#60a5fa",
+                fontSize: "12px",
+                fontWeight: "600",
+                marginTop: "2px",
+              }}
+            >
               {proposalReference || "OC-2025-0001"}
             </div>
             {revisionNumber && revisionNumber !== "0" && (
-              <div style={{ color: "#94a3b8", fontSize: "9px", marginTop: "2px" }}>
+              <div
+                style={{ color: "#94a3b8", fontSize: "9px", marginTop: "2px" }}
+              >
                 Rev. {revisionNumber}
               </div>
             )}
@@ -109,7 +179,15 @@ export const HomeAutomationCoverPage = ({
       </div>
 
       {/* Center: Main Title */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", paddingTop: "20mm" }}>
+      <div
+        style={{
+          flex: 1,
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          paddingTop: "20mm",
+        }}
+      >
         {/* Category badge */}
         <div style={{ marginBottom: "12px" }}>
           <span
@@ -158,21 +236,45 @@ export const HomeAutomationCoverPage = ({
           }}
         />
 
-        <p style={{ color: "#94a3b8", fontSize: "11px", lineHeight: "1.6", maxWidth: "320px" }}>
-          A premium intelligent living solution designed for comfort, luxury, security, and effortless control.
+        <p
+          style={{
+            color: "#94a3b8",
+            fontSize: "11px",
+            lineHeight: "1.6",
+            maxWidth: "320px",
+          }}
+        >
+          A premium intelligent living solution designed for comfort, luxury,
+          security, and effortless control.
         </p>
 
         {/* Project name */}
         {projectName && (
           <div style={{ marginTop: "16px" }}>
-            <div style={{ color: "#64748b", fontSize: "8px", letterSpacing: "2px", textTransform: "uppercase" }}>
+            <div
+              style={{
+                color: "#64748b",
+                fontSize: "8px",
+                letterSpacing: "2px",
+                textTransform: "uppercase",
+              }}
+            >
               Project
             </div>
-            <div style={{ color: "white", fontSize: "16px", fontWeight: "700", marginTop: "3px" }}>
+            <div
+              style={{
+                color: "white",
+                fontSize: "16px",
+                fontWeight: "700",
+                marginTop: "3px",
+              }}
+            >
               {projectName}
             </div>
             {projectLocation && (
-              <div style={{ color: "#60a5fa", fontSize: "10px", marginTop: "2px" }}>
+              <div
+                style={{ color: "#60a5fa", fontSize: "10px", marginTop: "2px" }}
+              >
                 📍 {projectLocation}
               </div>
             )}
@@ -191,27 +293,66 @@ export const HomeAutomationCoverPage = ({
         }}
       >
         <div>
-          <div style={{ color: "#64748b", fontSize: "7px", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "4px" }}>
+          <div
+            style={{
+              color: "#64748b",
+              fontSize: "7px",
+              letterSpacing: "2px",
+              textTransform: "uppercase",
+              marginBottom: "4px",
+            }}
+          >
             Prepared For
           </div>
-          <div style={{ color: "white", fontWeight: "600", fontSize: "12px" }}>{customerName || "—"}</div>
+          <div style={{ color: "white", fontWeight: "600", fontSize: "12px" }}>
+            {customerName || "—"}
+          </div>
           {customerCompany && (
-            <div style={{ color: "#94a3b8", fontSize: "10px", marginTop: "1px" }}>{customerCompany}</div>
+            <div
+              style={{ color: "#94a3b8", fontSize: "10px", marginTop: "1px" }}
+            >
+              {customerCompany}
+            </div>
           )}
         </div>
         <div>
-          <div style={{ color: "#64748b", fontSize: "7px", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "4px" }}>
+          <div
+            style={{
+              color: "#64748b",
+              fontSize: "7px",
+              letterSpacing: "2px",
+              textTransform: "uppercase",
+              marginBottom: "4px",
+            }}
+          >
             Prepared By
           </div>
-          <div style={{ color: "white", fontWeight: "600", fontSize: "12px" }}>Octonics Innovations</div>
-          <div style={{ color: "#94a3b8", fontSize: "10px", marginTop: "1px" }}>Kuwait</div>
+          <div style={{ color: "white", fontWeight: "600", fontSize: "12px" }}>
+            Octonics Innovations
+          </div>
+          <div style={{ color: "#94a3b8", fontSize: "10px", marginTop: "1px" }}>
+            Kuwait
+          </div>
         </div>
         <div style={{ textAlign: "right" }}>
-          <div style={{ color: "#64748b", fontSize: "7px", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "4px" }}>
+          <div
+            style={{
+              color: "#64748b",
+              fontSize: "7px",
+              letterSpacing: "2px",
+              textTransform: "uppercase",
+              marginBottom: "4px",
+            }}
+          >
             Proposal Date
           </div>
           <div style={{ color: "white", fontWeight: "600", fontSize: "12px" }}>
-            {proposalDate || new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "long", year: "numeric" })}
+            {proposalDate ||
+              new Date().toLocaleDateString("en-GB", {
+                day: "2-digit",
+                month: "long",
+                year: "numeric",
+              })}
           </div>
         </div>
       </div>

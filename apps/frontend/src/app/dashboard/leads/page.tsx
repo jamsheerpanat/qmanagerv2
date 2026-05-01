@@ -21,11 +21,7 @@ export default function LeadsPage() {
   const [view, setView] = useState<"kanban" | "list">("kanban");
   const router = useRouter();
 
-  useEffect(() => {
-    fetchLeads();
-  }, []);
-
-  const fetchLeads = async () => {
+  async function fetchLeads() {
     try {
       const { data } = await api.get("/leads");
       setLeads(data);
@@ -33,6 +29,11 @@ export default function LeadsPage() {
       console.error(e);
     }
   };
+
+  useEffect(() => {
+    fetchLeads();
+  }, []);
+
 
   return (
     <div className="space-y-6">

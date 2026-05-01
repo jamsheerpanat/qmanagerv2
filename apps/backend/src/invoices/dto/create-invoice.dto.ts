@@ -1,39 +1,61 @@
-import { IsString, IsOptional, IsNumber, IsEnum, IsArray, ValidateNested, IsDateString } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsEnum,
+  IsArray,
+  ValidateNested,
+  IsDateString,
+} from 'class-validator';
 import { Type } from 'class-transformer';
-import { InvoiceType, ItemType, DiscountType, PaymentMethod } from '@prisma/client';
+import {
+  InvoiceType,
+  ItemType,
+  DiscountType,
+  PaymentMethod,
+} from '@prisma/client';
 
 export class InvoiceItemDto {
   @IsEnum(ItemType)
   itemType: ItemType;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   productId?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   serviceItemId?: string;
 
   @IsString()
   description: string;
 
-  @IsOptional() @IsNumber()
+  @IsOptional()
+  @IsNumber()
   quantity?: number;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   unit?: string;
 
-  @IsOptional() @IsNumber()
+  @IsOptional()
+  @IsNumber()
   unitPrice?: number;
 
-  @IsOptional() @IsEnum(DiscountType)
+  @IsOptional()
+  @IsEnum(DiscountType)
   discountType?: DiscountType;
 
-  @IsOptional() @IsNumber()
+  @IsOptional()
+  @IsNumber()
   discountValue?: number;
 
-  @IsOptional() @IsNumber()
+  @IsOptional()
+  @IsNumber()
   taxRate?: number;
 
-  @IsOptional() @IsNumber()
+  @IsOptional()
+  @IsNumber()
   sortOrder?: number;
 }
 
@@ -41,31 +63,38 @@ export class CreateInvoiceDto {
   @IsString()
   companyId: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   branchId?: string;
 
   @IsString()
   customerId: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   contactId?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   serviceTypeId?: string;
 
   @IsEnum(InvoiceType)
   invoiceType: InvoiceType;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   currency?: string;
 
-  @IsOptional() @IsDateString()
+  @IsOptional()
+  @IsDateString()
   dueDate?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   notes?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   terms?: string;
 
   @IsOptional()
@@ -82,15 +111,19 @@ export class RecordPaymentDto {
   @IsEnum(PaymentMethod)
   paymentMethod: PaymentMethod;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   referenceNumber?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   notes?: string;
 
-  @IsOptional() @IsString()
+  @IsOptional()
+  @IsString()
   attachmentUrl?: string;
 
-  @IsOptional() @IsDateString()
+  @IsOptional()
+  @IsDateString()
   paymentDate?: string;
 }

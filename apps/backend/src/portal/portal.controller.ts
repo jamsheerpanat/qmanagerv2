@@ -13,14 +13,22 @@ export class PortalController {
   }
 
   @Post('quotations/:token/accept')
-  acceptQuotation(@Param('token') token: string, @Body() body: any, @Req() req: any) {
+  acceptQuotation(
+    @Param('token') token: string,
+    @Body() body: any,
+    @Req() req: any,
+  ) {
     const ip = req.ip || req.connection?.remoteAddress;
     const ua = req.headers['user-agent'];
     return this.portalService.acceptQuotation(token, body, ip, ua);
   }
 
   @Post('quotations/:token/reject')
-  rejectQuotation(@Param('token') token: string, @Body() body: any, @Req() req: any) {
+  rejectQuotation(
+    @Param('token') token: string,
+    @Body() body: any,
+    @Req() req: any,
+  ) {
     const ip = req.ip || req.connection?.remoteAddress;
     const ua = req.headers['user-agent'];
     return this.portalService.rejectQuotation(token, body, ip, ua);

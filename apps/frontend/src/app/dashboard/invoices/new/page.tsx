@@ -12,7 +12,7 @@ import { Save, ArrowLeft, Plus } from "lucide-react";
 export default function CreateDirectInvoicePage() {
   const router = useRouter();
   const { user } = useAuthStore();
-  
+
   const [customers, setCustomers] = useState<any[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -24,14 +24,10 @@ export default function CreateDirectInvoicePage() {
     currency: "KWD",
     notes: "",
     terms: "",
-    items: []
+    items: [],
   });
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  async function fetchData() {
     try {
       const [custRes, prodRes] = await Promise.all([
         api.get("/customers"),
@@ -43,6 +39,11 @@ export default function CreateDirectInvoicePage() {
       console.error("Failed to load initial data", e);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
 
   const updateForm = (field: string, value: any) => {
     setFormData((prev: any) => ({ ...prev, [field]: value }));
@@ -87,7 +88,7 @@ export default function CreateDirectInvoicePage() {
     updateForm("items", newItems);
   };
 
-  const handleSave = async () => {
+  async function handleSave() {
     if (!formData.customerId) {
       alert("Please select a customer");
       return;
@@ -104,7 +105,9 @@ export default function CreateDirectInvoicePage() {
         customerId: formData.customerId,
         invoiceType: formData.invoiceType,
         currency: formData.currency,
-        dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : undefined,
+        dueDate: formData.dueDate
+          ? new Date(formData.dueDate).toISOString()
+          : undefined,
         notes: formData.notes,
         terms: formData.terms,
         items: formData.items.map((item: any) => ({
@@ -112,7 +115,7 @@ export default function CreateDirectInvoicePage() {
           quantity: Number(item.quantity),
           unitPrice: Number(item.unitPrice),
           taxRate: Number(item.taxRate),
-        }))
+        })),
       };
 
       const { data } = await api.post("/invoices", payload);
@@ -133,7 +136,7 @@ export default function CreateDirectInvoicePage() {
       const qty = Number(item.quantity) || 0;
       const price = Number(item.unitPrice) || 0;
       const taxRate = Number(item.taxRate) || 0;
-      
+
       const lineTotal = qty * price;
       subtotal += lineTotal;
       taxAmount += lineTotal * (taxRate / 100);
@@ -142,7 +145,7 @@ export default function CreateDirectInvoicePage() {
     return {
       subtotal,
       taxAmount,
-      grandTotal: subtotal + taxAmount
+      grandTotal: subtotal + taxAmount,
     };
   };
 
@@ -152,13 +155,24 @@ export default function CreateDirectInvoicePage() {
     <div className="max-w-5xl mx-auto space-y-6">
       <div className="flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={() => router.push("/dashboard/invoices")}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push("/dashboard/invoices")}
+          >
             <ArrowLeft className="w-4 h-4 mr-2" /> Back
           </Button>
-          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Create Direct Invoice</h1>
+          <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
+            Create Direct Invoice
+          </h1>
         </div>
-        <Button onClick={handleSave} disabled={isSaving} className="bg-green-600 hover:bg-green-700">
-          {isSaving ? "Saving..." : "Save Invoice"} <Save className="w-4 h-4 ml-2" />
+        <Button
+          onClick={handleSave}
+          disabled={isSaving}
+          className="bg-green-600 hover:bg-green-700"
+        >
+          {isSaving ? "Saving..." : "Save Invoice"}{" "}
+          <Save className="w-4 h-4 ml-2" />
         </Button>
       </div>
 
@@ -171,8 +185,8 @@ export default function CreateDirectInvoicePage() {
             <CardContent>
               <div className="bg-gray-50 p-4 rounded-lg border border-dashed border-gray-300 mb-6">
                 <div className="flex gap-2 mb-2">
-                  <select 
-                    className="border rounded-md p-2 bg-white flex-1" 
+                  <select
+                    className="border rounded-md p-2 bg-white flex-1"
                     id="product-select"
                     onChange={(e) => {
                       handleAddItem(e.target.value);
@@ -181,7 +195,9 @@ export default function CreateDirectInvoicePage() {
                   >
                     <option value="">-- Add Product from Catalog --</option>
                     {products.map((p: any) => (
-                      <option key={p.id} value={p.id}>{p.productName} ({p.currency} {p.sellingPrice})</option>
+                      <option key={p.id} value={p.id}>
+                        {p.productName} ({p.currency} {p.sellingPrice})
+                      </option>
                     ))}
                   </select>
                   <Button variant="outline" onClick={handleAddCustomItem}>
@@ -205,44 +221,63 @@ export default function CreateDirectInvoicePage() {
                     {formData.items.map((item: any, idx: number) => (
                       <tr key={idx} className="bg-white">
                         <td className="p-3">
-                          <Input 
-                            value={item.description} 
-                            onChange={(e) => updateItem(idx, "description", e.target.value)} 
+                          <Input
+                            value={item.description}
+                            onChange={(e) =>
+                              updateItem(idx, "description", e.target.value)
+                            }
                             placeholder="Description"
                           />
                         </td>
                         <td className="p-3">
-                          <Input 
-                            type="number" 
-                            className="p-2" 
-                            value={item.quantity} 
-                            onChange={(e) => updateItem(idx, "quantity", e.target.value)}
+                          <Input
+                            type="number"
+                            className="p-2"
+                            value={item.quantity}
+                            onChange={(e) =>
+                              updateItem(idx, "quantity", e.target.value)
+                            }
                           />
                         </td>
                         <td className="p-3">
-                          <Input 
-                            type="number" 
-                            className="p-2" 
-                            value={item.unitPrice} 
-                            onChange={(e) => updateItem(idx, "unitPrice", e.target.value)}
+                          <Input
+                            type="number"
+                            className="p-2"
+                            value={item.unitPrice}
+                            onChange={(e) =>
+                              updateItem(idx, "unitPrice", e.target.value)
+                            }
                           />
                         </td>
                         <td className="p-3">
-                          <Input 
-                            type="number" 
-                            className="p-2" 
-                            value={item.taxRate} 
-                            onChange={(e) => updateItem(idx, "taxRate", e.target.value)}
+                          <Input
+                            type="number"
+                            className="p-2"
+                            value={item.taxRate}
+                            onChange={(e) =>
+                              updateItem(idx, "taxRate", e.target.value)
+                            }
                           />
                         </td>
                         <td className="p-3">
-                          <Button variant="destructive" size="sm" onClick={() => removeItem(idx)}>Remove</Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => removeItem(idx)}
+                          >
+                            Remove
+                          </Button>
                         </td>
                       </tr>
                     ))}
                     {formData.items.length === 0 && (
                       <tr>
-                        <td colSpan={5} className="p-8 text-center text-gray-500">No items added to invoice.</td>
+                        <td
+                          colSpan={5}
+                          className="p-8 text-center text-gray-500"
+                        >
+                          No items added to invoice.
+                        </td>
                       </tr>
                     )}
                   </tbody>
@@ -258,19 +293,21 @@ export default function CreateDirectInvoicePage() {
             <CardContent className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Notes</label>
-                <textarea 
-                  className="w-full border rounded-md p-2" 
-                  rows={3} 
+                <textarea
+                  className="w-full border rounded-md p-2"
+                  rows={3}
                   value={formData.notes}
                   onChange={(e) => updateForm("notes", e.target.value)}
                   placeholder="Notes visible to the customer..."
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-1">Terms & Conditions</label>
-                <textarea 
-                  className="w-full border rounded-md p-2" 
-                  rows={3} 
+                <label className="block text-sm font-medium mb-1">
+                  Terms & Conditions
+                </label>
+                <textarea
+                  className="w-full border rounded-md p-2"
+                  rows={3}
                   value={formData.terms}
                   onChange={(e) => updateForm("terms", e.target.value)}
                   placeholder="Standard terms and conditions..."
@@ -287,22 +324,28 @@ export default function CreateDirectInvoicePage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-1">Customer <span className="text-red-500">*</span></label>
-                <select 
+                <label className="block text-sm font-medium mb-1">
+                  Customer <span className="text-red-500">*</span>
+                </label>
+                <select
                   className="w-full border rounded-md p-2 bg-white"
                   value={formData.customerId}
                   onChange={(e) => updateForm("customerId", e.target.value)}
                 >
                   <option value="">-- Select Customer --</option>
                   {customers.map((c: any) => (
-                    <option key={c.id} value={c.id}>{c.displayName}</option>
+                    <option key={c.id} value={c.id}>
+                      {c.displayName}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <div>
-                <label className="block text-sm font-medium mb-1">Invoice Type</label>
-                <select 
+                <label className="block text-sm font-medium mb-1">
+                  Invoice Type
+                </label>
+                <select
                   className="w-full border rounded-md p-2 bg-white"
                   value={formData.invoiceType}
                   onChange={(e) => updateForm("invoiceType", e.target.value)}
@@ -316,8 +359,10 @@ export default function CreateDirectInvoicePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Currency</label>
-                <select 
+                <label className="block text-sm font-medium mb-1">
+                  Currency
+                </label>
+                <select
                   className="w-full border rounded-md p-2 bg-white"
                   value={formData.currency}
                   onChange={(e) => updateForm("currency", e.target.value)}
@@ -329,8 +374,10 @@ export default function CreateDirectInvoicePage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Due Date</label>
-                <Input 
+                <label className="block text-sm font-medium mb-1">
+                  Due Date
+                </label>
+                <Input
                   type="date"
                   value={formData.dueDate}
                   onChange={(e) => updateForm("dueDate", e.target.value)}
@@ -347,15 +394,23 @@ export default function CreateDirectInvoicePage() {
               <div className="space-y-3 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-500">Subtotal</span>
-                  <span className="font-medium">{totals.subtotal.toLocaleString()} {formData.currency}</span>
+                  <span className="font-medium">
+                    {totals.subtotal.toLocaleString()} {formData.currency}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Tax</span>
-                  <span className="font-medium">{totals.taxAmount.toLocaleString()} {formData.currency}</span>
+                  <span className="font-medium">
+                    {totals.taxAmount.toLocaleString()} {formData.currency}
+                  </span>
                 </div>
                 <div className="flex justify-between pt-3 border-t mt-3">
-                  <span className="text-gray-900 font-bold text-base">Grand Total</span>
-                  <span className="font-bold text-lg text-gray-900">{totals.grandTotal.toLocaleString()} {formData.currency}</span>
+                  <span className="text-gray-900 font-bold text-base">
+                    Grand Total
+                  </span>
+                  <span className="font-bold text-lg text-gray-900">
+                    {totals.grandTotal.toLocaleString()} {formData.currency}
+                  </span>
                 </div>
               </div>
             </CardContent>

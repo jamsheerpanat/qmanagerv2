@@ -15,8 +15,14 @@ export class PdfProcessor extends WorkerHost {
   }
 
   async process(job: Job<any, any, string>): Promise<any> {
-    const { documentId, templateId, userId, customerName, totalAmount, quotationId } =
-      job.data;
+    const {
+      documentId,
+      templateId,
+      userId,
+      customerName,
+      totalAmount,
+      quotationId,
+    } = job.data;
 
     // Build render URL — service-specific templates use dedicated routes,
     // all others fall through to the generic [templateId] route.
@@ -25,20 +31,23 @@ export class PdfProcessor extends WorkerHost {
       'smart-home': 'home-automation',
       'smart-home-automation': 'home-automation',
       'building-automation': 'building-automation',
-      'bms': 'building-automation',
+      bms: 'building-automation',
       'software-development': 'software-development',
-      'software': 'software-development',
+      software: 'software-development',
       'web-development': 'software-development',
       'it-infrastructure': 'it-infrastructure',
       'it-infra': 'it-infrastructure',
-      'network': 'it-infrastructure',
+      network: 'it-infrastructure',
     };
     const routeSegment = SERVICE_TEMPLATE_ROUTES[templateId] || templateId;
     const qParam = quotationId ? `&quotationId=${quotationId}` : '';
     const renderUrl = `http://localhost:3000/render-pdf/${routeSegment}?docId=${documentId}${qParam}`;
 
     try {
-      const browser = await chromium.launch({ headless: true });
+      const browser = await chromium.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+      });
       const page = await browser.newPage();
 
       await page.goto(renderUrl, { waitUntil: 'networkidle' });

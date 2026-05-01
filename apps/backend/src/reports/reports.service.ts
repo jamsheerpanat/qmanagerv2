@@ -20,10 +20,15 @@ export class ReportsService {
       this.prisma.customer.count({ where: { companyId } }),
       this.prisma.lead.count({ where: { customer: { companyId } } }), // lead has no companyId, it's via customer
       this.prisma.quotation.count({ where: { companyId } }),
-      this.prisma.quotation.count({ where: { companyId, status: 'PENDING_APPROVAL' } }),
+      this.prisma.quotation.count({
+        where: { companyId, status: 'PENDING_APPROVAL' },
+      }),
       this.prisma.quotation.count({ where: { companyId, status: 'ACCEPTED' } }),
       this.prisma.quotation.aggregate({
-        where: { companyId, status: { notIn: ['DRAFT', 'REJECTED', 'EXPIRED'] } },
+        where: {
+          companyId,
+          status: { notIn: ['DRAFT', 'REJECTED', 'EXPIRED'] },
+        },
         _sum: { grandTotal: true },
       }),
       this.prisma.invoice.aggregate({
@@ -52,9 +57,11 @@ export class ReportsService {
       invoices: {
         totalValue: invoicesTotalValue._sum.grandTotal || 0,
         paid: invoicesPaid._sum.paidAmount || 0,
-        outstanding: (invoicesTotalValue._sum.grandTotal || 0) - (invoicesPaid._sum.paidAmount || 0),
+        outstanding:
+          (invoicesTotalValue._sum.grandTotal || 0) -
+          (invoicesPaid._sum.paidAmount || 0),
         overdue: invoicesOverdue._sum.balanceAmount || 0,
-      }
+      },
     };
   }
 
@@ -66,13 +73,15 @@ export class ReportsService {
       _count: { id: true },
     });
 
-    const leadSourceChart = leadsBySource.map(l => ({
+    const leadSourceChart = leadsBySource.map((l) => ({
       name: l.source || 'Unknown',
-      value: l._count.id
+      value: l._count.id,
     }));
 
     // Funnel
-    const leads = await this.prisma.lead.count({ where: { customer: { companyId } } });
+    const leads = await this.prisma.lead.count({
+      where: { customer: { companyId } },
+    });
     const quotes = await this.prisma.quotation.count({ where: { companyId } });
     const invoices = await this.prisma.invoice.count({ where: { companyId } });
 
@@ -86,13 +95,16 @@ export class ReportsService {
     const qStatuses = await this.prisma.quotation.groupBy({
       by: ['status'],
       where: { companyId },
-      _count: { id: true }
+      _count: { id: true },
     });
 
     return {
       leadSourceChart,
       funnel,
-      quotationStatusChart: qStatuses.map(q => ({ name: q.status, value: q._count.id }))
+      quotationStatusChart: qStatuses.map((q) => ({
+        name: q.status,
+        value: q._count.id,
+      })),
     };
   }
 
@@ -104,22 +116,34 @@ export class ReportsService {
     switch (type) {
       case 'customers':
         return this.prisma.customer.findMany({
-          where: { companyId, ...(Object.keys(dateFilter).length && { createdAt: dateFilter }) },
-          select: { displayName: true, email: true, phone: true, customerType: true }
+          where: {
+            companyId,
+            ...(Object.keys(dateFilter).length && { createdAt: dateFilter }),
+          },
+          select: {
+            displayName: true,
+            email: true,
+            phone: true,
+            customerType: true,
+          },
         });
 
       case 'quotations':
         return this.prisma.quotation.findMany({
-          where: { 
-            companyId, 
+          where: {
+            companyId,
             ...(Object.keys(dateFilter).length && { issueDate: dateFilter }),
             ...(filters.status && { status: filters.status }),
           },
-          select: { 
-            quotationNumber: true, revisionNumber: true, status: true, 
-            grandTotal: true, issueDate: true, validUntil: true,
-            customer: { select: { displayName: true } }
-          }
+          select: {
+            quotationNumber: true,
+            revisionNumber: true,
+            status: true,
+            grandTotal: true,
+            issueDate: true,
+            validUntil: true,
+            customer: { select: { displayName: true } },
+          },
         });
 
       case 'invoices':
@@ -127,14 +151,19 @@ export class ReportsService {
           where: {
             companyId,
             ...(Object.keys(dateFilter).length && { invoiceDate: dateFilter }),
-            ...(filters.status && { paymentStatus: filters.status })
+            ...(filters.status && { paymentStatus: filters.status }),
           },
           select: {
-            invoiceNumber: true, invoiceType: true, paymentStatus: true,
-            grandTotal: true, paidAmount: true, balanceAmount: true,
-            invoiceDate: true, dueDate: true,
-            customer: { select: { displayName: true } }
-          }
+            invoiceNumber: true,
+            invoiceType: true,
+            paymentStatus: true,
+            grandTotal: true,
+            paidAmount: true,
+            balanceAmount: true,
+            invoiceDate: true,
+            dueDate: true,
+            customer: { select: { displayName: true } },
+          },
         });
 
       default:

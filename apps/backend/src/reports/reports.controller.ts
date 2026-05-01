@@ -23,18 +23,24 @@ export class ReportsController {
   @Get(':type')
   @RequirePermissions('reports.view')
   async getReport(
-    @Req() req: any, 
-    @Query('type') type: string, 
+    @Req() req: any,
+    @Query('type') type: string,
     @Query() filters: any,
-    @Res() res: any
+    @Res() res: any,
   ) {
-    const data = await this.reportsService.getReportData(req.user.companyId, type, filters);
+    const data = await this.reportsService.getReportData(
+      req.user.companyId,
+      type,
+      filters,
+    );
 
     if (filters.export === 'csv') {
       const parser = new Parser();
       const csv = parser.parse(data);
       res.header('Content-Type', 'text/csv');
-      res.attachment(`report-${type}-${new Date().toISOString().split('T')[0]}.csv`);
+      res.attachment(
+        `report-${type}-${new Date().toISOString().split('T')[0]}.csv`,
+      );
       return res.send(csv);
     }
 
