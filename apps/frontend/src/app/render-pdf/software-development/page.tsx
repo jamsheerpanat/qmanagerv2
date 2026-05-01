@@ -23,7 +23,7 @@ const FontLoader = () => (
 function SoftwareDevRenderPageInner() {
   const searchParams = useSearchParams();
   const quotationId = searchParams.get("quotationId");
-  const docId = searchParams.get("docId") || "UNKNOWN";
+  const docId = searchParams.get("docId") || quotationId || "UNKNOWN";
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -73,7 +73,7 @@ function SoftwareDevRenderPageInner() {
     );
   if (!data) return null;
 
-  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/verify/${docId}`;
+  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}`;
 
   return (
     <>

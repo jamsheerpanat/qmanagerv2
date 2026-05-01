@@ -104,7 +104,8 @@ export default function RenderPdfPage({
 }) {
   const { templateId } = use(params);
   const searchParams = useSearchParams();
-  const docId = searchParams.get("docId") || "UNKNOWN";
+  const quotationId = searchParams.get("quotationId") || searchParams.get("invoiceId");
+  const docId = searchParams.get("docId") || quotationId || "UNKNOWN";
 
   const data = getTemplateData(templateId);
   const total = data.items.reduce(
@@ -114,7 +115,7 @@ export default function RenderPdfPage({
 
   // URL that will be placed in the QR code.
   // In production, this should be the public domain.
-  const verifyUrl = `http://localhost:3000/verify/SCAN-ME-LATER-${docId}`;
+  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}`;
 
   return (
     <div className="pdf-container print:bg-white bg-gray-100 flex flex-col items-center py-10 print:py-0 print:block">

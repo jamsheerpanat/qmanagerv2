@@ -30,8 +30,8 @@ import { ScheduleModule } from '@nestjs/schedule';
   imports: [
     BullModule.forRoot({
       connection: {
-        host: 'localhost',
-        port: 6402,
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379', 10),
       },
     }),
     ScheduleModule.forRoot(),

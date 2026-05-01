@@ -16,14 +16,13 @@ import {
   InvoiceType,
   DiscountType,
 } from '@prisma/client';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
+import { PdfService } from '../pdf/pdf.service';
 
 @Injectable()
 export class InvoicesService {
   constructor(
     private prisma: PrismaService,
-    @InjectQueue('pdf-generation') private pdfQueue: Queue,
+    private pdfService: PdfService,
   ) {}
 
   async create(dto: CreateInvoiceDto, userId?: string) {
@@ -338,26 +337,15 @@ export class InvoicesService {
     return this.findOne(id);
   }
 
-  async generatePdf(id: string, userId: string) {
+  async generatePdf(id: string, userId: string): Promise<Buffer> {
     const inv = await this.findOne(id);
 
-    const document = await this.prisma.document.create({
-      data: {
-        type: 'INVOICE',
-        referenceId: inv.invoiceNumber || `DRAFT-${inv.id.slice(0, 6)}`,
-        status: 'PROCESSING',
-        generatedById: userId,
-        metadata: { invoiceId: inv.id },
-      },
-    });
+    const pdfBuffer = await this.pdfService.generatePdfSync(
+      'invoice-standard',
+      inv.id,
+      'invoiceId',
+    );
 
-    await this.pdfQueue.add('generate-pdf', {
-      documentId: document.id,
-      templateId: 'invoice-standard',
-      userId: userId,
-      invoiceId: inv.id,
-    });
-
-    return { success: true, documentId: document.id };
+    return pdfBuffer;
   }
 }

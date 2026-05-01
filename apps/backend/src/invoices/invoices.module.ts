@@ -2,14 +2,12 @@ import { Module } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
 import { InvoicesController } from './invoices.controller';
 import { PrismaModule } from '../prisma/prisma.module';
-import { BullModule } from '@nestjs/bullmq';
+import { PdfModule } from '../pdf/pdf.module';
 
 @Module({
   imports: [
     PrismaModule,
-    BullModule.registerQueue({
-      name: 'pdf-generation',
-    }),
+    PdfModule,
   ],
   controllers: [InvoicesController],
   providers: [InvoicesService],

@@ -9,6 +9,7 @@ import {
   UseGuards,
   Req,
   Query,
+  Res,
 } from '@nestjs/common';
 import { QuotationsService } from './quotations.service';
 import {
@@ -138,8 +139,14 @@ export class QuotationsController {
 
   @RequirePermissions('quotations.generate_pdf')
   @Post(':id/generate-pdf')
-  generatePdf(@Param('id') id: string, @Req() req: any) {
-    return this.quotationsService.generatePdf(id, req.user?.id);
+  async generatePdf(@Param('id') id: string, @Req() req: any, @Res() res: any) {
+    const pdfBuffer = await this.quotationsService.generatePdf(id, req.user?.id);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename=quotation-${id}.pdf`,
+      'Content-Length': pdfBuffer.length,
+    });
+    res.send(pdfBuffer);
   }
 
   @RequirePermissions('quotations.view')

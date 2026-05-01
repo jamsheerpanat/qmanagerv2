@@ -8,6 +8,7 @@ import {
   Req,
   UseGuards,
   Query,
+  Res,
 } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
 import {
@@ -87,7 +88,13 @@ export class InvoicesController {
 
   @RequirePermissions('invoices.generate_pdf')
   @Post(':id/generate-pdf')
-  generatePdf(@Param('id') id: string, @Req() req: any) {
-    return this.invoicesService.generatePdf(id, req.user.id);
+  async generatePdf(@Param('id') id: string, @Req() req: any, @Res() res: any) {
+    const pdfBuffer = await this.invoicesService.generatePdf(id, req.user.id);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename=invoice-${id}.pdf`,
+      'Content-Length': pdfBuffer.length,
+    });
+    res.send(pdfBuffer);
   }
 }

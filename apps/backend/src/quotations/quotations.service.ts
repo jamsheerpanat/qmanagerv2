@@ -14,14 +14,13 @@ import { UpdateQuotationDto } from './dto/update-quotation.dto';
 import { ItemType, DiscountType, QuotationStatus } from '@prisma/client';
 import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
+import { PdfService } from '../pdf/pdf.service';
 
 @Injectable()
 export class QuotationsService {
   constructor(
     private prisma: PrismaService,
-    @InjectQueue('pdf-generation') private pdfQueue: Queue,
+    private pdfService: PdfService,
   ) {}
 
   private async checkLock(id: string) {
@@ -588,43 +587,17 @@ export class QuotationsService {
     return { success: true, token };
   }
 
-  async generatePdf(id: string, userId: string) {
+  async generatePdf(id: string, userId: string): Promise<Buffer> {
     const q = await this.findOne(id);
-    if (
-      ![
-        QuotationStatus.DRAFT,
-        QuotationStatus.APPROVED,
-        QuotationStatus.PENDING_REVIEW,
-      ].includes(q.status as any)
-    ) {
-      // Rule logic can be stricter
-    }
 
-    // Create a document record
-    const document = await this.prisma.document.create({
-      data: {
-        type: 'QUOTATION',
-        referenceId: q.quotationNumber,
-        status: 'PROCESSING',
-        generatedById: userId,
-        metadata: {
-          quotationId: q.id,
-          revision: q.revisionNumber,
-          customerName: q.customer?.displayName,
-          totalAmount: q.grandTotal,
-        },
-      },
-    });
+    // Call the synchronous PDF generation
+    const pdfBuffer = await this.pdfService.generatePdfSync(
+      q.serviceType?.slug || 'smart-home',
+      q.id,
+      'quotationId',
+    );
 
-    // Add job to BullMQ
-    await this.pdfQueue.add('generate-pdf', {
-      documentId: document.id,
-      templateId: q.serviceType?.slug || 'smart-home',
-      userId: userId,
-      quotationId: q.id,
-    });
-
-    return { success: true, documentId: document.id };
+    return pdfBuffer;
   }
 
   async getSharedQuotation(token: string) {

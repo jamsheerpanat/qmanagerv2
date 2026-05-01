@@ -172,47 +172,23 @@ export default function QuotationDetailPage({
   async function generatePdf() {
     setIsGenerating(true);
     try {
-      const { data } = await api.post(`/quotations/${id}/generate-pdf`);
-      const docId = data.documentId;
+      const response = await api.post(`/quotations/${id}/generate-pdf`, {}, {
+        responseType: "blob",
+      });
 
-      let isDone = false;
-      let attempts = 0;
-
-      while (!isDone && attempts < 20) {
-        await new Promise((r) => setTimeout(r, 2000));
-        const { data: doc } = await api.get(`/documents/${docId}`);
-
-        if (doc.status === "PUBLISHED") {
-          isDone = true;
-          // Download the authenticated PDF
-          const response = await api.get(`/documents/${docId}/download`, {
-            responseType: "blob",
-          });
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement("a");
-          link.href = url;
-          link.setAttribute(
-            "download",
-            `${quotation.quotationNumber || "quotation"}.pdf`,
-          );
-          document.body.appendChild(link);
-          link.click();
-          link.parentNode?.removeChild(link);
-        } else if (doc.status === "FAILED") {
-          alert("PDF generation failed on the server.");
-          break;
-        }
-        attempts++;
-      }
-
-      if (!isDone && attempts >= 20) {
-        alert(
-          "PDF generation is taking too long. Please check Documents later.",
-        );
-      }
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `${quotation.quotationNumber || "quotation"}.pdf`,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
     } catch (e) {
       console.error(e);
-      alert("Failed to queue PDF generation");
+      alert("Failed to generate PDF");
     } finally {
       setIsGenerating(false);
     }

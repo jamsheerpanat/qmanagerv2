@@ -84,11 +84,23 @@ export default function InvoiceDetailPage({
   async function generatePdf() {
     setIsGenerating(true);
     try {
-      const { data } = await api.post(`/invoices/${id}/generate-pdf`);
-      alert(`PDF Generation Queued. Document ID: ${data.documentId}`);
+      const response = await api.post(`/invoices/${id}/generate-pdf`, {}, {
+        responseType: "blob",
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute(
+        "download",
+        `${invoice.invoiceNumber || "invoice"}.pdf`,
+      );
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
     } catch (e) {
       console.error(e);
-      alert("Failed to queue PDF generation");
+      alert("Failed to generate PDF");
     } finally {
       setIsGenerating(false);
     }
