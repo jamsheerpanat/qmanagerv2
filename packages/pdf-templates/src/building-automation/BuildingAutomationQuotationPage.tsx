@@ -21,6 +21,25 @@ export const BuildingAutomationQuotationPage = ({
   const accentGrad = "linear-gradient(135deg,#0c2340,#0c3560)";
   const accentHighlight = "#06b6d4";
 
+  const sectionTotals: any[] = [];
+  let currentSection = "General";
+  let currentTotal = 0;
+
+  (items || []).forEach((item: any) => {
+    if (item.itemType === "SECTION_HEADING") {
+      if (currentTotal > 0 || currentSection !== "General") {
+        sectionTotals.push({ title: currentSection, total: currentTotal });
+      }
+      currentSection = item.sectionTitle || "Section";
+      currentTotal = 0;
+    } else {
+      currentTotal += (item.quantity || 0) * (item.unitPrice || 0) - (item.discountAmount || 0);
+    }
+  });
+  if (currentTotal > 0 || currentSection !== "General") {
+    sectionTotals.push({ title: currentSection, total: currentTotal });
+  }
+
   return (
     <div
       className="pdf-page"
@@ -415,6 +434,21 @@ export const BuildingAutomationQuotationPage = ({
           }}
         >
           <div style={{ minWidth: "260px", maxWidth: "280px" }}>
+            {sectionTotals.length > 0 && (
+              <div style={{ marginBottom: "12px" }}>
+                <div style={{ fontSize: "7px", fontWeight: "700", color: "#94a3b8", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "6px", textAlign: "right" }}>
+                  SECTION SUMMARY
+                </div>
+                <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+                  {sectionTotals.map((s, idx) => (
+                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 14px", borderBottom: idx === sectionTotals.length - 1 ? "none" : "1px solid #f1f5f9" }}>
+                      <span style={{ fontSize: "7.5px", color: "#475569", fontWeight: "500" }}>{s.title}</span>
+                      <span style={{ fontSize: "8px", fontWeight: "600", color: "#0f172a", fontFamily: "'Inter', monospace" }}>{fmt(s.total)} <span style={{ fontSize: "6px", color: "#94a3b8" }}>{currency}</span></span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div
               style={{
                 fontSize: "7px",

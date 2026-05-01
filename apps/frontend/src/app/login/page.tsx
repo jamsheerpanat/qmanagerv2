@@ -60,7 +60,7 @@ export default function LoginPage() {
           <img
             src="/qmanager-logo.jpeg"
             alt="Q-Manager Logo"
-            className="h-12 w-auto object-contain"
+            className="h-20 w-auto object-contain"
           />
           <CardDescription>
             Enter your credentials to access the admin portal

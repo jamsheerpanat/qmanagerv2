@@ -224,7 +224,7 @@ export default function DashboardLayout({
               alt="Q-Manager Logo"
               style={{
                 width: "auto",
-                height: "36px",
+                height: "54px",
                 borderRadius: "4px",
                 objectFit: "contain",
               }}

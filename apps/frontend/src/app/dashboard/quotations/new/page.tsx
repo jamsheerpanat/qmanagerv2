@@ -303,6 +303,36 @@ export default function CreateQuotationWizard() {
                             </div>
                           </td>
                           <td className="p-3 flex gap-1 justify-end items-center">
+                            <select
+                              className="border rounded p-1 text-xs bg-white text-gray-700 w-28 mr-2"
+                              onChange={(e) => {
+                                const prodId = e.target.value;
+                                if (!prodId) return;
+                                const product = products.find((p: any) => p.id === prodId) as any;
+                                if (!product) return;
+                                const newItem = {
+                                  itemType: "PRODUCT",
+                                  productId: product.id,
+                                  sectionTitle: product.productName,
+                                  description: product.shortDescription || product.productName,
+                                  quantity: 1,
+                                  unitPrice: product.sellingPrice,
+                                  taxRate: product.taxRate,
+                                  image: product.productImage,
+                                };
+                                const newItems = [...formData.items];
+                                newItems.splice(idx + 1, 0, newItem);
+                                updateForm("items", newItems);
+                                e.target.value = "";
+                              }}
+                            >
+                              <option value="">+ Add Product</option>
+                              {products.map((p: any) => (
+                                <option key={p.id} value={p.id}>
+                                  {p.productName}
+                                </option>
+                              ))}
+                            </select>
                             <Button
                               variant="ghost"
                               size="icon"
