@@ -41,7 +41,8 @@ export class PdfProcessor extends WorkerHost {
     };
     const routeSegment = SERVICE_TEMPLATE_ROUTES[templateId] || templateId;
     const qParam = quotationId ? `&quotationId=${quotationId}` : '';
-    const renderUrl = `http://localhost:3000/render-pdf/${routeSegment}?docId=${documentId}${qParam}`;
+    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
+    const renderUrl = `${baseUrl}/render-pdf/${routeSegment}?docId=${documentId}${qParam}`;
 
     try {
       const browser = await chromium.launch({
