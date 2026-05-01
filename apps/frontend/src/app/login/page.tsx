@@ -98,21 +98,6 @@ export default function LoginPage() {
               {isSubmitting ? "Signing in..." : "Sign In"}
             </Button>
 
-            <div className="pt-4 border-t mt-4 text-center">
-              <Button
-                variant="outline"
-                type="button"
-                className="w-full border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                onClick={() => {
-                  onSubmit({
-                    email: "superadmin@qmanager.local",
-                    password: "Admin@123",
-                  });
-                }}
-              >
-                🚀 Quick Auto-Login as Super Admin
-              </Button>
-            </div>
           </form>
         </CardContent>
       </Card>
