@@ -177,11 +177,15 @@ export class QuotationsService {
   }
 
   async remove(id: string) {
-    const quotation = await this.checkLock(id);
+    const quotation = await this.prisma.quotation.findUnique({ where: { id } });
     if (!quotation) throw new NotFoundException('Quotation not found');
-    if (quotation.status !== QuotationStatus.DRAFT) {
-      throw new BadRequestException('Only DRAFT quotations can be deleted');
-    }
+
+    // Unlink any child revisions to prevent foreign key constraint violations
+    await this.prisma.quotation.updateMany({
+      where: { parentQuotationId: id },
+      data: { parentQuotationId: null },
+    });
+
     return this.prisma.quotation.delete({ where: { id } });
   }
 
@@ -611,6 +615,38 @@ export class QuotationsService {
     }
 
     return { success: true, token };
+  }
+
+  async generateShareLink(id: string, userId: string) {
+    const q = await this.findOne(id);
+    const token = crypto.randomBytes(32).toString('hex');
+
+    await this.prisma.quotationShare.create({
+      data: {
+        quotationId: id,
+        token,
+        recipientEmail: 'share-link',
+      },
+    });
+
+    // Lock and mark as sent — same lifecycle as sendQuotation
+    if (
+      q.status === 'APPROVED' ||
+      q.status === 'SENT_TO_CUSTOMER' ||
+      q.status === 'ACCEPTED'
+    ) {
+      await this.prisma.quotation.update({
+        where: { id },
+        data: {
+          status: QuotationStatus.SENT_TO_CUSTOMER,
+          sentAt: q.sentAt || new Date(),
+          isLocked: true,
+        },
+      });
+    }
+
+    const portalLink = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/portal/quotation/${token}`;
+    return { success: true, token, portalLink };
   }
 
   async generatePdf(id: string, userId: string): Promise<Buffer> {

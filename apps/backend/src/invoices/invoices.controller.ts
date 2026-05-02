@@ -9,6 +9,7 @@ import {
   UseGuards,
   Query,
   Res,
+  Delete,
 } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
 import {
@@ -68,6 +69,12 @@ export class InvoicesController {
   @Patch(':id/items')
   updateItems(@Param('id') id: string, @Body() items: InvoiceItemDto[]) {
     return this.invoicesService.replaceItems(id, items);
+  }
+
+  @RequirePermissions('invoices.delete')
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.invoicesService.remove(id);
   }
 
   @RequirePermissions('invoices.create')

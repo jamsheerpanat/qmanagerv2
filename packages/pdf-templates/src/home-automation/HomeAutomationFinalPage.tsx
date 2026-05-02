@@ -112,7 +112,7 @@ export const HomeAutomationFinalPage = ({
 
   return (
     <div
-      className="pdf-page"
+      className="pdf-page-flow"
       style={{
         fontFamily: "'Inter', 'Montserrat', sans-serif",
         background: "#f8fafc",
@@ -121,7 +121,6 @@ export const HomeAutomationFinalPage = ({
       <div
         style={{
           padding: "14mm 16mm",
-          height: "297mm",
           display: "flex",
           flexDirection: "column",
           gap: "0",
@@ -427,8 +426,6 @@ export const HomeAutomationFinalPage = ({
                     display: "flex",
                     flexDirection: "column",
                     gap: "4px",
-                    maxHeight: "80px",
-                    overflow: "hidden",
                   }}
                 >
                   {terms.map((t: any, i: number) => (

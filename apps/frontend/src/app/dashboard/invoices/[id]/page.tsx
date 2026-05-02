@@ -15,6 +15,7 @@ import {
   CreditCard,
   History,
   FileText,
+  Trash2,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -231,6 +232,24 @@ export default function InvoiceDetailPage({
           </div>
         </div>
         <div className="flex gap-2">
+          <Button
+            variant="outline"
+            className="border-red-200 text-red-600 hover:bg-red-50"
+            onClick={async () => {
+              if (confirm("Are you sure you want to delete this invoice? This action cannot be undone.")) {
+                try {
+                  await api.delete(`/invoices/${id}`);
+                  router.push("/dashboard/invoices");
+                } catch (e) {
+                  console.error(e);
+                  alert("Failed to delete invoice.");
+                }
+              }
+            }}
+          >
+            <Trash2 className="w-4 h-4 mr-2" /> Delete
+          </Button>
+
           {invoice.invoiceStatus === "DRAFT" && (
             <Button
               className="bg-blue-600 hover:bg-blue-700"

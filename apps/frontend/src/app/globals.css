@@ -344,8 +344,26 @@
   min-height: 297mm;
   page-break-after: always;
   position: relative;
-  overflow: hidden;
   background: white !important;
+}
+
+/* Fluid quotation pages — no fixed height, table flows naturally across A4 pages */
+.pdf-page-flow {
+  width: 210mm;
+  position: relative;
+  background: white !important;
+}
+
+@media screen {
+  .pdf-page,
+  .pdf-page-flow {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+  }
+  .pdf-page + .pdf-page,
+  .pdf-page + .pdf-page-flow,
+  .pdf-page-flow + .pdf-page {
+    margin-top: 16px;
+  }
 }
 
 .pdf-page-content {

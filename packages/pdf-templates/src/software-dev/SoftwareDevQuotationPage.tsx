@@ -2,570 +2,108 @@ import React from "react";
 import { SDHeader, SDFooter } from "./SoftwareDevAboutPage";
 
 export const SoftwareDevQuotationPage = ({
-  items,
-  subtotal,
-  discount,
-  tax,
-  grandTotal,
-  currency = "KWD",
+  items, subtotal, discount, tax, grandTotal, currency = "KWD",
 }: any) => {
-  const fmt = (n: any) =>
-    Number(n || 0).toLocaleString("en-US", {
-      minimumFractionDigits: 3,
-      maximumFractionDigits: 3,
-    });
-
-  // Color theme - indigo/violet for software dev
+  const fmt = (n: any) => Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
   const accent = "#4f46e5";
   const accentLight = "#eef2ff";
-  const accentGrad = "linear-gradient(135deg,#1e1b4b,#312e81)";
+  const darkGrad = "linear-gradient(135deg,#1e1b4b 0%,#312e81 100%)";
   const accentHighlight = "#a5b4fc";
 
   const sectionTotals: any[] = [];
-  let currentSection = "General";
-  let currentTotal = 0;
-
+  let cs = "General", ct = 0;
   (items || []).forEach((item: any) => {
     if (item.itemType === "SECTION_HEADING") {
-      if (currentTotal > 0 || currentSection !== "General") {
-        sectionTotals.push({ title: currentSection, total: currentTotal });
-      }
-      currentSection = item.sectionTitle || "Section";
-      currentTotal = 0;
-    } else {
-      currentTotal += (item.quantity || 0) * (item.unitPrice || 0) - (item.discountAmount || 0);
-    }
+      if (ct > 0 || cs !== "General") sectionTotals.push({ title: cs, total: ct });
+      cs = item.sectionTitle || "Section"; ct = 0;
+    } else { ct += (item.quantity || 0) * (item.unitPrice || 0) - (item.discountAmount || 0); }
   });
-  if (currentTotal > 0 || currentSection !== "General") {
-    sectionTotals.push({ title: currentSection, total: currentTotal });
-  }
+  if (ct > 0 || cs !== "General") sectionTotals.push({ title: cs, total: ct });
+
+  let serial = 0;
+  const cell = (extra: React.CSSProperties = {}): React.CSSProperties => ({ padding: "5px 7px", verticalAlign: "middle", ...extra });
 
   return (
-    <div
-      className="pdf-page"
-      style={{
-        fontFamily: "'Inter', 'Montserrat', sans-serif",
-        background: "white",
-      }}
-    >
-      <div
-        style={{
-          padding: "14mm 16mm",
-          height: "297mm",
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
+    <div className="pdf-page-flow" style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "white" }}>
+      <div style={{ padding: "10mm 13mm 8mm" }}>
         <SDHeader pageTitle="Commercial Quotation" />
-
-        {/* Page badge */}
-        <div style={{ marginBottom: "6px" }}>
-          <span
-            style={{
-              fontSize: "6.5px",
-              fontWeight: "700",
-              letterSpacing: "2.5px",
-              color: accent,
-              textTransform: "uppercase",
-              background: accentLight,
-              padding: "3px 12px",
-              borderRadius: "20px",
-              border: `1px solid ${accent}22`,
-            }}
-          >
-            QUOTATION ITEMS
-          </span>
+        <div style={{ marginBottom: "10px" }}>
+          <span style={{ fontSize: "5.5px", fontWeight: "700", letterSpacing: "1.8px", color: accent, textTransform: "uppercase", background: accentLight, padding: "2px 8px", borderRadius: "8px" }}>Quotation Items</span>
+          <h2 style={{ fontSize: "15px", fontWeight: "800", color: "#0f172a", fontFamily: "'Montserrat',sans-serif", margin: "5px 0 0", letterSpacing: "-0.3px" }}>
+            Commercial <span style={{ color: accent }}>Quotation</span>
+          </h2>
+          <div style={{ width: "36px", height: "2px", background: `linear-gradient(90deg,${accent},${accentHighlight})`, borderRadius: "2px", marginTop: "3px" }} />
         </div>
 
-        {/* Title */}
-        <h2
-          style={{
-            fontSize: "20px",
-            fontWeight: "800",
-            color: "#0f172a",
-            fontFamily: "'Montserrat', sans-serif",
-            marginBottom: "2px",
-            marginTop: "6px",
-            letterSpacing: "-0.3px",
-          }}
-        >
-          Commercial <span style={{ color: accent }}>Quotation</span>
-        </h2>
-        <div
-          style={{
-            width: "60px",
-            height: "3px",
-            background: `linear-gradient(90deg,${accent},#818cf8)`,
-            borderRadius: "2px",
-            marginBottom: "16px",
-          }}
-        />
-
-        {/* Table */}
-        <div style={{ overflow: "hidden" }}>
-          <table
-            style={{
-              width: "100%",
-              borderCollapse: "collapse",
-              fontSize: "8px",
-            }}
-          >
-            <thead>
-              <tr style={{ background: accentGrad, color: "white" }}>
-                <th
-                  style={{
-                    padding: "10px 8px",
-                    textAlign: "center",
-                    fontWeight: "700",
-                    letterSpacing: "0.8px",
-                    fontSize: "7px",
-                    textTransform: "uppercase",
-                    borderRadius: "8px 0 0 0",
-                    width: "5%",
-                  }}
-                >
-                  #
-                </th>
-                <th
-                  style={{
-                    padding: "10px 8px",
-                    textAlign: "left",
-                    fontWeight: "700",
-                    letterSpacing: "0.8px",
-                    fontSize: "7px",
-                    textTransform: "uppercase",
-                    width: "30%",
-                  }}
-                >
-                  Item / Service
-                </th>
-                <th
-                  style={{
-                    padding: "10px 8px",
-                    textAlign: "left",
-                    fontWeight: "700",
-                    letterSpacing: "0.8px",
-                    fontSize: "7px",
-                    textTransform: "uppercase",
-                    width: "25%",
-                  }}
-                >
-                  Description
-                </th>
-                <th
-                  style={{
-                    padding: "10px 8px",
-                    textAlign: "center",
-                    fontWeight: "700",
-                    letterSpacing: "0.8px",
-                    fontSize: "7px",
-                    textTransform: "uppercase",
-                    width: "10%",
-                  }}
-                >
-                  Module
-                </th>
-                <th
-                  style={{
-                    padding: "10px 8px",
-                    textAlign: "center",
-                    fontWeight: "700",
-                    letterSpacing: "0.8px",
-                    fontSize: "7px",
-                    textTransform: "uppercase",
-                    width: "7%",
-                  }}
-                >
-                  Qty
-                </th>
-                <th
-                  style={{
-                    padding: "10px 8px",
-                    textAlign: "right",
-                    fontWeight: "700",
-                    letterSpacing: "0.8px",
-                    fontSize: "7px",
-                    textTransform: "uppercase",
-                    width: "12%",
-                  }}
-                >
-                  Unit Price
-                </th>
-                <th
-                  style={{
-                    padding: "10px 8px",
-                    textAlign: "right",
-                    fontWeight: "700",
-                    letterSpacing: "0.8px",
-                    fontSize: "7px",
-                    textTransform: "uppercase",
-                    borderRadius: "0 8px 0 0",
-                    width: "11%",
-                  }}
-                >
-                  Total
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {(items || []).map((item: any, idx: number) => {
-                if (item.itemType === "SECTION_HEADING") {
-                  return (
-                    <tr key={idx}>
-                      <td
-                        colSpan={7}
-                        style={{
-                          padding: "8px 10px",
-                          fontWeight: "700",
-                          color: accent,
-                          fontSize: "8px",
-                          letterSpacing: "0.8px",
-                          background: accentLight,
-                          borderLeft: `3px solid ${accent}`,
-                        }}
-                      >
-                        ▸ {item.sectionTitle}
-                      </td>
-                    </tr>
-                  );
-                }
-                const lineTotal =
-                  (item.quantity || 0) * (item.unitPrice || 0) -
-                  (item.discountAmount || 0);
-                const isEven = idx % 2 === 0;
-                return (
-                  <tr
-                    key={idx}
-                    style={{
-                      background: isEven ? "white" : "#f8fafc",
-                      borderBottom: "1px solid #f1f5f9",
-                    }}
-                  >
-                    <td
-                      style={{
-                        padding: "9px 8px",
-                        color: "#94a3b8",
-                        textAlign: "center",
-                        fontSize: "7.5px",
-                        fontWeight: "600",
-                      }}
-                    >
-                      {item.isOptional ? (
-                        <span
-                          style={{
-                            fontSize: "6px",
-                            background: "#fef3c7",
-                            color: "#b45309",
-                            padding: "2px 5px",
-                            borderRadius: "4px",
-                            fontWeight: "700",
-                            letterSpacing: "0.5px",
-                          }}
-                        >
-                          OPT
-                        </span>
-                      ) : (
-                        <span
-                          style={{
-                            background: "#f1f5f9",
-                            borderRadius: "4px",
-                            padding: "2px 5px",
-                          }}
-                        >
-                          {item.serialNumber || String(idx + 1).padStart(2, "0")}
-                        </span>
-                      )}
-                    </td>
-                    <td
-                      style={{
-                        padding: "9px 8px",
-                        fontWeight: "600",
-                        color: "#0f172a",
-                        fontSize: "8px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "8px",
-                        }}
-                      >
-                        {item.image && (
-                          <img
-                            src={item.image}
-                            style={{
-                              width: "28px",
-                              height: "28px",
-                              objectFit: "contain",
-                              borderRadius: "6px",
-                              border: "1px solid #e2e8f0",
-                              background: "#f8fafc",
-                              padding: "2px",
-                            }}
-                          />
-                        )}
-                        <div>
-                          <div style={{ lineHeight: "1.3" }}>
-                            {item.sectionTitle ||
-                              item.description?.substring(0, 36)}
-                          </div>
-                          {item.sectionTitle &&
-                            item.description &&
-                            item.sectionTitle !== item.description && (
-                              <div
-                                style={{
-                                  fontSize: "6.5px",
-                                  color: "#94a3b8",
-                                  marginTop: "1px",
-                                  lineHeight: "1.2",
-                                }}
-                              >
-                                {item.description?.substring(0, 50)}
-                              </div>
-                            )}
-                        </div>
-                      </div>
-                    </td>
-                    <td
-                      style={{
-                        padding: "9px 8px",
-                        color: "#64748b",
-                        fontSize: "7.5px",
-                        lineHeight: "1.4",
-                      }}
-                    >
-                      {item.description?.substring(0, 70)}
-                      {item.warranty && (
-                        <div
-                          style={{
-                            color: accent,
-                            fontSize: "6.5px",
-                            marginTop: "3px",
-                            fontWeight: "600",
-                          }}
-                        >
-                          ✓ Warranty: {item.warranty}
-                        </div>
-                      )}
-                    </td>
-                    <td
-                      style={{
-                        padding: "9px 8px",
-                        textAlign: "center",
-                        color: "#6366f1",
-                        fontSize: "7px",
-                        fontWeight: "600",
-                      }}
-                    >
-                      {item.brand || item.category || "—"}
-                    </td>
-                    <td
-                      style={{
-                        padding: "9px 8px",
-                        textAlign: "center",
-                        color: "#0f172a",
-                        fontWeight: "700",
-                        fontSize: "8px",
-                      }}
-                    >
-                      {item.quantity || 1}
-                      <div
-                        style={{
-                          fontSize: "6px",
-                          color: "#94a3b8",
-                          fontWeight: "500",
-                          marginTop: "1px",
-                        }}
-                      >
-                        {item.unit || "pcs"}
-                      </div>
-                    </td>
-                    <td
-                      style={{
-                        padding: "9px 8px",
-                        textAlign: "right",
-                        color: "#475569",
-                        fontSize: "8px",
-                        fontFamily: "'Inter', monospace",
-                      }}
-                    >
-                      {fmt(item.unitPrice)}
-                    </td>
-                    <td
-                      style={{
-                        padding: "9px 8px",
-                        textAlign: "right",
-                        fontWeight: "700",
-                        color: "#0f172a",
-                        fontSize: "8.5px",
-                        fontFamily: "'Inter', monospace",
-                      }}
-                    >
-                      {fmt(lineTotal)}
-                    </td>
-                  </tr>
-                );
-              })}
-              {(!items || items.length === 0) && (
-                <tr>
-                  <td
-                    colSpan={7}
-                    style={{
-                      padding: "30px",
-                      textAlign: "center",
-                      color: "#94a3b8",
-                      fontSize: "9px",
-                    }}
-                  >
-                    No items defined for this quotation.
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7.5px", border: "1px solid #e2e8f0", borderRadius: "5px", overflow: "hidden" }}>
+          <thead>
+            <tr style={{ background: darkGrad, color: "#fff" }}>
+              {[{ label: "#", w: "3.5%", align: "center" as const },{ label: "Item / Product", w: "27%", align: "left" as const },{ label: "Description", w: "30%", align: "left" as const },{ label: "Brand", w: "8%", align: "center" as const },{ label: "Qty", w: "5.5%", align: "center" as const },{ label: "Unit Price", w: "13%", align: "right" as const },{ label: "Total", w: "13%", align: "right" as const }].map((h) => (
+                <th key={h.label} style={{ padding: "6px 7px", fontWeight: "600", letterSpacing: "0.5px", fontSize: "6px", textTransform: "uppercase", textAlign: h.align, width: h.w }}>{h.label}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {(items || []).map((item: any, idx: number) => {
+              if (item.itemType === "SECTION_HEADING") {
+                return (<tr key={idx} style={{ breakInside: "avoid", pageBreakInside: "avoid" }}><td colSpan={7} style={{ padding: "5px 8px", fontWeight: "700", color: accent, fontSize: "7px", letterSpacing: "0.4px", background: accentLight, borderLeft: `2.5px solid ${accent}`, borderBottom: `1px solid ${accentHighlight}44` }}>{item.sectionTitle}</td></tr>);
+              }
+              serial++;
+              const lineTotal = (item.quantity || 0) * (item.unitPrice || 0) - (item.discountAmount || 0);
+              const stripe = idx % 2 === 0 ? "#ffffff" : "#f8fafc";
+              return (
+                <tr key={idx} style={{ background: stripe, borderBottom: "1px solid #f1f5f9", breakInside: "avoid", pageBreakInside: "avoid" }}>
+                  <td style={cell({ textAlign: "center", color: "#94a3b8", fontSize: "6.5px", fontWeight: "600" })}>
+                    {item.isOptional ? <span style={{ fontSize: "5px", background: "#fef3c7", color: "#92400e", padding: "1px 3px", borderRadius: "2px", fontWeight: "700" }}>OPT</span> : <span style={{ background: "#f1f5f9", borderRadius: "3px", padding: "1px 4px" }}>{item.serialNumber || String(serial).padStart(2, "0")}</span>}
                   </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Totals Card */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            marginTop: "18px",
-          }}
-        >
-          <div style={{ minWidth: "260px", maxWidth: "280px" }}>
-            {sectionTotals.length > 0 && (
-              <div style={{ marginBottom: "12px" }}>
-                <div style={{ fontSize: "7px", fontWeight: "700", color: "#94a3b8", letterSpacing: "2px", textTransform: "uppercase", marginBottom: "6px", textAlign: "right" }}>
-                  SECTION SUMMARY
-                </div>
-                <div style={{ background: "white", border: "1px solid #e2e8f0", borderRadius: "12px", overflow: "hidden", boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
-                  {sectionTotals.map((s, idx) => (
-                    <div key={idx} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "6px 14px", borderBottom: idx === sectionTotals.length - 1 ? "none" : "1px solid #f1f5f9" }}>
-                      <span style={{ fontSize: "7.5px", color: "#475569", fontWeight: "500" }}>{s.title}</span>
-                      <span style={{ fontSize: "8px", fontWeight: "600", color: "#0f172a", fontFamily: "'Inter', monospace" }}>{fmt(s.total)} <span style={{ fontSize: "6px", color: "#94a3b8" }}>{currency}</span></span>
+                  <td style={cell({ fontWeight: "600", color: "#0f172a", fontSize: "7px" })}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+                      {item.image && <img src={item.image} style={{ width: "20px", height: "20px", objectFit: "contain", borderRadius: "3px", border: "1px solid #e2e8f0", background: "#fff", flexShrink: 0 }} />}
+                      <span style={{ lineHeight: "1.25" }}>{item.sectionTitle || item.description}</span>
                     </div>
-                  ))}
+                  </td>
+                  <td style={cell({ color: "#64748b", fontSize: "6.5px", lineHeight: "1.3" })}>
+                    {item.description}
+                    {item.warranty && <div style={{ color: accent, fontSize: "5.5px", marginTop: "1px", fontWeight: "600" }}>✓ {item.warranty}</div>}
+                  </td>
+                  <td style={cell({ textAlign: "center", color: "#64748b", fontSize: "6.5px" })}>{item.brand || "—"}</td>
+                  <td style={cell({ textAlign: "center", color: "#0f172a", fontWeight: "700", fontSize: "7px" })}>
+                    {item.quantity || 0}<div style={{ fontSize: "5px", color: "#94a3b8", fontWeight: "400" }}>{item.unit || "pcs"}</div>
+                  </td>
+                  <td style={cell({ textAlign: "right", color: "#475569", fontSize: "7px", fontVariantNumeric: "tabular-nums" })}>{fmt(item.unitPrice)}</td>
+                  <td style={cell({ textAlign: "right", fontWeight: "700", color: "#0f172a", fontSize: "7px", fontVariantNumeric: "tabular-nums" })}>{fmt(lineTotal)}</td>
+                </tr>
+              );
+            })}
+            {(!items || items.length === 0) && <tr><td colSpan={7} style={{ padding: "20px", textAlign: "center", color: "#94a3b8", fontSize: "8px" }}>No items defined.</td></tr>}
+          </tbody>
+        </table>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "12px", breakInside: "avoid", pageBreakInside: "avoid" }}>
+          <div style={{ width: "230px" }}>
+            {sectionTotals.length > 0 && (
+              <div style={{ marginBottom: "8px" }}>
+                <div style={{ fontSize: "5.5px", fontWeight: "700", color: "#94a3b8", letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: "3px", textAlign: "right" }}>Section Summary</div>
+                <div style={{ border: "1px solid #e8ecf0", borderRadius: "6px", overflow: "hidden" }}>
+                  {sectionTotals.map((s, i) => (<div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "4px 10px", borderBottom: i === sectionTotals.length - 1 ? "none" : "1px solid #f1f5f9", fontSize: "6.5px" }}><span style={{ color: "#475569" }}>{s.title}</span><span style={{ fontWeight: "600", color: "#0f172a", fontVariantNumeric: "tabular-nums" }}>{fmt(s.total)} <span style={{ fontSize: "5px", color: "#94a3b8" }}>{currency}</span></span></div>))}
                 </div>
               </div>
             )}
-            <div
-              style={{
-                fontSize: "7px",
-                fontWeight: "700",
-                color: "#94a3b8",
-                letterSpacing: "2px",
-                textTransform: "uppercase",
-                marginBottom: "6px",
-                textAlign: "right",
-              }}
-            >
-              PRICE SUMMARY
-            </div>
-            <div
-              style={{
-                background: "white",
-                border: "1px solid #e2e8f0",
-                borderRadius: "12px",
-                overflow: "hidden",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.04)",
-              }}
-            >
-              {[
-                {
-                  label: "Subtotal",
-                  value: fmt(subtotal),
-                  color: "#0f172a",
-                  bg: "white",
-                },
-                {
-                  label: "Discount",
-                  value: `− ${fmt(discount)}`,
-                  color: "#dc2626",
-                  bg: "#fef2f2",
-                },
-                {
-                  label: "Tax (VAT)",
-                  value: `+ ${fmt(tax)}`,
-                  color: "#64748b",
-                  bg: "#f8fafc",
-                },
-              ].map(({ label, value, color, bg }) => (
-                <div
-                  key={label}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "8px 14px",
-                    background: bg,
-                    borderBottom: "1px solid #f1f5f9",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "8px",
-                      color: "#64748b",
-                      fontWeight: "500",
-                    }}
-                  >
-                    {label}
-                  </span>
-                  <span
-                    style={{
-                      fontSize: "9px",
-                      fontWeight: "600",
-                      color,
-                      fontFamily: "'Inter', monospace",
-                    }}
-                  >
-                    {value}{" "}
-                    <span style={{ fontSize: "7px", color: "#94a3b8" }}>
-                      {currency}
-                    </span>
-                  </span>
+            <div style={{ fontSize: "5.5px", fontWeight: "700", color: "#94a3b8", letterSpacing: "1.2px", textTransform: "uppercase", marginBottom: "3px", textAlign: "right" }}>Price Summary</div>
+            <div style={{ border: "1px solid #e8ecf0", borderRadius: "6px", overflow: "hidden" }}>
+              {[{ label: "Subtotal", value: fmt(subtotal), color: "#0f172a", bg: "#fff" },{ label: "Discount", value: `− ${fmt(discount)}`, color: "#dc2626", bg: "#fef2f2" },{ label: "Tax (VAT)", value: `+ ${fmt(tax)}`, color: "#64748b", bg: "#f8fafc" }].map(({ label, value, color, bg }) => (
+                <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 10px", background: bg, borderBottom: "1px solid #f1f5f9", fontSize: "7px" }}>
+                  <span style={{ color: "#64748b" }}>{label}</span><span style={{ fontWeight: "600", color, fontVariantNumeric: "tabular-nums" }}>{value} <span style={{ fontSize: "5px", color: "#94a3b8" }}>{currency}</span></span>
                 </div>
               ))}
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "12px 14px",
-                  background: accentGrad,
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "9px",
-                    fontWeight: "700",
-                    color: "white",
-                    letterSpacing: "1px",
-                    textTransform: "uppercase",
-                  }}
-                >
-                  Grand Total
-                </span>
-                <span
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "800",
-                    color: accentHighlight,
-                    fontFamily: "'Montserrat', sans-serif",
-                  }}
-                >
-                  {fmt(grandTotal)}{" "}
-                  <span style={{ fontSize: "8px", fontWeight: "600" }}>
-                    {currency}
-                  </span>
-                </span>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 10px", background: darkGrad }}>
+                <span style={{ fontSize: "7px", fontWeight: "700", color: "#fff", letterSpacing: "0.6px", textTransform: "uppercase" }}>Grand Total</span>
+                <span style={{ fontSize: "12px", fontWeight: "800", color: accentHighlight, fontFamily: "'Montserrat',sans-serif", fontVariantNumeric: "tabular-nums" }}>{fmt(grandTotal)} <span style={{ fontSize: "6.5px", fontWeight: "600" }}>{currency}</span></span>
               </div>
             </div>
           </div>
         </div>
 
-        <div style={{ flex: 1 }} />
         <SDFooter pageNum={4} />
       </div>
     </div>

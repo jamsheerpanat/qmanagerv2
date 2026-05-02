@@ -260,7 +260,7 @@ export class InvoicesService {
       },
     });
 
-    const seq = (count + 1).toString().padStart(4, '0');
+    const seq = (count + 450 + 1).toString().padStart(4, '0');
     const invoiceNumber = `${prefix}-${year}-${seq}`;
 
     await this.prisma.invoice.update({
@@ -348,5 +348,13 @@ export class InvoicesService {
     );
 
     return pdfBuffer;
+  }
+
+  async remove(id: string) {
+    const invoice = await this.findOne(id);
+    if (!invoice) {
+      throw new NotFoundException('Invoice not found');
+    }
+    return this.prisma.invoice.delete({ where: { id } });
   }
 }

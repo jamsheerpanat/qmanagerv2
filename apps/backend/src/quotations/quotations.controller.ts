@@ -149,6 +149,12 @@ export class QuotationsController {
     res.send(pdfBuffer);
   }
 
+  @RequirePermissions('quotations.send')
+  @Post(':id/generate-share-link')
+  generateShareLink(@Param('id') id: string, @Req() req: any) {
+    return this.quotationsService.generateShareLink(id, req.user?.id);
+  }
+
   @RequirePermissions('quotations.view')
   @Get(':id/readiness')
   checkReadiness(@Param('id') id: string) {

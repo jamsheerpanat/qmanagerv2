@@ -21,6 +21,9 @@ import {
   AlertTriangle,
   Plus,
   Trash2,
+  Link2,
+  Copy,
+  Check,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import {
@@ -49,6 +52,12 @@ export default function QuotationDetailPage({
   const [invoiceType, setInvoiceType] = useState("FINAL");
   const [readiness, setReadiness] = useState<any>(null);
   const [diffData, setDiffData] = useState<any>(null);
+
+  // Share Link State
+  const [showShareLinkModal, setShowShareLinkModal] = useState(false);
+  const [shareLinkUrl, setShareLinkUrl] = useState("");
+  const [isGeneratingLink, setIsGeneratingLink] = useState(false);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   // Terms Management State
   const [showTermsModal, setShowTermsModal] = useState(false);
@@ -299,29 +308,30 @@ export default function QuotationDetailPage({
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2 xl:justify-end">
+          <Button
+            variant="outline"
+            className="border-red-200 text-red-600 hover:bg-red-50"
+            onClick={async () => {
+              if (confirm("Are you sure you want to delete this quotation? This action cannot be undone.")) {
+                try {
+                  await api.delete(`/quotations/${id}`);
+                  router.push("/dashboard/quotations");
+                } catch (e) {
+                  console.error(e);
+                  alert("Failed to delete quotation.");
+                }
+              }
+            }}
+          >
+            <Trash2 className="w-4 h-4 mr-2" /> Delete
+          </Button>
+          
           {!quotation.isLocked &&
             (quotation.status === "DRAFT" ||
               quotation.status === "REVISED") && (
               <>
                 <Button variant="outline" onClick={() => router.push(`/dashboard/quotations/${id}/edit`)}>
                   <Edit className="w-4 h-4 mr-2" /> Edit
-                </Button>
-                <Button
-                  variant="outline"
-                  className="border-red-200 text-red-600 hover:bg-red-50"
-                  onClick={async () => {
-                    if (confirm("Are you sure you want to delete this quotation? This action cannot be undone.")) {
-                      try {
-                        await api.delete(`/quotations/${id}`);
-                        router.push("/dashboard/quotations");
-                      } catch (e) {
-                        console.error(e);
-                        alert("Failed to delete quotation. It might not be in DRAFT state.");
-                      }
-                    }
-                  }}
-                >
-                  <Trash2 className="w-4 h-4 mr-2" /> Delete
                 </Button>
                 <Button
                   variant="outline"
@@ -400,6 +410,27 @@ export default function QuotationDetailPage({
             quotation.status === "SENT_TO_CUSTOMER" ||
             quotation.status === "ACCEPTED") && (
             <>
+              <Button
+                variant="outline"
+                className="border-teal-200 text-teal-700 hover:bg-teal-50"
+                disabled={isGeneratingLink}
+                onClick={async () => {
+                  setIsGeneratingLink(true);
+                  try {
+                    const { data } = await api.post(`/quotations/${id}/generate-share-link`);
+                    setShareLinkUrl(data.portalLink);
+                    setLinkCopied(false);
+                    setShowShareLinkModal(true);
+                  } catch (e) {
+                    console.error(e);
+                    alert("Failed to generate share link.");
+                  } finally {
+                    setIsGeneratingLink(false);
+                  }
+                }}
+              >
+                <Link2 className="w-4 h-4 mr-2" /> {isGeneratingLink ? "Generating..." : "Share Link"}
+              </Button>
               <Button
                 className="bg-blue-600 hover:bg-blue-700"
                 onClick={() => handleAction("send")}
@@ -746,9 +777,10 @@ export default function QuotationDetailPage({
               </div>
             </div>
           ) : activeTab === "preview" ? (
-            <Card className="border-none shadow-sm overflow-hidden h-[800px] flex flex-col relative">
-              <div className="absolute top-0 w-full bg-gray-800 p-2 text-center text-white text-xs font-mono z-10 opacity-0 hover:opacity-100 transition-opacity">
-                Live PDF Render Preview (A4 Size)
+            <Card className="border-none shadow-sm overflow-hidden flex flex-col relative" style={{ height: "calc(100vh - 180px)", minHeight: "600px" }}>
+              <div className="bg-slate-800/90 backdrop-blur px-4 py-1.5 flex items-center justify-between z-10">
+                <span className="text-white/70 text-xs font-medium">Live Preview</span>
+                <span className="text-white/40 text-[10px] font-mono">A4 · 210×297mm</span>
               </div>
               <iframe
                 src={`/render-pdf/${
@@ -765,7 +797,7 @@ export default function QuotationDetailPage({
                   quotation.serviceType?.slug ||
                   "home-automation"
                 }?quotationId=${quotation.id}`}
-                className="w-full h-full border-0 bg-gray-100"
+                className="w-full flex-1 border-0 bg-gray-100"
                 title="PDF Live Preview"
               />
             </Card>
@@ -1063,6 +1095,49 @@ export default function QuotationDetailPage({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Share Link Modal */}
+      {showShareLinkModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-2xl">
+            <h2 className="text-xl font-bold mb-2 flex items-center">
+              <Link2 className="w-5 h-5 mr-2 text-teal-600" /> Share Quotation Link
+            </h2>
+            <p className="text-sm text-gray-500 mb-4">
+              Copy this link and share it with your customer via WhatsApp, SMS, or any other channel.
+            </p>
+            <div className="flex items-center gap-2">
+              <input
+                type="text"
+                readOnly
+                value={shareLinkUrl}
+                className="flex-1 border rounded-lg p-3 text-sm bg-gray-50 text-gray-700 font-mono truncate"
+                onClick={(e) => (e.target as HTMLInputElement).select()}
+              />
+              <Button
+                variant={linkCopied ? "default" : "outline"}
+                className={linkCopied ? "bg-green-600 hover:bg-green-700 shrink-0" : "shrink-0"}
+                onClick={() => {
+                  navigator.clipboard.writeText(shareLinkUrl);
+                  setLinkCopied(true);
+                  setTimeout(() => setLinkCopied(false), 3000);
+                }}
+              >
+                {linkCopied ? (
+                  <><Check className="w-4 h-4 mr-1" /> Copied!</>
+                ) : (
+                  <><Copy className="w-4 h-4 mr-1" /> Copy</>
+                )}
+              </Button>
+            </div>
+            <div className="flex justify-end mt-6">
+              <Button variant="outline" onClick={() => setShowShareLinkModal(false)}>
+                Close
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

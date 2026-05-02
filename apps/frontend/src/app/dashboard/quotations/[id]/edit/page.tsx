@@ -31,6 +31,25 @@ const STEPS = [
   "Review",
 ];
 
+async function compressImage(base64Str: string, maxWidth = 150): Promise<string> {
+  return new Promise((resolve) => {
+    if (!base64Str || !base64Str.startsWith('data:image')) return resolve(base64Str);
+    const img = new Image();
+    img.src = base64Str;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const ratio = maxWidth / img.width;
+      if (ratio >= 1) return resolve(base64Str);
+      canvas.width = maxWidth;
+      canvas.height = img.height * ratio;
+      const ctx = canvas.getContext('2d');
+      if (ctx) ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL('image/jpeg', 0.6));
+    };
+    img.onerror = () => resolve(base64Str);
+  });
+}
+
 export default function EditQuotationWizard({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [step, setStep] = useState(0);
@@ -212,10 +231,20 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
         scopeSummary: formData.scopeSummary,
       });
 
-      const itemsPayload = formData.items.map((i: any) => {
-        const { brand, image, taxRate, ...rest } = i;
-        return { ...rest, image: image || undefined, taxRate: taxRate || 0 };
-      });
+      const itemsPayload = await Promise.all(formData.items.map(async (i: any) => {
+        const { brand, image, taxRate, productId, serviceItemId, ...rest } = i;
+        const payload: any = { ...rest, taxRate: taxRate || 0 };
+        
+        if (productId) {
+          payload.productId = productId;
+          // If product exists, omit image from payload to drastically reduce size. PDF picks it up.
+        } else if (image) {
+          payload.image = await compressImage(image, 250);
+        }
+        
+        if (serviceItemId) payload.serviceItemId = serviceItemId;
+        return payload;
+      }));
 
       await api.post(`/quotations/${id}/items`, itemsPayload);
 
@@ -384,7 +413,10 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
 
             {showProductModal && (
               <Dialog open={showProductModal} onOpenChange={setShowProductModal}>
-                <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
+                <DialogContent 
+                  className="max-h-[85vh] flex flex-col" 
+                  style={{ maxWidth: '896px', width: '90vw' }}
+                >
                   <DialogHeader>
                     <DialogTitle>Search Products</DialogTitle>
                   </DialogHeader>
@@ -439,15 +471,15 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
               </Dialog>
             )}
 
-            <div className="mt-6 border rounded-lg overflow-hidden">
-              <table className="w-full text-sm text-left">
+            <div className="mt-6 border rounded-lg overflow-x-auto">
+              <table className="w-full text-sm text-left min-w-[800px]">
                 <thead className="bg-gray-50 text-gray-700">
                   <tr>
                     <th className="p-3">Description</th>
-                    <th className="p-3 w-20">Qty</th>
-                    <th className="p-3 w-32">Unit Price</th>
-                    <th className="p-3 w-20">Tax %</th>
-                    <th className="p-3 w-16"></th>
+                    <th className="p-3 w-28">Qty</th>
+                    <th className="p-3 w-36">Unit Price</th>
+                    <th className="p-3 w-24">Tax %</th>
+                    <th className="p-3 w-20"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -538,24 +570,26 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                     }
                     return (
                       <tr key={idx} className="bg-white">
-                        <td className="p-3 flex items-center gap-3">
-                          {item.image && (
-                            <img
-                              src={item.image}
-                              alt=""
-                              className="w-10 h-10 object-cover rounded-md border bg-gray-50"
-                            />
-                          )}
-                          <div>
-                            <div className="font-medium text-gray-900">
-                              {item.sectionTitle || item.description}
+                        <td className="p-3">
+                          <div className="flex items-center gap-3">
+                            {item.image && (
+                              <img
+                                src={item.image}
+                                alt=""
+                                className="w-10 h-10 object-cover rounded-md border bg-gray-50 flex-shrink-0"
+                              />
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <div className="font-medium text-gray-900 break-words whitespace-normal max-w-[300px]">
+                                {item.sectionTitle || item.description}
+                              </div>
+                              {item.sectionTitle &&
+                                item.sectionTitle !== item.description && (
+                                  <div className="text-xs text-gray-500 truncate mt-0.5 max-w-[300px]">
+                                    {item.description}
+                                  </div>
+                                )}
                             </div>
-                            {item.sectionTitle &&
-                              item.sectionTitle !== item.description && (
-                                <div className="text-xs text-gray-500 max-w-sm truncate mt-0.5">
-                                  {item.description}
-                                </div>
-                              )}
                           </div>
                         </td>
                         <td className="p-3">
