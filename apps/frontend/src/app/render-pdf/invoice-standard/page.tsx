@@ -76,6 +76,10 @@ function InvoiceStandardRenderPageInner() {
     ? format(new Date(data.invoiceDate), "dd MMM yyyy")
     : format(new Date(), "dd MMM yyyy");
 
+  const formattedDueDate = data.dueDate
+    ? format(new Date(data.dueDate), "dd MMM yyyy")
+    : "";
+
   return (
     <>
       <FontLoader />
@@ -83,6 +87,9 @@ function InvoiceStandardRenderPageInner() {
         <ModernInvoicePage
           invoiceNumber={data.invoiceNumber || "DRAFT"}
           invoiceDate={formattedDate}
+          dueDate={formattedDueDate}
+          companyName={data.company?.name || "Octonics Co. W.L.L."}
+          companyAddress={data.company?.address || ""}
           customerName={data.customer?.displayName}
           customerCompany={data.customer?.company}
           customerAddress={data.customer?.address}

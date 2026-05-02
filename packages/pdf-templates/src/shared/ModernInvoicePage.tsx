@@ -18,6 +18,8 @@ export const ModernInvoicePage = ({
   currency = "KWD",
   notes = "",
   qrVerificationUrl = "",
+  companyName = "Octonics Co. W.L.L.",
+  companyAddress = "",
 }: any) => {
   return (
     <div className="pdf-page bg-white font-sans text-gray-800 relative flex flex-col h-full w-full">
@@ -32,17 +34,30 @@ export const ModernInvoicePage = ({
             INVOICE
           </h1>
           <p className="text-sm text-gray-500 mt-1 uppercase tracking-wider font-semibold">
-            Octonics Co. W.L.L.
+            {companyName}
           </p>
+          {companyAddress && (
+            <p className="text-xs text-gray-400 mt-1 whitespace-pre-wrap max-w-xs">
+              {companyAddress}
+            </p>
+          )}
         </div>
         <div className="text-right">
           <div className="text-xl font-bold text-gray-900">
             {invoiceNumber || "INV-0000"}
           </div>
           <div className="text-sm text-gray-500 mt-1 flex gap-4 justify-end">
-            <div>
-              <span className="font-semibold text-gray-700">Date:</span>{" "}
-              {invoiceDate}
+            <div className="text-right">
+              <div className="mb-1">
+                <span className="font-semibold text-gray-700">Date:</span>{" "}
+                {invoiceDate}
+              </div>
+              {dueDate && (
+                <div>
+                  <span className="font-semibold text-gray-700">Due Date:</span>{" "}
+                  {dueDate}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -227,8 +242,8 @@ export const ModernInvoicePage = ({
       {/* Footer / QR Verification */}
       <div className="mt-auto px-12 pb-8 pt-8 flex items-end justify-between border-t border-gray-100">
         <div className="text-xs text-gray-400 max-w-sm">
-          If you have any questions about this invoice, please contact us at
-          support@octonics.com
+          If you have any questions about this invoice, please contact us at{" "}
+          {companyName.replace(/[^a-zA-Z0-9]/g, "").toLowerCase()}@support.com
         </div>
 
         {qrVerificationUrl && (

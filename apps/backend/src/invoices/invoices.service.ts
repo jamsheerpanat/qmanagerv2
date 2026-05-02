@@ -134,6 +134,7 @@ export class InvoicesService {
     const invoice = await this.prisma.invoice.findUnique({
       where: { id },
       include: {
+        company: true,
         customer: true,
         contact: true,
         quotation: { select: { quotationNumber: true } },
