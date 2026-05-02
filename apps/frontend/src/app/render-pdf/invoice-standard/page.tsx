@@ -35,7 +35,10 @@ function InvoiceStandardRenderPageInner() {
       try {
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/internal/invoices/${invoiceId}`,
-          { headers: { "x-internal-pdf-render": "1" } },
+          { 
+            headers: { "x-internal-pdf-render": "1" },
+            cache: "no-store"
+          },
         );
         if (res.ok) {
           const invData = await res.json();
