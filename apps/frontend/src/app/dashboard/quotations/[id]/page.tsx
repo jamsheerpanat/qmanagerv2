@@ -406,44 +406,37 @@ export default function QuotationDetailPage({
             <Download className="w-4 h-4 mr-2" /> Generate PDF
           </Button>
 
+          <Button
+            variant="outline"
+            className="border-teal-200 text-teal-700 hover:bg-teal-50"
+            disabled={isGeneratingLink}
+            onClick={async () => {
+              setIsGeneratingLink(true);
+              try {
+                const { data } = await api.post(`/quotations/${id}/generate-share-link`);
+                setShareLinkUrl(data.portalLink);
+                setLinkCopied(false);
+                setShowShareLinkModal(true);
+              } catch (e) {
+                console.error(e);
+                alert("Failed to generate share link.");
+              } finally {
+                setIsGeneratingLink(false);
+              }
+            }}
+          >
+            <Link2 className="w-4 h-4 mr-2" /> {isGeneratingLink ? "Generating..." : "Share Link"}
+          </Button>
+
           {(quotation.status === "APPROVED" ||
             quotation.status === "SENT_TO_CUSTOMER" ||
             quotation.status === "ACCEPTED") && (
-            <>
-              <Button
-                variant="outline"
-                className="border-teal-200 text-teal-700 hover:bg-teal-50"
-                disabled={isGeneratingLink}
-                onClick={async () => {
-                  setIsGeneratingLink(true);
-                  try {
-                    const { data } = await api.post(`/quotations/${id}/generate-share-link`);
-                    setShareLinkUrl(data.portalLink);
-                    setLinkCopied(false);
-                    setShowShareLinkModal(true);
-                  } catch (e) {
-                    console.error(e);
-                    alert("Failed to generate share link.");
-                  } finally {
-                    setIsGeneratingLink(false);
-                  }
-                }}
-              >
-                <Link2 className="w-4 h-4 mr-2" /> {isGeneratingLink ? "Generating..." : "Share Link"}
-              </Button>
-              <Button
-                className="bg-blue-600 hover:bg-blue-700"
-                onClick={() => handleAction("send")}
-              >
-                <Send className="w-4 h-4 mr-2" /> Send to Customer
-              </Button>
               <Button
                 className="bg-purple-600 hover:bg-purple-700"
                 onClick={() => setShowInvoiceModal(true)}
               >
                 <Receipt className="w-4 h-4 mr-2" /> Convert to Invoice
               </Button>
-            </>
           )}
         </div>
       </div>
