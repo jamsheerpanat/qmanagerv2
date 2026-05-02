@@ -16,6 +16,8 @@ import {
   Trash2,
   ArrowUp,
   ArrowDown,
+  Download,
+  Upload,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Search } from "lucide-react";
@@ -71,6 +73,65 @@ export default function CreateQuotationWizard() {
     }
     updateForm("items", newItems);
     setInsertIndex(null);
+  };
+
+  const handleDownloadSample = () => {
+    const csvContent = "Type,Description,Quantity,Price,Tax Rate\nPRODUCT,Sample Product A,2,150.00,0\nSECTION_HEADING,Installation Phase,,,\nSERVICE,Installation Labor,10,25.00,5";
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement("a");
+    const url = URL.createObjectURL(blob);
+    link.setAttribute("href", url);
+    link.setAttribute("download", "sample-quotation-items.csv");
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const csvData = event.target?.result as string;
+      const lines = csvData.split('\n');
+      const newItems = [];
+      
+      for (let i = 1; i < lines.length; i++) {
+        const line = lines[i].trim();
+        if (!line) continue;
+        
+        const cols = line.split(',');
+        const type = cols[0]?.trim();
+        const description = cols[1]?.trim();
+        const quantity = cols[2]?.trim();
+        const price = cols[3]?.trim();
+        const taxRate = cols[4]?.trim();
+        
+        if (type === 'SECTION_HEADING') {
+          newItems.push({
+            itemType: "SECTION_HEADING",
+            sectionTitle: description,
+          });
+        } else if (type === 'PRODUCT' || type === 'SERVICE' || type === 'CUSTOM') {
+          newItems.push({
+            itemType: type,
+            sectionTitle: description,
+            description: description,
+            quantity: Number(quantity) || 1,
+            unitPrice: Number(price) || 0,
+            taxRate: Number(taxRate) || 0,
+          });
+        }
+      }
+      
+      if (newItems.length > 0) {
+        updateForm("items", [...formData.items, ...newItems]);
+      }
+      e.target.value = '';
+    };
+    reader.readAsText(file);
   };
 
   const [formData, setFormData] = useState<any>({
@@ -130,18 +191,18 @@ export default function CreateQuotationWizard() {
 
       if (formData.items.length > 0) {
         const itemsPayload = formData.items.map((i: any) => {
-          const { brand, ...rest } = i;
-          return rest;
+          const { brand, image, taxRate, ...rest } = i;
+          return { ...rest, image: image || undefined, taxRate: taxRate || 0 };
         });
         await api.post(`/quotations/${quotation.id}/items`, itemsPayload);
       }
 
       if (formData.terms.length > 0) {
-        const payload = formData.terms.map((t: any, idx: number) => ({
-          categoryId: t.categoryId || null,
-          content: t.content,
-          sortOrder: idx,
-        }));
+        const payload = formData.terms.map((t: any, idx: number) => {
+          const res: any = { content: t.content, sortOrder: idx };
+          if (t.categoryId) res.categoryId = t.categoryId;
+          return res;
+        });
         await api.post(`/quotations/${quotation.id}/terms`, payload);
       }
 
@@ -246,37 +307,60 @@ export default function CreateQuotationWizard() {
               <p className="text-sm text-gray-500 mb-4">
                 Select items to add to your quotation.
               </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    updateForm("items", [
-                      ...formData.items,
-                      {
-                        itemType: "SECTION_HEADING",
-                        sectionTitle: "New Section Title",
-                      },
-                    ]);
-                  }}
-                >
-                  <Plus className="w-4 h-4 mr-2" /> Add Section
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setInsertIndex(null);
-                    setSearchQuery("");
-                    setShowProductModal(true);
-                  }}
-                >
-                  <Search className="w-4 h-4 mr-2" /> Search Product
-                </Button>
+              <div className="flex flex-wrap gap-2 justify-between w-full">
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      updateForm("items", [
+                        ...formData.items,
+                        {
+                          itemType: "SECTION_HEADING",
+                          sectionTitle: "New Section Title",
+                        },
+                      ]);
+                    }}
+                  >
+                    <Plus className="w-4 h-4 mr-2" /> Add Section
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setInsertIndex(null);
+                      setSearchQuery("");
+                      setShowProductModal(true);
+                    }}
+                  >
+                    <Search className="w-4 h-4 mr-2" /> Search Product
+                  </Button>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    onClick={handleDownloadSample}
+                    className="text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                  >
+                    <Download className="w-4 h-4 mr-2" /> Sample CSV
+                  </Button>
+                  <div className="relative">
+                    <input 
+                      type="file" 
+                      accept=".csv" 
+                      onChange={handleImportCSV}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                      title="Import CSV"
+                    />
+                    <Button variant="outline" className="pointer-events-none bg-white">
+                      <Upload className="w-4 h-4 mr-2" /> Import CSV
+                    </Button>
+                  </div>
+                </div>
               </div>
             </div>
 
             {showProductModal && (
               <Dialog open={showProductModal} onOpenChange={setShowProductModal}>
-                <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+                <DialogContent className="max-w-4xl max-h-[85vh] flex flex-col">
                   <DialogHeader>
                     <DialogTitle>Search Products</DialogTitle>
                   </DialogHeader>
@@ -288,25 +372,25 @@ export default function CreateQuotationWizard() {
                       autoFocus
                     />
                   </div>
-                  <div className="flex-1 overflow-y-auto">
-                    <table className="w-full text-sm">
-                      <thead className="bg-gray-50">
+                  <div className="flex-1 overflow-auto border rounded-md">
+                    <table className="w-full text-sm min-w-[700px]">
+                      <thead className="bg-gray-50 sticky top-0 z-10 shadow-sm">
                         <tr>
-                          <th className="p-2 text-left">Code</th>
-                          <th className="p-2 text-left">Product</th>
-                          <th className="p-2 text-left">Brand</th>
-                          <th className="p-2 text-right">Price</th>
-                          <th className="p-2 text-center">Action</th>
+                          <th className="p-3 text-left font-semibold w-1/4">Code</th>
+                          <th className="p-3 text-left font-semibold w-1/3">Product</th>
+                          <th className="p-3 text-left font-semibold w-1/6">Brand</th>
+                          <th className="p-3 text-right font-semibold w-1/6">Price</th>
+                          <th className="p-3 text-center font-semibold w-24">Action</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y">
+                      <tbody className="divide-y bg-white">
                         {filteredProducts.map((p: any) => (
                           <tr key={p.id} className="hover:bg-gray-50">
-                            <td className="p-2">{p.productCode}</td>
-                            <td className="p-2">{p.productName}</td>
-                            <td className="p-2">{p.brand || "-"}</td>
-                            <td className="p-2 text-right">{p.sellingPrice}</td>
-                            <td className="p-2 text-center">
+                            <td className="p-3">{p.productCode}</td>
+                            <td className="p-3">{p.productName}</td>
+                            <td className="p-3">{p.brand || "-"}</td>
+                            <td className="p-3 text-right">{p.sellingPrice}</td>
+                            <td className="p-3 text-center">
                               <Button
                                 size="sm"
                                 onClick={() => {
@@ -321,7 +405,7 @@ export default function CreateQuotationWizard() {
                         ))}
                         {filteredProducts.length === 0 && (
                           <tr>
-                            <td colSpan={5} className="p-4 text-center text-gray-500">No products found.</td>
+                            <td colSpan={5} className="p-8 text-center text-gray-500">No products found.</td>
                           </tr>
                         )}
                       </tbody>

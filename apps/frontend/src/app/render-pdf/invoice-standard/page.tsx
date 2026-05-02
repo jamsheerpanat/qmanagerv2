@@ -33,8 +33,9 @@ function InvoiceStandardRenderPageInner() {
         return;
       }
       try {
+        const endpoint = searchParams.get("invoiceId") ? "invoices" : "quotations";
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/internal/invoices/${invoiceId}`,
+          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/internal/${endpoint}/${invoiceId}`,
           { 
             headers: { "x-internal-pdf-render": "1" },
             cache: "no-store"
@@ -94,8 +95,8 @@ function InvoiceStandardRenderPageInner() {
           companyName={data.company?.name || "Octonics Co. W.L.L."}
           companyAddress={data.company?.address || ""}
           customerName={data.customer?.displayName}
-          customerCompany={data.customer?.company}
-          customerAddress={data.customer?.address}
+          customerCompany={data.customer?.legalName}
+          customerAddress={data.customer?.addressLine1 || data.customer?.area || ""}
           items={data.items || []}
           subtotal={data.subtotal}
           discount={data.discountAmount}

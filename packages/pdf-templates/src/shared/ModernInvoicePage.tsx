@@ -206,7 +206,7 @@ export const ModernInvoicePage = ({
               color: "#2563eb",
             }}
           >
-            {balanceAmount.toLocaleString(undefined, {
+            {(balanceAmount || 0).toLocaleString(undefined, {
               minimumFractionDigits: 3,
               maximumFractionDigits: 3,
             })}{" "}
@@ -363,7 +363,7 @@ export const ModernInvoicePage = ({
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
             <span style={{ fontSize: "14px", color: "#4b5563", fontWeight: 500 }}>Subtotal</span>
             <span style={{ color: "#111827", fontWeight: 500 }}>
-              {subtotal.toLocaleString(undefined, {
+              {(subtotal || 0).toLocaleString(undefined, {
                 minimumFractionDigits: 3,
                 maximumFractionDigits: 3,
               })}{" "}
@@ -411,7 +411,7 @@ export const ModernInvoicePage = ({
           >
             <span style={{ fontWeight: 700, color: "#111827" }}>Grand Total</span>
             <span style={{ fontWeight: 700, color: "#111827" }}>
-              {grandTotal.toLocaleString(undefined, {
+              {(grandTotal || 0).toLocaleString(undefined, {
                 minimumFractionDigits: 3,
                 maximumFractionDigits: 3,
               })}{" "}
@@ -435,7 +435,7 @@ export const ModernInvoicePage = ({
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "8px" }}>
             <span style={{ fontSize: "18px", fontWeight: 700, color: "#111827" }}>Balance Due</span>
             <span style={{ fontSize: "20px", fontWeight: 700, color: "#2563eb" }}>
-              {balanceAmount.toLocaleString(undefined, {
+              {(balanceAmount || 0).toLocaleString(undefined, {
                 minimumFractionDigits: 3,
                 maximumFractionDigits: 3,
               })}{" "}
