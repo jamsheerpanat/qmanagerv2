@@ -272,7 +272,7 @@ export const SoftwareDevQuotationPage = ({
                             padding: "2px 5px",
                           }}
                         >
-                          {String(idx + 1).padStart(2, "0")}
+                          {item.serialNumber || String(idx + 1).padStart(2, "0")}
                         </span>
                       )}
                     </td>

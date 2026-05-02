@@ -151,11 +151,16 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
         scopeSummary: formData.scopeSummary,
       });
 
-      await api.post(`/quotations/${id}/items`, formData.items);
+      const itemsPayload = formData.items.map((i: any) => {
+        const { brand, ...rest } = i;
+        return rest;
+      });
+
+      await api.post(`/quotations/${id}/items`, itemsPayload);
 
       if (formData.terms.length > 0) {
         const payload = formData.terms.map((t: any, idx: number) => ({
-          categoryId: t.categoryId || "custom",
+          categoryId: t.categoryId || null,
           content: t.content,
           sortOrder: idx,
         }));

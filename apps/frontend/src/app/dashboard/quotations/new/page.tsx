@@ -129,12 +129,16 @@ export default function CreateQuotationWizard() {
       });
 
       if (formData.items.length > 0) {
-        await api.post(`/quotations/${quotation.id}/items`, formData.items);
+        const itemsPayload = formData.items.map((i: any) => {
+          const { brand, ...rest } = i;
+          return rest;
+        });
+        await api.post(`/quotations/${quotation.id}/items`, itemsPayload);
       }
 
       if (formData.terms.length > 0) {
         const payload = formData.terms.map((t: any, idx: number) => ({
-          categoryId: t.categoryId || "custom",
+          categoryId: t.categoryId || null,
           content: t.content,
           sortOrder: idx,
         }));

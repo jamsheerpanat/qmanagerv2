@@ -164,7 +164,22 @@ function transformQuotation(q: any, docId: string) {
     proposalReference: q.quotationNumber || docId,
     revisionNumber: String(q.revisionNumber ?? 0),
     projectLocation: q.projectLocation || "",
-    items: (q.items || []).map((i: any) => ({ ...i, brand: i.product?.brand || "" })),
+    items: (() => {
+      let counter = 0;
+      return (q.items || []).map((i: any) => {
+        let serialNumber = "";
+        if (i.itemType !== "SECTION_HEADING" && !i.isOptional) {
+          counter++;
+          serialNumber = String(counter).padStart(2, "0");
+        }
+        return {
+          ...i,
+          brand: i.product?.brand || "",
+          image: i.image || i.product?.productImage || "",
+          serialNumber,
+        };
+      });
+    })(),
     subtotal: q.subtotal || 0,
     discount: q.discountAmount || 0,
     tax: q.taxAmount || 0,

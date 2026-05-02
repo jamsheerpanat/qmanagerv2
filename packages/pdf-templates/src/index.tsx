@@ -39,6 +39,7 @@ export {
 
 // Shared Components
 export { OctonicsProductsPage } from "./shared/OctonicsProductsPage";
+export { ModernInvoicePage } from "./shared/ModernInvoicePage";
 
 export const PdfPage = ({
   children,

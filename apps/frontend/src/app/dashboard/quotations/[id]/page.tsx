@@ -308,6 +308,23 @@ export default function QuotationDetailPage({
                 </Button>
                 <Button
                   variant="outline"
+                  className="border-red-200 text-red-600 hover:bg-red-50"
+                  onClick={async () => {
+                    if (confirm("Are you sure you want to delete this quotation? This action cannot be undone.")) {
+                      try {
+                        await api.delete(`/quotations/${id}`);
+                        router.push("/dashboard/quotations");
+                      } catch (e) {
+                        console.error(e);
+                        alert("Failed to delete quotation. It might not be in DRAFT state.");
+                      }
+                    }
+                  }}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" /> Delete
+                </Button>
+                <Button
+                  variant="outline"
                   className="border-orange-200 text-orange-700 hover:bg-orange-50"
                   onClick={() => {
                     if (readiness && readiness.warnings.length > 0) {

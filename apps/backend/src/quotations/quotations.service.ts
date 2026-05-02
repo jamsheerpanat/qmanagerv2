@@ -46,7 +46,9 @@ export class QuotationsService {
 
     const prefix = company.quotationPrefix || 'QTN';
     const year = new Date().getFullYear();
-    const count = await this.prisma.quotation.count({
+    
+    // Find the latest quotation to determine the next sequence number safely
+    const lastQuotation = await this.prisma.quotation.findFirst({
       where: {
         companyId: company.id,
         issueDate: {
@@ -55,8 +57,29 @@ export class QuotationsService {
         },
         revisionNumber: 0, // Count only base quotations
       },
+      orderBy: {
+        createdAt: 'desc',
+      },
     });
-    const seq = (count + 1).toString().padStart(4, '0');
+
+    let lastSeq = 0;
+    if (lastQuotation && lastQuotation.quotationNumber) {
+      // Assuming format PREFIX-YYYY-SEQ (e.g., QTN-2026-0001)
+      const parts = lastQuotation.quotationNumber.split('-');
+      if (parts.length >= 3) {
+        const parsedSeq = parseInt(parts[2], 10);
+        if (!isNaN(parsedSeq)) {
+          lastSeq = parsedSeq;
+        }
+      }
+    }
+
+    // Ensure the sequence starts from at least 469 so the next one is 470+
+    if (lastSeq < 469) {
+      lastSeq = 469;
+    }
+
+    const seq = (lastSeq + 1).toString().padStart(4, '0');
     const quotationNumber = `${prefix}-${year}-${seq}`;
 
     let validUntil = createQuotationDto.validUntil;
