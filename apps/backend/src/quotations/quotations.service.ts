@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
@@ -18,6 +19,8 @@ import { PdfService } from '../pdf/pdf.service';
 
 @Injectable()
 export class QuotationsService {
+  private readonly logger = new Logger(QuotationsService.name);
+
   constructor(
     private prisma: PrismaService,
     private pdfService: PdfService,
@@ -74,7 +77,9 @@ export class QuotationsService {
       }
     }
 
-    // Ensure the sequence starts from at least 469 so the next one is 470+
+    // Migration baseline: production had 469 quotations before QManager v2 launch.
+    // This ensures new quotations continue from QT-YYYY-0470+ and never collide
+    // with legacy numbering. Safe to remove once lastSeq naturally exceeds 469.
     if (lastSeq < 469) {
       lastSeq = 469;
     }
@@ -604,13 +609,13 @@ export class QuotationsService {
             </div>
           `,
         });
-        console.log(`Email successfully sent to ${recipientEmail}`);
+        this.logger.log(`Quotation email sent to ${recipientEmail}`);
       } catch (err) {
-        console.error('Failed to send SMTP email:', err);
+        this.logger.error(`Failed to send SMTP email to ${recipientEmail}`, err instanceof Error ? err.stack : String(err));
       }
     } else {
-      console.log(
-        `[SMTP Not Configured] Sending quotation link to ${recipientEmail}: ${portalLink}`,
+      this.logger.warn(
+        `SMTP not configured — share link generated for ${recipientEmail}: ${portalLink}`,
       );
     }
 

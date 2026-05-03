@@ -1,4 +1,5 @@
-ssh root@76.13.76.173
-Password : Jamsheer@9975#
+# Deployment
 
-domain : qmanager2.octolabs.cloud
+**Server**: `qmanager2.octolabs.cloud`
+
+> Credentials stored securely — do not commit passwords to version control.

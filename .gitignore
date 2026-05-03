@@ -7,3 +7,29 @@ dist/
 lint_output.txt
 .DS_Store
 apps/backend/dist/
+
+# Environment & secrets
+.env
+.env.*
+Deploy.md
+
+# Generated / build artifacts
+out.css
+*.pdf
+
+# Test & scratch scripts (root)
+test-*.js
+extract_products.py
+
+# Backend scratch files
+apps/backend/scratch.js
+apps/backend/test-*.js
+apps/backend/test-*.ts
+apps/backend/reset-password.js
+apps/backend/fix_live_data.ts
+
+# Images at root (branding assets — use /public instead)
+*.jpeg
+*.jpg
+*.gif
+# Keep .png for logo assets if needed

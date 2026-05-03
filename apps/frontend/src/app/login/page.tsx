@@ -78,7 +78,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="superadmin@qmanager.local"
+                placeholder="you@company.com"
                 {...register("email")}
               />
               {errors.email && (
