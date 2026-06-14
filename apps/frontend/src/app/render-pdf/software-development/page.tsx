@@ -88,7 +88,7 @@ function SoftwareDevRenderPageInner() {
           projectLocation={data.projectLocation}
         />
         <SoftwareDevAboutPage />
-        <SoftwareDevScopePage items={data.items} />
+        <SoftwareDevScopePage />
         <SoftwareDevQuotationPage
           items={data.items}
           subtotal={data.subtotal}
