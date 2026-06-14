@@ -16,11 +16,27 @@ async function main() {
   let user = await prisma.user.findUnique({ where: { email } });
 
   if (user) {
+    const superAdminRole = await prisma.role.findUnique({ where: { name: 'Super Admin' } });
+
     await prisma.user.update({
       where: { email },
-      data: { passwordHash },
+      data: { 
+        passwordHash,
+        roles: superAdminRole ? {
+          upsert: {
+            where: {
+              userId_roleId: {
+                userId: user.id,
+                roleId: superAdminRole.id
+              }
+            },
+            update: {},
+            create: { roleId: superAdminRole.id }
+          }
+        } : undefined
+      },
     });
-    console.log(`Password for ${email} has been updated.`);
+    console.log(`Password for ${email} has been updated and Super Admin role ensured.`);
   } else {
     // Find default company
     const defaultCompany = await prisma.company.findFirst();
