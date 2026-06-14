@@ -19,7 +19,7 @@ function getDbUrl() {
     console.error('Failed to read .env file', e);
   }
   console.log('Falling back to default DATABASE_URL');
-  return process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5436/qmanager?schema=public';
+  return process.env.DATABASE_URL || 'postgresql://qmanager_user:password@localhost:5432/qmanager_v2';
 }
 
 const connectionString = getDbUrl();
