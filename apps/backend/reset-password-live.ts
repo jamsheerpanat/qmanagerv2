@@ -29,20 +29,27 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  const email = 'jamsheer@octonics.com';
-  const newPassword = 'Finn@9975#';
-  const passwordHash = await bcrypt.hash(newPassword, 10);
+  const superAdminRole = await prisma.role.findUnique({ where: { name: 'Super Admin' } });
 
-  let user = await prisma.user.findUnique({ where: { email } });
+  if (!superAdminRole) {
+    console.log('Super Admin role does not exist in the database! Please run permission seeder first.');
+    return;
+  }
 
-  if (user) {
-    const superAdminRole = await prisma.role.findUnique({ where: { name: 'Super Admin' } });
+  const allUsers = await prisma.user.findMany();
+  
+  if (allUsers.length === 0) {
+    console.log('NO USERS FOUND IN THE LIVE DATABASE!');
+    return;
+  }
 
+  console.log(`Found ${allUsers.length} users. Granting Super Admin to all of them...`);
+
+  for (const user of allUsers) {
     await prisma.user.update({
-      where: { email },
-      data: { 
-        passwordHash,
-        roles: superAdminRole ? {
+      where: { id: user.id },
+      data: {
+        roles: {
           upsert: {
             where: {
               userId_roleId: {
@@ -53,34 +60,13 @@ async function main() {
             update: {},
             create: { roleId: superAdminRole.id }
           }
-        } : undefined
-      },
-    });
-    console.log(`Password for ${email} has been updated in LIVE DB and Super Admin role ensured.`);
-  } else {
-    // Find default company
-    const defaultCompany = await prisma.company.findFirst();
-    if (!defaultCompany) {
-      console.log('No company found in live database to attach user to.');
-      process.exit(1);
-    }
-    
-    // Find Super Admin role
-    const superAdminRole = await prisma.role.findUnique({ where: { name: 'Super Admin' } });
-
-    user = await prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        name: 'Jamsheer',
-        companyId: defaultCompany.id,
-        roles: superAdminRole ? {
-          create: [{ roleId: superAdminRole.id }]
-        } : undefined
+        }
       }
     });
-    console.log(`User ${email} created as Super Admin with new password in LIVE DB.`);
+    console.log(`Granted Super Admin to: ${user.email}`);
   }
+
+  console.log('All existing users have been granted Super Admin access in the LIVE DB.');
 }
 
 main()

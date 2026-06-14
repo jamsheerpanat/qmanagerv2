@@ -13,7 +13,7 @@ function getDbUrl() {
       if (match && match[1]) return match[1];
     }
   } catch (e) {}
-  return process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5436/qmanager?schema=public';
+  return process.env.DATABASE_URL || 'postgresql://qmanager_user:password@localhost:5432/qmanager_v2';
 }
 
 const connectionString = getDbUrl();
