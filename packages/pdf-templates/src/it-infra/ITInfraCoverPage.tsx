@@ -88,44 +88,16 @@ export const ITInfraCoverPage = ({
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div
+          <img
+            src="/octonics-emblem.png"
+            alt="Octonics Innovations"
             style={{
-              width: "40px",
               height: "40px",
-              borderRadius: "8px",
-              background: "linear-gradient(135deg, #0369a1, #0ea5e9)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "18px",
-              fontWeight: "900",
-              color: "white",
+              width: "auto",
+              objectFit: "contain",
+              filter: "brightness(0) invert(1)",
             }}
-          >
-            O
-          </div>
-          <div>
-            <div
-              style={{
-                color: "white",
-                fontWeight: "700",
-                fontSize: "14px",
-                letterSpacing: "1px",
-              }}
-            >
-              OCTONICS
-            </div>
-            <div
-              style={{
-                color: "#38bdf8",
-                fontSize: "9px",
-                letterSpacing: "2px",
-                textTransform: "uppercase",
-              }}
-            >
-              INNOVATIONS
-            </div>
-          </div>
+          />
         </div>
         <div style={{ textAlign: "right" }}>
           <div

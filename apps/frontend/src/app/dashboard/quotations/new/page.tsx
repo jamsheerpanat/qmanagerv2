@@ -26,7 +26,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 const STEPS = [
   "Customer & Lead",
   "Service & Details",
-  "Products/Services",
+  "Items & Services",
   "Scope & Terms",
   "Review",
 ];
@@ -57,42 +57,14 @@ export default function CreateQuotationWizard() {
 
   const [customers, setCustomers] = useState<any[]>([]);
   const [serviceTypes, setServiceTypes] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
   const [serviceItems, setServiceItems] = useState<any[]>([]);
   const [termsTemplates, setTermsTemplates] = useState<any[]>([]);
+  const [termsGroups, setTermsGroups] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [showProductModal, setShowProductModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [insertIndex, setInsertIndex] = useState<number | null>(null);
+  const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
 
-  const filteredProducts = products.filter((p: any) =>
-    (p.productName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (p.productCode || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (p.brand || "").toLowerCase().includes(searchQuery.toLowerCase())
-  ).slice(0, 50);
-
-  const handleAddProduct = (product: any) => {
-    const newItem = {
-      itemType: "PRODUCT",
-      productId: product.id,
-      sectionTitle: product.productName,
-      description: product.shortDescription || product.productName,
-      quantity: 1,
-      unitPrice: product.sellingPrice,
-      taxRate: product.taxRate,
-      image: product.productImage,
-      brand: product.brand,
-    };
-    
-    const newItems = [...formData.items];
-    if (insertIndex !== null) {
-      newItems.splice(insertIndex + 1, 0, newItem);
-    } else {
-      newItems.push(newItem);
-    }
-    updateForm("items", newItems);
-    setInsertIndex(null);
-  };
+  // Product logic removed
 
   const handleDownloadSample = () => {
     const csvContent = "Type,Description,Quantity,Price,Tax Rate\nPRODUCT,Sample Product A,2,150.00,0\nSECTION_HEADING,Installation Phase,,,\nSERVICE,Installation Labor,10,25.00,5";
@@ -166,19 +138,19 @@ export default function CreateQuotationWizard() {
 
   async function fetchData() {
     try {
-      const [custRes, servRes, prodRes, servItemRes, termsRes] =
+      const [custRes, servRes, servItemRes, termsRes, groupsRes] =
         await Promise.all([
           api.get("/customers"),
           api.get("/catalog/service-types"),
-          api.get("/catalog/products"),
           api.get("/catalog/service-items"),
           api.get("/terms/templates"),
+          api.get("/terms/groups"),
         ]);
       setCustomers(custRes.data);
       setServiceTypes(servRes.data);
-      setProducts(prodRes.data);
       setServiceItems(servItemRes.data);
       setTermsTemplates(termsRes.data);
+      setTermsGroups(groupsRes.data);
     } catch (e) {
       console.error("Failed to load initial data", e);
     }
@@ -352,16 +324,6 @@ export default function CreateQuotationWizard() {
                   >
                     <Plus className="w-4 h-4 mr-2" /> Add Section
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setInsertIndex(null);
-                      setSearchQuery("");
-                      setShowProductModal(true);
-                    }}
-                  >
-                    <Search className="w-4 h-4 mr-2" /> Search Product
-                  </Button>
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -387,65 +349,7 @@ export default function CreateQuotationWizard() {
               </div>
             </div>
 
-            {showProductModal && (
-              <Dialog open={showProductModal} onOpenChange={setShowProductModal}>
-                <DialogContent 
-                  className="max-h-[85vh] flex flex-col" 
-                  style={{ maxWidth: '896px', width: '90vw' }}
-                >
-                  <DialogHeader>
-                    <DialogTitle>Search Products</DialogTitle>
-                  </DialogHeader>
-                  <div className="flex gap-2 mb-4">
-                    <Input
-                      placeholder="Search by product name, code, or brand..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      autoFocus
-                    />
-                  </div>
-                  <div className="flex-1 overflow-auto border rounded-md">
-                    <table className="w-full text-sm min-w-[700px]">
-                      <thead className="bg-gray-50 sticky top-0 z-10 shadow-sm">
-                        <tr>
-                          <th className="p-3 text-left font-semibold w-1/4">Code</th>
-                          <th className="p-3 text-left font-semibold w-1/3">Product</th>
-                          <th className="p-3 text-left font-semibold w-1/6">Brand</th>
-                          <th className="p-3 text-right font-semibold w-1/6">Price</th>
-                          <th className="p-3 text-center font-semibold w-24">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y bg-white">
-                        {filteredProducts.map((p: any) => (
-                          <tr key={p.id} className="hover:bg-gray-50">
-                            <td className="p-3">{p.productCode}</td>
-                            <td className="p-3">{p.productName}</td>
-                            <td className="p-3">{p.brand || "-"}</td>
-                            <td className="p-3 text-right">{p.sellingPrice}</td>
-                            <td className="p-3 text-center">
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  handleAddProduct(p);
-                                  setShowProductModal(false);
-                                }}
-                              >
-                                Add
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                        {filteredProducts.length === 0 && (
-                          <tr>
-                            <td colSpan={5} className="p-8 text-center text-gray-500">No products found.</td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
+            {/* Product Modal removed */}
 
             <div className="mt-6 border rounded-lg overflow-x-auto">
               <table className="w-full text-sm text-left min-w-[800px]">
@@ -490,11 +394,21 @@ export default function CreateQuotationWizard() {
                               className="text-xs h-8 px-2 mr-2"
                               onClick={() => {
                                 setInsertIndex(idx);
-                                setSearchQuery("");
-                                setShowProductModal(true);
+                                updateForm("items", [
+                                  ...formData.items.slice(0, idx + 1),
+                                  {
+                                    itemType: "SERVICE",
+                                    sectionTitle: "New Service",
+                                    description: "",
+                                    quantity: 1,
+                                    unitPrice: 0,
+                                    taxRate: 0,
+                                  },
+                                  ...formData.items.slice(idx + 1),
+                                ]);
                               }}
                             >
-                              <Plus className="w-3 h-3 mr-1" /> Add Product
+                              <Plus className="w-3 h-3 mr-1" /> Add Item
                             </Button>
                             <Button
                               variant="ghost"
@@ -681,38 +595,81 @@ export default function CreateQuotationWizard() {
               Type has defaults.
             </p>
 
-            <div className="flex gap-2 mb-4 bg-gray-50 p-4 border rounded-lg">
-              <select
-                className="border rounded-md p-2 bg-white flex-1"
-                id="template-select"
-              >
-                <option value="">-- Add from Template --</option>
-                {termsTemplates.map((t: any) => (
-                  <option key={t.id} value={t.id}>
-                    {t.title} ({t.category?.name || "Uncategorized"})
-                  </option>
-                ))}
-              </select>
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  const select = document.getElementById(
-                    "template-select",
-                  ) as HTMLSelectElement;
-                  const tmplId = select.value;
-                  if (!tmplId) return;
-                  const tmpl = termsTemplates.find((t: any) => t.id === tmplId);
-                  if (tmpl) {
-                    updateForm("terms", [
-                      ...formData.terms,
-                      { content: tmpl.content, categoryId: tmpl.categoryId },
-                    ]);
-                  }
-                  select.value = "";
-                }}
-              >
-                Add Template
-              </Button>
+            <div className="flex flex-col gap-4 mb-4 bg-gray-50 p-4 border rounded-lg">
+              <div className="flex gap-2 items-end">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium mb-1 text-gray-700">Add from Terms Group</label>
+                  <select
+                    className="w-full border rounded-md p-2 bg-white"
+                    id="group-select"
+                  >
+                    <option value="">-- Select Terms Group --</option>
+                    {termsGroups.map((g: any) => (
+                      <option key={g.id} value={g.id}>
+                        {g.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    const select = document.getElementById("group-select") as HTMLSelectElement;
+                    const grpId = select.value;
+                    if (!grpId) return;
+                    const grp = termsGroups.find((g: any) => g.id === grpId);
+                    if (grp && grp.templates) {
+                      const newTerms = grp.templates.map((t: any) => ({
+                        content: t.content,
+                        categoryId: t.categoryId,
+                      }));
+                      updateForm("terms", [...formData.terms, ...newTerms]);
+                    }
+                    select.value = "";
+                  }}
+                >
+                  Add Group Terms
+                </Button>
+              </div>
+
+              <div className="border-t pt-4">
+                <label className="block text-sm font-medium mb-2 text-gray-700">Or Select Individual Terms</label>
+                <div className="max-h-48 overflow-y-auto border rounded-md bg-white p-2 space-y-2 mb-3">
+                  {termsTemplates.map((t: any) => (
+                    <label key={t.id} className="flex items-start space-x-3 p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        className="mt-1"
+                        checked={selectedTemplateIds.includes(t.id)}
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          setSelectedTemplateIds(prev => 
+                            isChecked ? [...prev, t.id] : prev.filter(id => id !== t.id)
+                          );
+                        }}
+                      />
+                      <div>
+                        <div className="text-sm font-medium">{t.title} <span className="text-xs text-gray-500">({t.category?.name})</span></div>
+                        <div className="text-xs text-gray-500 line-clamp-1">{t.content}</div>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    if (selectedTemplateIds.length === 0) return;
+                    const newTerms = termsTemplates
+                      .filter((t: any) => selectedTemplateIds.includes(t.id))
+                      .map((t: any) => ({ content: t.content, categoryId: t.categoryId }));
+                    updateForm("terms", [...formData.terms, ...newTerms]);
+                    setSelectedTemplateIds([]); // Reset selection
+                  }}
+                  disabled={selectedTemplateIds.length === 0}
+                >
+                  Add Selected Terms ({selectedTemplateIds.length})
+                </Button>
+              </div>
             </div>
 
             <div className="space-y-3">

@@ -8,7 +8,6 @@ import {
   SoftwareDevScopePage,
   SoftwareDevQuotationPage,
   SoftwareDevFinalPage,
-  OctonicsProductsPage,
 } from "@qmanager/pdf-templates";
 
 const FontLoader = () => (
@@ -89,11 +88,7 @@ function SoftwareDevRenderPageInner() {
           projectLocation={data.projectLocation}
         />
         <SoftwareDevAboutPage />
-        <SoftwareDevScopePage />
-        <OctonicsProductsPage
-          accentColor="#6366f1"
-          headerLabel="SOFTWARE DEVELOPMENT PROPOSAL"
-        />
+        <SoftwareDevScopePage items={data.items} />
         <SoftwareDevQuotationPage
           items={data.items}
           subtotal={data.subtotal}

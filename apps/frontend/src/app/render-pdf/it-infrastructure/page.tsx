@@ -8,7 +8,6 @@ import {
   ITInfraScopePage,
   ITInfraQuotationPage,
   ITInfraFinalPage,
-  OctonicsProductsPage,
 } from "@qmanager/pdf-templates";
 
 const FontLoader = () => (
@@ -90,10 +89,6 @@ function ITInfraRenderPageInner() {
         />
         <ITInfraAboutPage />
         <ITInfraScopePage />
-        <OctonicsProductsPage
-          accentColor="#38bdf8"
-          headerLabel="IT INFRASTRUCTURE PROPOSAL"
-        />
         <ITInfraQuotationPage
           items={data.items}
           subtotal={data.subtotal}

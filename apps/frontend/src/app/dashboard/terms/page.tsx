@@ -18,11 +18,16 @@ import { Input } from "@/components/ui/input";
 export default function TermsMasterPage() {
   const [categories, setCategories] = useState<any[]>([]);
   const [templates, setTemplates] = useState<any[]>([]);
+  const [groups, setGroups] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Category Modal State
   const [showCatModal, setShowCatModal] = useState(false);
   const [catForm, setCatForm] = useState({ id: "", name: "", isActive: true });
+
+  // Group Modal State
+  const [showGrpModal, setShowGrpModal] = useState(false);
+  const [grpForm, setGrpForm] = useState({ id: "", name: "", description: "", isActive: true, templateIds: [] as string[] });
 
   // Template Modal State
   const [showTmplModal, setShowTmplModal] = useState(false);
@@ -37,12 +42,14 @@ export default function TermsMasterPage() {
 
   async function fetchData() {
     try {
-      const [catRes, tempRes] = await Promise.all([
+      const [catRes, tempRes, grpRes] = await Promise.all([
         api.get("/terms/categories"),
         api.get("/terms/templates"),
+        api.get("/terms/groups"),
       ]);
       setCategories(catRes.data);
       setTemplates(tempRes.data);
+      setGroups(grpRes.data);
     } catch (e) {
       console.error(e);
     } finally {
@@ -90,6 +97,35 @@ export default function TermsMasterPage() {
       setCatForm({ id: "", name: "", isActive: true });
     }
     setShowCatModal(true);
+  };
+
+  async function handleSaveGroup() {
+    try {
+      if (grpForm.id) {
+        await api.patch(`/terms/groups/${grpForm.id}`, grpForm);
+      } else {
+        await api.post("/terms/groups", grpForm);
+      }
+      setShowGrpModal(false);
+      fetchData();
+    } catch (error) {
+      console.error("Error saving group", error);
+    }
+  }
+
+  const openGrpModal = (grp?: any) => {
+    if (grp) {
+      setGrpForm({
+        id: grp.id,
+        name: grp.name,
+        description: grp.description || "",
+        isActive: grp.isActive,
+        templateIds: grp.templates?.map((t: any) => t.id) || [],
+      });
+    } else {
+      setGrpForm({ id: "", name: "", description: "", isActive: true, templateIds: [] });
+    }
+    setShowGrpModal(true);
   };
 
   const openTmplModal = (tmpl?: any) => {
@@ -223,6 +259,49 @@ export default function TermsMasterPage() {
         </Card>
       </div>
 
+      {/* Terms Groups Card */}
+      <Card className="shadow-sm mt-6">
+        <CardHeader className="pb-3 border-b mb-3">
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-lg">Terms Groups</CardTitle>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 w-8 p-0"
+              onClick={() => openGrpModal()}
+            >
+              <Plus className="w-4 h-4" />
+            </Button>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {groups.length === 0 ? (
+            <p className="text-sm text-gray-500">No groups found.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {groups.map((g: any) => (
+                <div
+                  key={g.id}
+                  onClick={() => openGrpModal(g)}
+                  className="p-4 border rounded-md hover:bg-gray-50 cursor-pointer space-y-2"
+                >
+                  <div className="flex justify-between items-start">
+                    <span className="font-semibold text-sm">{g.name}</span>
+                    <Badge variant={g.isActive ? "outline" : "secondary"} className="text-xs">
+                      {g.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </div>
+                  {g.description && <p className="text-xs text-gray-500">{g.description}</p>}
+                  <div className="text-xs text-blue-600 bg-blue-50 w-fit px-2 py-1 rounded-md">
+                    {g.templates?.length || 0} terms
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
       {/* Category Modal */}
       <Dialog open={showCatModal} onOpenChange={setShowCatModal}>
         <DialogContent>
@@ -354,6 +433,66 @@ export default function TermsMasterPage() {
               Cancel
             </Button>
             <Button onClick={handleSaveTemplate}>Save Template</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Group Modal */}
+      <Dialog open={showGrpModal} onOpenChange={setShowGrpModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{grpForm.id ? "Edit Terms Group" : "Add Terms Group"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div>
+              <label className="text-sm font-medium">Group Name</label>
+              <Input
+                value={grpForm.name}
+                onChange={(e) => setGrpForm({ ...grpForm, name: e.target.value })}
+                placeholder="e.g. Standard Payment Terms"
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Select Terms</label>
+              <div className="mt-2 border rounded-md max-h-64 overflow-y-auto p-2 bg-gray-50 space-y-2">
+                {templates.map((t) => (
+                  <label key={t.id} className="flex items-start space-x-3 p-2 hover:bg-white rounded border border-transparent hover:border-gray-200 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="mt-1"
+                      checked={grpForm.templateIds.includes(t.id)}
+                      onChange={(e) => {
+                        const isChecked = e.target.checked;
+                        setGrpForm(prev => ({
+                          ...prev,
+                          templateIds: isChecked
+                            ? [...prev.templateIds, t.id]
+                            : prev.templateIds.filter(id => id !== t.id)
+                        }));
+                      }}
+                    />
+                    <div>
+                      <div className="text-sm font-medium">{t.title} <span className="text-xs text-gray-500">({t.category?.name})</span></div>
+                      <div className="text-xs text-gray-500 line-clamp-1">{t.content}</div>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="grpActive"
+                checked={grpForm.isActive}
+                onChange={(e) => setGrpForm({ ...grpForm, isActive: e.target.checked })}
+              />
+              <label htmlFor="grpActive" className="text-sm font-medium">Active</label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowGrpModal(false)}>Cancel</Button>
+            <Button onClick={handleSaveGroup}>Save Group</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

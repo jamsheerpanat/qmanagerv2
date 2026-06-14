@@ -26,7 +26,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 const STEPS = [
   "Customer & Lead",
   "Service & Details",
-  "Products/Services",
+  "Items & Services",
   "Scope & Terms",
   "Review",
 ];
@@ -58,42 +58,12 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
 
   const [customers, setCustomers] = useState<any[]>([]);
   const [serviceTypes, setServiceTypes] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
   const [serviceItems, setServiceItems] = useState<any[]>([]);
   const [termsTemplates, setTermsTemplates] = useState<any[]>([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [showProductModal, setShowProductModal] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [insertIndex, setInsertIndex] = useState<number | null>(null);
 
-  const filteredProducts = products.filter((p: any) =>
-    (p.productName || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (p.productCode || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
-    (p.brand || "").toLowerCase().includes(searchQuery.toLowerCase())
-  ).slice(0, 50);
-
-  const handleAddProduct = (product: any) => {
-    const newItem = {
-      itemType: "PRODUCT",
-      productId: product.id,
-      sectionTitle: product.productName,
-      description: product.shortDescription || product.productName,
-      quantity: 1,
-      unitPrice: product.sellingPrice,
-      taxRate: product.taxRate,
-      image: product.productImage,
-      brand: product.brand,
-    };
-    
-    const newItems = [...formData.items];
-    if (insertIndex !== null) {
-      newItems.splice(insertIndex + 1, 0, newItem);
-    } else {
-      newItems.push(newItem);
-    }
-    updateForm("items", newItems);
-    setInsertIndex(null);
-  };
+  // Product logic removed
 
   const handleDownloadSample = () => {
     const csvContent = "Type,Description,Quantity,Price,Tax Rate\nPRODUCT,Sample Product A,2,150.00,0\nSECTION_HEADING,Installation Phase,,,\nSERVICE,Installation Labor,10,25.00,5";
@@ -167,18 +137,16 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
 
   async function fetchData() {
     try {
-      const [custRes, servRes, prodRes, servItemRes, termsRes, quoteRes] =
+      const [custRes, servRes, servItemRes, termsRes, quoteRes] =
         await Promise.all([
           api.get("/customers"),
           api.get("/catalog/service-types"),
-          api.get("/catalog/products"),
           api.get("/catalog/service-items"),
           api.get("/terms/templates"),
           api.get(`/quotations/${id}`),
         ]);
       setCustomers(custRes.data);
       setServiceTypes(servRes.data);
-      setProducts(prodRes.data);
       setServiceItems(servItemRes.data);
       setTermsTemplates(termsRes.data);
       
@@ -376,16 +344,6 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                   >
                     <Plus className="w-4 h-4 mr-2" /> Add Section
                   </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => {
-                      setInsertIndex(null);
-                      setSearchQuery("");
-                      setShowProductModal(true);
-                    }}
-                  >
-                    <Search className="w-4 h-4 mr-2" /> Search Product
-                  </Button>
                 </div>
                 <div className="flex gap-2">
                   <Button
@@ -411,65 +369,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
               </div>
             </div>
 
-            {showProductModal && (
-              <Dialog open={showProductModal} onOpenChange={setShowProductModal}>
-                <DialogContent 
-                  className="max-h-[85vh] flex flex-col" 
-                  style={{ maxWidth: '896px', width: '90vw' }}
-                >
-                  <DialogHeader>
-                    <DialogTitle>Search Products</DialogTitle>
-                  </DialogHeader>
-                  <div className="flex gap-2 mb-4">
-                    <Input
-                      placeholder="Search by product name, code, or brand..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      autoFocus
-                    />
-                  </div>
-                  <div className="flex-1 overflow-auto border rounded-md">
-                    <table className="w-full text-sm min-w-[700px]">
-                      <thead className="bg-gray-50 sticky top-0 z-10 shadow-sm">
-                        <tr>
-                          <th className="p-3 text-left font-semibold w-1/4">Code</th>
-                          <th className="p-3 text-left font-semibold w-1/3">Product</th>
-                          <th className="p-3 text-left font-semibold w-1/6">Brand</th>
-                          <th className="p-3 text-right font-semibold w-1/6">Price</th>
-                          <th className="p-3 text-center font-semibold w-24">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y bg-white">
-                        {filteredProducts.map((p: any) => (
-                          <tr key={p.id} className="hover:bg-gray-50">
-                            <td className="p-3">{p.productCode}</td>
-                            <td className="p-3">{p.productName}</td>
-                            <td className="p-3">{p.brand || "-"}</td>
-                            <td className="p-3 text-right">{p.sellingPrice}</td>
-                            <td className="p-3 text-center">
-                              <Button
-                                size="sm"
-                                onClick={() => {
-                                  handleAddProduct(p);
-                                  setShowProductModal(false);
-                                }}
-                              >
-                                Add
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                        {filteredProducts.length === 0 && (
-                          <tr>
-                            <td colSpan={5} className="p-8 text-center text-gray-500">No products found.</td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </DialogContent>
-              </Dialog>
-            )}
+            {/* Product Modal removed */}
 
             <div className="mt-6 border rounded-lg overflow-x-auto">
               <table className="w-full text-sm text-left min-w-[800px]">
@@ -514,11 +414,21 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                               className="text-xs h-8 px-2 mr-2"
                               onClick={() => {
                                 setInsertIndex(idx);
-                                setSearchQuery("");
-                                setShowProductModal(true);
+                                updateForm("items", [
+                                  ...formData.items.slice(0, idx + 1),
+                                  {
+                                    itemType: "SERVICE",
+                                    sectionTitle: "New Service",
+                                    description: "",
+                                    quantity: 1,
+                                    unitPrice: 0,
+                                    taxRate: 0,
+                                  },
+                                  ...formData.items.slice(idx + 1),
+                                ]);
                               }}
                             >
-                              <Plus className="w-3 h-3 mr-1" /> Add Product
+                              <Plus className="w-3 h-3 mr-1" /> Add Item
                             </Button>
                             <Button
                               variant="ghost"

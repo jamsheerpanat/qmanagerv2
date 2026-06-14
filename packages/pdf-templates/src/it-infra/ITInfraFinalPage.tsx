@@ -615,26 +615,7 @@ export const ITInfraFinalPage = ({
                     </div>
                   </div>
 
-                  <div
-                    style={{
-                      fontSize: "6px",
-                      color: "#64748b",
-                      lineHeight: "1.4",
-                    }}
-                  >
-                    Scan QR code to authenticate document via QManager secure
-                    ledger.
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "5.5px",
-                      color: "#94a3b8",
-                      marginTop: "2px",
-                      wordBreak: "break-all" as any,
-                    }}
-                  >
-                    {verifyUrl}
-                  </div>
+
                 </div>
               </div>
             </div>

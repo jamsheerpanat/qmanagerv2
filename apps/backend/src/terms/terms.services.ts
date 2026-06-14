@@ -44,3 +44,47 @@ export class TermsTemplatesService {
     return this.prisma.termsTemplate.delete({ where: { id } });
   }
 }
+
+@Injectable()
+export class TermsGroupsService {
+  constructor(private prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.termsGroup.findMany({
+      include: { templates: true },
+      orderBy: { name: 'asc' },
+    });
+  }
+
+  async create(data: any) {
+    const { templateIds, id, ...rest } = data;
+    return this.prisma.termsGroup.create({
+      data: {
+        ...rest,
+        templates: {
+          connect: templateIds?.map((id: string) => ({ id })) || [],
+        },
+      },
+    });
+  }
+
+  async update(id: string, data: any) {
+    const { templateIds, ...rest } = data;
+    const updateData: any = { ...rest };
+    
+    if (templateIds) {
+      updateData.templates = {
+        set: templateIds.map((tid: string) => ({ id: tid })),
+      };
+    }
+
+    return this.prisma.termsGroup.update({
+      where: { id },
+      data: updateData,
+    });
+  }
+
+  async remove(id: string) {
+    return this.prisma.termsGroup.delete({ where: { id } });
+  }
+}

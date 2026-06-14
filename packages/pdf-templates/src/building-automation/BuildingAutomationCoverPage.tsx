@@ -93,8 +93,8 @@ export const BuildingAutomationCoverPage = ({
       >
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <img
-            src="/octonics-logo.png"
-            alt="Octonics"
+            src="/octonics-emblem.png"
+            alt="Octonics Innovations"
             style={{
               height: "40px",
               width: "auto",
@@ -102,56 +102,36 @@ export const BuildingAutomationCoverPage = ({
               filter: "brightness(0) invert(1)",
             }}
           />
-          <div>
-            <div
-              style={{
-                color: "white",
-                fontWeight: "700",
-                fontSize: "14px",
-                letterSpacing: "1px",
-              }}
-            >
-              OCTONICS
-            </div>
-            <div
-              style={{
-                color: "#06b6d4",
-                fontSize: "9px",
-                letterSpacing: "2px",
-                textTransform: "uppercase",
-              }}
-            >
-              INNOVATIONS
-            </div>
-          </div>
         </div>
         <div style={{ display: "flex", alignItems: "flex-start", gap: "12px" }}>
           <div
             style={{
               display: "flex",
-              flexDirection: "column",
-              gap: "4px",
-              alignItems: "flex-end",
+              gap: "8px",
+              alignItems: "center",
+              background: "white",
+              padding: "6px 10px",
+              borderRadius: "6px",
+              boxShadow: "0 2px 8px rgba(0,0,0,0.3)",
             }}
           >
             <img
               src="/knx-partner-logo.jpg"
               alt="KNX"
               style={{
-                height: "22px",
+                height: "18px",
                 width: "auto",
                 objectFit: "contain",
-                opacity: 0.7,
               }}
             />
+            <div style={{ width: "1px", height: "14px", background: "#cbd5e1" }} />
             <img
               src="/iso-certification.gif"
               alt="ISO"
               style={{
-                height: "22px",
+                height: "18px",
                 width: "auto",
                 objectFit: "contain",
-                opacity: 0.7,
               }}
             />
           </div>
