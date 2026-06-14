@@ -53,10 +53,19 @@ export class PermissionsGuard implements CanActivate {
     }
 
     const userPermissions = new Set<string>();
+    let isSuperAdmin = false;
     for (const ur of userWithRoles.roles) {
+      if (ur.role.name === 'Super Admin') {
+        isSuperAdmin = true;
+      }
       for (const rp of ur.role.permissions) {
         userPermissions.add(rp.permission.action);
       }
+    }
+
+    if (isSuperAdmin) {
+      user.permissions = ['*'];
+      return true;
     }
 
     const hasPermission = requiredPermissions.every((permission) =>
