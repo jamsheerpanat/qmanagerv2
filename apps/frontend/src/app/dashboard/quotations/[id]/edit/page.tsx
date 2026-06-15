@@ -89,8 +89,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
       ...formData.items.slice(idx + 1),
     ];
     
-    setFormData((prev: any) => ({ ...prev, items: newItems }));
-    calculateTotals(newItems);
+    updateForm("items", newItems);
 
     setIsItemModalOpen(false);
     setInsertIndex(null);
