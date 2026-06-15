@@ -5,21 +5,24 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 function getDbUrl() {
-  try {
-    const envPath = path.join(__dirname, '.env');
-    if (fs.existsSync(envPath)) {
-      const envContent = fs.readFileSync(envPath, 'utf8');
-      const match = envContent.match(/DATABASE_URL="?([^"\n]+)"?/);
-      if (match && match[1]) {
-        console.log('Using DATABASE_URL from .env');
-        return match[1];
-      }
-    }
-  } catch (e) {
-    console.error('Failed to read .env file', e);
+  if (process.env.LIVE_DATABASE_URL) {
+    console.log('Using LIVE_DATABASE_URL from environment variable');
+    return process.env.LIVE_DATABASE_URL;
   }
-  console.log('Falling back to default DATABASE_URL');
-  return process.env.DATABASE_URL || 'postgresql://qmanager_user:password@localhost:5432/qmanager_v2';
+  
+  // NOTE: We don't automatically read .env here because local .env usually points to localhost
+  // which causes accidental seeding of local db instead of live.
+  console.warn('\n⚠️ WARNING: LIVE_DATABASE_URL is not set.');
+  console.warn('To seed the live database remotely, run:');
+  console.warn('LIVE_DATABASE_URL="your_live_db_url_here" npx ts-node seed-terms-live.ts\n');
+  
+  // Fallback to local DB *only* if explicitly forced
+  if (process.env.FORCE_LOCAL_SEED === 'true') {
+    return process.env.DATABASE_URL || 'postgresql://postgres:password@localhost:5436/qmanager?schema=public';
+  }
+  
+  console.error("Exiting to prevent accidental local seeding.");
+  process.exit(1);
 }
 
 const connectionString = getDbUrl();

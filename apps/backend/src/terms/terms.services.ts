@@ -13,10 +13,14 @@ export class TermsCategoriesService {
   }
 
   async create(data: any) {
+    if (data.id === '') {
+      delete data.id;
+    }
     return this.prisma.termsCategory.create({ data });
   }
 
   async update(id: string, data: any) {
+    if (data.id) delete data.id;
     return this.prisma.termsCategory.update({ where: { id }, data });
   }
 }
@@ -33,10 +37,14 @@ export class TermsTemplatesService {
   }
 
   async create(data: any) {
+    if (data.id === '') {
+      delete data.id;
+    }
     return this.prisma.termsTemplate.create({ data });
   }
 
   async update(id: string, data: any) {
+    if (data.id) delete data.id;
     return this.prisma.termsTemplate.update({ where: { id }, data });
   }
 
@@ -58,6 +66,7 @@ export class TermsGroupsService {
 
   async create(data: any) {
     const { templateIds, id, ...rest } = data;
+    if (rest.id === '') delete rest.id;
     return this.prisma.termsGroup.create({
       data: {
         ...rest,
@@ -71,6 +80,7 @@ export class TermsGroupsService {
   async update(id: string, data: any) {
     const { templateIds, ...rest } = data;
     const updateData: any = { ...rest };
+    if (updateData.id) delete updateData.id;
     
     if (templateIds) {
       updateData.templates = {
