@@ -72,8 +72,8 @@ export default function CreateQuotationWizard() {
   const handleSelectItem = (item: any, type: "PRODUCT" | "SERVICE") => {
     const newItem = {
       itemType: type,
-      sectionTitle: item.name,
-      description: item.description || "",
+      sectionTitle: type === "PRODUCT" ? item.productName || "New Custom Product" : item.serviceName || "New Custom Service",
+      description: type === "PRODUCT" ? item.shortDescription || "" : item.description || "",
       quantity: 1,
       unitPrice: type === "PRODUCT" ? item.sellingPrice || 0 : item.defaultPrice || 0,
       taxRate: item.taxRate || 0,
@@ -414,18 +414,24 @@ export default function CreateQuotationWizard() {
                 <div className="flex-1 overflow-y-auto mt-4 space-y-2 pr-2">
                   {selectedTab === 'PRODUCT' ? (
                     products
-                      .filter((p: any) => p.name?.toLowerCase().includes(searchQuery.toLowerCase()) || p.partNumber?.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .filter((p: any) => 
+                        p.productName?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        p.productCode?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                        p.modelNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        p.brand?.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
                       .map((p: any) => (
                         <div key={p.id} className="flex justify-between items-center p-3 border rounded-lg hover:bg-gray-50">
                           <div className="flex items-center gap-3">
                             {p.image ? (
-                              <img src={p.image} alt={p.name} className="w-12 h-12 rounded object-cover border" />
+                              <img src={p.image} alt={p.productName} className="w-12 h-12 rounded object-cover border" />
                             ) : (
-                              <div className="w-12 h-12 rounded bg-gray-100 border flex items-center justify-center text-gray-400 text-xs">No img</div>
+                              <div className="w-12 h-12 rounded bg-gray-100 border flex items-center justify-center text-gray-400 text-xs text-center break-words p-1">No img</div>
                             )}
                             <div>
-                              <div className="font-medium text-gray-900">{p.name}</div>
-                              <div className="text-xs text-gray-500">Part: {p.partNumber || 'N/A'} • Brand: {p.brand || 'N/A'}</div>
+                              <div className="font-medium text-gray-900">{p.productName}</div>
+                              <div className="text-xs text-gray-500">Code: {p.productCode || 'N/A'} • Model: {p.modelNumber || 'N/A'} • Brand: {p.brand || 'N/A'}</div>
+                              {p.shortDescription && <div className="text-xs text-gray-400 line-clamp-1 mt-0.5">{p.shortDescription}</div>}
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
@@ -439,12 +445,15 @@ export default function CreateQuotationWizard() {
                       ))
                   ) : (
                     serviceItems
-                      .filter((s: any) => s.name?.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .filter((s: any) => 
+                        s.serviceName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                        s.serviceCode?.toLowerCase().includes(searchQuery.toLowerCase())
+                      )
                       .map((s: any) => (
                         <div key={s.id} className="flex justify-between items-center p-3 border rounded-lg hover:bg-gray-50">
                           <div>
-                            <div className="font-medium text-gray-900">{s.name}</div>
-                            {s.description && <div className="text-xs text-gray-500 line-clamp-1">{s.description}</div>}
+                            <div className="font-medium text-gray-900">{s.serviceName} <span className="text-xs text-gray-400 font-normal ml-2">({s.serviceCode})</span></div>
+                            {s.description && <div className="text-xs text-gray-500 line-clamp-1 mt-0.5">{s.description}</div>}
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="text-right">
@@ -462,7 +471,7 @@ export default function CreateQuotationWizard() {
                   <div className="text-sm text-gray-500">
                     Cannot find what you're looking for?
                   </div>
-                  <Button variant="outline" onClick={() => handleSelectItem({ name: "New Custom Item", description: "", sellingPrice: 0, defaultPrice: 0, taxRate: 0 }, selectedTab)}>
+                  <Button variant="outline" onClick={() => handleSelectItem({ productName: "New Custom Product", serviceName: "New Custom Service", shortDescription: "", description: "", sellingPrice: 0, defaultPrice: 0, taxRate: 0 }, selectedTab)}>
                     Add Custom {selectedTab === 'PRODUCT' ? 'Product' : 'Service'}
                   </Button>
                 </div>
