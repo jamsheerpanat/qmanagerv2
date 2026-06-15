@@ -6,5 +6,9 @@ npx prisma db push
 npm run build
 export LIVE_DATABASE_URL="postgresql://postgres:password@localhost:5436/qmanager?schema=public"
 npx ts-node seed-terms-live.ts
+cd ../frontend
+npm install
+npm run build
+cd ../..
 pm2 restart qmanager2-api
 pm2 restart qmanager2-web
