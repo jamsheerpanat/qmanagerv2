@@ -63,6 +63,37 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
   const [isSaving, setIsSaving] = useState(false);
   const [insertIndex, setInsertIndex] = useState<number | null>(null);
 
+  const [products, setProducts] = useState<any[]>([]);
+  const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTab, setSelectedTab] = useState<"PRODUCT" | "SERVICE">("PRODUCT");
+
+  const handleSelectItem = (item: any, type: "PRODUCT" | "SERVICE") => {
+    const newItem = {
+      itemType: type,
+      sectionTitle: item.name,
+      description: item.description || "",
+      quantity: 1,
+      unitPrice: type === "PRODUCT" ? item.sellingPrice || 0 : item.defaultPrice || 0,
+      taxRate: item.taxRate || 0,
+      productId: type === "PRODUCT" && item.id ? item.id : undefined,
+      serviceItemId: type === "SERVICE" && item.id ? item.id : undefined,
+      image: item.image || undefined,
+    };
+
+    const idx = insertIndex !== null ? insertIndex : formData.items.length - 1;
+    
+    updateForm("items", [
+      ...formData.items.slice(0, idx + 1),
+      newItem,
+      ...formData.items.slice(idx + 1),
+    ]);
+
+    setIsItemModalOpen(false);
+    setInsertIndex(null);
+    setSearchQuery("");
+  };
+
   // Product logic removed
 
   const handleDownloadSample = () => {
@@ -137,18 +168,20 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
 
   async function fetchData() {
     try {
-      const [custRes, servRes, servItemRes, termsRes, quoteRes] =
+      const [custRes, servRes, servItemRes, termsRes, quoteRes, prodRes] =
         await Promise.all([
           api.get("/customers"),
           api.get("/catalog/service-types"),
           api.get("/catalog/service-items"),
           api.get("/terms/templates"),
           api.get(`/quotations/${id}`),
+          api.get("/catalog/products"),
         ]);
       setCustomers(custRes.data);
       setServiceTypes(servRes.data);
       setServiceItems(servItemRes.data);
       setTermsTemplates(termsRes.data);
+      setProducts(prodRes.data);
       
       const q = quoteRes.data;
       setFormData({
@@ -369,7 +402,94 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
               </div>
             </div>
 
-            {/* Product Modal removed */}
+            <Dialog open={isItemModalOpen} onOpenChange={setIsItemModalOpen}>
+              <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+                <DialogHeader>
+                  <DialogTitle>Add Item to Quotation</DialogTitle>
+                </DialogHeader>
+                
+                <div className="flex gap-4 border-b">
+                  <button
+                    className={`pb-2 px-4 font-medium text-sm ${selectedTab === 'PRODUCT' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    onClick={() => setSelectedTab('PRODUCT')}
+                  >
+                    Products
+                  </button>
+                  <button
+                    className={`pb-2 px-4 font-medium text-sm ${selectedTab === 'SERVICE' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500 hover:text-gray-700'}`}
+                    onClick={() => setSelectedTab('SERVICE')}
+                  >
+                    Services
+                  </button>
+                </div>
+
+                <div className="relative mt-4">
+                  <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
+                  <Input
+                    placeholder="Search by name or part number..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-9"
+                  />
+                </div>
+
+                <div className="flex-1 overflow-y-auto mt-4 space-y-2 pr-2">
+                  {selectedTab === 'PRODUCT' ? (
+                    products
+                      .filter((p: any) => p.name?.toLowerCase().includes(searchQuery.toLowerCase()) || p.partNumber?.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((p: any) => (
+                        <div key={p.id} className="flex justify-between items-center p-3 border rounded-lg hover:bg-gray-50">
+                          <div className="flex items-center gap-3">
+                            {p.image ? (
+                              <img src={p.image} alt={p.name} className="w-12 h-12 rounded object-cover border" />
+                            ) : (
+                              <div className="w-12 h-12 rounded bg-gray-100 border flex items-center justify-center text-gray-400 text-xs">No img</div>
+                            )}
+                            <div>
+                              <div className="font-medium text-gray-900">{p.name}</div>
+                              <div className="text-xs text-gray-500">Part: {p.partNumber || 'N/A'} • Brand: {p.brand || 'N/A'}</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <div className="font-semibold">{p.sellingPrice} AED</div>
+                              <div className="text-xs text-gray-500">Tax: {p.taxRate}%</div>
+                            </div>
+                            <Button size="sm" onClick={() => handleSelectItem(p, 'PRODUCT')}>Add</Button>
+                          </div>
+                        </div>
+                      ))
+                  ) : (
+                    serviceItems
+                      .filter((s: any) => s.name?.toLowerCase().includes(searchQuery.toLowerCase()))
+                      .map((s: any) => (
+                        <div key={s.id} className="flex justify-between items-center p-3 border rounded-lg hover:bg-gray-50">
+                          <div>
+                            <div className="font-medium text-gray-900">{s.name}</div>
+                            {s.description && <div className="text-xs text-gray-500 line-clamp-1">{s.description}</div>}
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <div className="font-semibold">{s.defaultPrice} AED</div>
+                              <div className="text-xs text-gray-500">Tax: {s.taxRate}%</div>
+                            </div>
+                            <Button size="sm" onClick={() => handleSelectItem(s, 'SERVICE')}>Add</Button>
+                          </div>
+                        </div>
+                      ))
+                  )}
+                </div>
+                
+                <div className="pt-4 border-t flex justify-between items-center">
+                  <div className="text-sm text-gray-500">
+                    Cannot find what you're looking for?
+                  </div>
+                  <Button variant="outline" onClick={() => handleSelectItem({ name: "New Custom Item", description: "", sellingPrice: 0, defaultPrice: 0, taxRate: 0 }, selectedTab)}>
+                    Add Custom {selectedTab === 'PRODUCT' ? 'Product' : 'Service'}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
 
             <div className="mt-6 border rounded-lg overflow-x-auto">
               <table className="w-full text-sm text-left min-w-[800px]">
@@ -414,18 +534,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                               className="text-xs h-8 px-2 mr-2"
                               onClick={() => {
                                 setInsertIndex(idx);
-                                updateForm("items", [
-                                  ...formData.items.slice(0, idx + 1),
-                                  {
-                                    itemType: "SERVICE",
-                                    sectionTitle: "New Service",
-                                    description: "",
-                                    quantity: 1,
-                                    unitPrice: 0,
-                                    taxRate: 0,
-                                  },
-                                  ...formData.items.slice(idx + 1),
-                                ]);
+                                setIsItemModalOpen(true);
                               }}
                             >
                               <Plus className="w-3 h-3 mr-1" /> Add Item
