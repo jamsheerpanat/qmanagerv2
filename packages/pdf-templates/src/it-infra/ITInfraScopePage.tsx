@@ -230,7 +230,7 @@ const DELIVERABLES = [
   "Support as per agreement",
 ];
 
-export const ITInfraScopePage = () => (
+export const ITInfraScopePage = ({ scopeSummary }: { scopeSummary?: string }) => (
   <div
     className="pdf-page"
     style={{
@@ -287,10 +287,8 @@ export const ITInfraScopePage = () => (
           marginBottom: "8px",
         }}
       />
-      <p style={{ fontSize: "8.5px", color: "#64748b", marginBottom: "10px" }}>
-        The proposed IT infrastructure solution can include the following
-        systems and services based on the selected project scope and approved
-        quotation items.
+      <p style={{ fontSize: "8.5px", color: "#64748b", marginBottom: "10px", whiteSpace: "pre-wrap" }}>
+        {scopeSummary || "The proposed IT infrastructure solution can include the following systems and services based on the selected project scope and approved quotation items."}
       </p>
 
       <div

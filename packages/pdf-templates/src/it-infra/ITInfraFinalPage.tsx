@@ -346,8 +346,6 @@ export const ITInfraFinalPage = ({
                     display: "flex",
                     flexDirection: "column" as any,
                     gap: "3px",
-                    maxHeight: "70px",
-                    overflow: "hidden",
                   }}
                 >
                   {terms.map((t: any, i: number) => (

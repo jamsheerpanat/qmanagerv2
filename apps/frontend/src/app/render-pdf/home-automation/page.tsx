@@ -96,7 +96,7 @@ function HomeAutomationRenderPageInner() {
 
         <HomeAutomationAboutPage />
 
-        <HomeAutomationScopePage items={data.items} />
+        <HomeAutomationScopePage items={data.items} scopeSummary={data.scopeSummary} />
 
         <HomeAutomationQuotationPage
           items={data.items}
@@ -202,6 +202,7 @@ function transformQuotation(q: any, docId: string) {
     tax: q.taxAmount || 0,
     grandTotal: q.grandTotal || 0,
     currency: q.currency || "KWD",
+    scopeSummary: q.scopeSummary || "",
     terms: q.terms || [],
     paymentTerms:
       paymentTerm ||
@@ -241,6 +242,7 @@ function getSampleData(docId: string) {
       new Date().toLocaleDateString("en-GB"),
     deliveryTimeline:
       "Estimated 8–12 weeks from order confirmation and advance payment receipt, subject to equipment availability.",
+    scopeSummary: "",
     terms: [],
     items: [
       {

@@ -324,7 +324,7 @@ const DELIVERABLES = [
   "System handover documentation",
 ];
 
-export const HomeAutomationScopePage = ({ items = [] }: { items?: any[] }) => {
+export const HomeAutomationScopePage = ({ items = [], scopeSummary }: { items?: any[], scopeSummary?: string }) => {
   let activeScopes = SCOPES;
 
   if (items && items.length > 0) {
@@ -414,10 +414,8 @@ export const HomeAutomationScopePage = ({ items = [] }: { items?: any[] }) => {
           }}
         />
 
-        <p style={{ fontSize: "9px", color: "#64748b", marginBottom: "14px" }}>
-          The proposed smart home automation solution can include the following
-          systems based on the selected project scope and approved quotation
-          items.
+        <p style={{ fontSize: "9px", color: "#64748b", marginBottom: "14px", whiteSpace: "pre-wrap" }}>
+          {scopeSummary || "The proposed smart home automation solution can include the following systems based on the selected project scope and approved quotation items."}
         </p>
 
         {/* Scope sections - two column layout */}

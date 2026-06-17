@@ -91,7 +91,7 @@ function BuildingAutomationRenderPageInner() {
           projectLocation={data.projectLocation}
         />
         <BuildingAutomationAboutPage />
-        <BuildingAutomationScopePage items={data.items} />
+        <BuildingAutomationScopePage items={data.items} scopeSummary={data.scopeSummary} />
         <BuildingAutomationQuotationPage
           items={data.items}
           subtotal={data.subtotal}
@@ -185,6 +185,7 @@ function transformQuotation(q: any, docId: string) {
     tax: q.taxAmount || 0,
     grandTotal: q.grandTotal || 0,
     currency: q.currency || "KWD",
+    scopeSummary: q.scopeSummary || "",
     terms: q.terms || [],
     paymentTerms:
       find("payment") ||
@@ -223,6 +224,7 @@ function getSampleData(docId: string) {
     validityPeriod: `This proposal is valid for 30 days from ${today}.`,
     deliveryTimeline:
       "Estimated 10–14 weeks from order confirmation and advance payment receipt.",
+    scopeSummary: "",
     terms: [],
     items: [
       {

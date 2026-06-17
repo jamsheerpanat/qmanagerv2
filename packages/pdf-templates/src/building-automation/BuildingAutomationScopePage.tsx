@@ -236,8 +236,10 @@ const DELIVERABLES = [
 
 export const BuildingAutomationScopePage = ({
   items = [],
+  scopeSummary,
 }: {
   items?: any[];
+  scopeSummary?: string;
 }) => {
   let activeScopes = SCOPES;
 
@@ -327,11 +329,9 @@ export const BuildingAutomationScopePage = ({
         />
 
         <p
-          style={{ fontSize: "8.5px", color: "#64748b", marginBottom: "10px" }}
+          style={{ fontSize: "8.5px", color: "#64748b", marginBottom: "10px", whiteSpace: "pre-wrap" }}
         >
-          The proposed building automation solution can include the following
-          systems based on the selected project scope and approved quotation
-          items.
+          {scopeSummary || "The proposed building automation solution can include the following systems based on the selected project scope and approved quotation items."}
         </p>
 
         {/* Two-column scope layout */}

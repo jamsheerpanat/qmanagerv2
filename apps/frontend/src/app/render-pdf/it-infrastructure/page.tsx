@@ -88,7 +88,7 @@ function ITInfraRenderPageInner() {
           projectLocation={data.projectLocation}
         />
         <ITInfraAboutPage />
-        <ITInfraScopePage />
+        <ITInfraScopePage scopeSummary={data.scopeSummary} />
         <ITInfraQuotationPage
           items={data.items}
           subtotal={data.subtotal}
@@ -182,6 +182,7 @@ function transformQuotation(q: any, docId: string) {
     tax: q.taxAmount || 0,
     grandTotal: q.grandTotal || 0,
     currency: q.currency || "KWD",
+    scopeSummary: q.scopeSummary || "",
     terms: q.terms || [],
     paymentTerms:
       find("payment") ||
@@ -220,6 +221,7 @@ function getSampleData(docId: string) {
     validityPeriod: `This proposal is valid for 30 days from ${today}.`,
     deliveryTimeline:
       "Estimated 4–6 weeks from order confirmation and advance payment receipt.",
+    scopeSummary: "",
     terms: [],
     items: [
       {

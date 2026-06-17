@@ -234,7 +234,7 @@ const DELIVERABLES = [
   "Post-deployment support as agreed",
 ];
 
-export const SoftwareDevScopePage = () => (
+export const SoftwareDevScopePage = ({ scopeSummary }: { scopeSummary?: string }) => (
   <div
     className="pdf-page"
     style={{
@@ -291,10 +291,8 @@ export const SoftwareDevScopePage = () => (
           marginBottom: "8px",
         }}
       />
-      <p style={{ fontSize: "8.5px", color: "#64748b", marginBottom: "10px" }}>
-        The proposed software solution can include the following modules and
-        capabilities based on the selected project scope and approved quotation
-        items.
+      <p style={{ fontSize: "8.5px", color: "#64748b", marginBottom: "10px", whiteSpace: "pre-wrap" }}>
+        {scopeSummary || "The proposed software solution can include the following modules and capabilities based on the selected project scope and approved quotation items."}
       </p>
 
       <div

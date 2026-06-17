@@ -446,6 +446,48 @@ export const SoftwareDevFinalPage = ({
                 </div>
               </div>
             )}
+            {terms && terms.length > 0 && (
+              <div
+                style={{
+                  background: "white",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "8px",
+                  padding: "10px",
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: "8px",
+                    fontWeight: "700",
+                    color: "#0f172a",
+                    marginBottom: "6px",
+                  }}
+                >
+                  TERMS & CONDITIONS
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column" as any,
+                    gap: "4px",
+                  }}
+                >
+                  {terms.map((t: any, i: number) => (
+                    <div
+                      key={i}
+                      style={{
+                        fontSize: "7.5px",
+                        color: "#475569",
+                        lineHeight: "1.4",
+                      }}
+                    >
+                      <strong>{t.category?.name || `${i + 1}.`}</strong>{" "}
+                      {t.content}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Right column */}
