@@ -88,7 +88,7 @@ function ITInfraRenderPageInner() {
           projectLocation={data.projectLocation}
         />
         <ITInfraAboutPage />
-        <ITInfraScopePage scopeSummary={data.scopeSummary} />
+        {!data.scopeSummary && <ITInfraScopePage />}
         <ITInfraQuotationPage
           items={data.items}
           subtotal={data.subtotal}
@@ -96,6 +96,7 @@ function ITInfraRenderPageInner() {
           tax={data.tax}
           grandTotal={data.grandTotal}
           currency={data.currency}
+          scopeSummary={data.scopeSummary}
         />
         <ITInfraFinalPage
           terms={data.terms}

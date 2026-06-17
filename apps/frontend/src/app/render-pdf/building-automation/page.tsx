@@ -91,7 +91,7 @@ function BuildingAutomationRenderPageInner() {
           projectLocation={data.projectLocation}
         />
         <BuildingAutomationAboutPage />
-        <BuildingAutomationScopePage items={data.items} scopeSummary={data.scopeSummary} />
+        {!data.scopeSummary && <BuildingAutomationScopePage items={data.items} />}
         <BuildingAutomationQuotationPage
           items={data.items}
           subtotal={data.subtotal}
@@ -99,6 +99,7 @@ function BuildingAutomationRenderPageInner() {
           tax={data.tax}
           grandTotal={data.grandTotal}
           currency={data.currency}
+          scopeSummary={data.scopeSummary}
         />
         <BuildingAutomationFinalPage
           terms={data.terms}

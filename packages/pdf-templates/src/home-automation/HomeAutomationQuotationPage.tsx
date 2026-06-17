@@ -66,12 +66,7 @@ const QFooter = () => (
 /* ─────────────────────────── Main Quotation Component ────────────────────── */
 
 export const HomeAutomationQuotationPage = ({
-  items,
-  subtotal,
-  discount,
-  tax,
-  grandTotal,
-  currency = "KWD",
+  items, subtotal, discount, tax, grandTotal, currency = "KWD", scopeSummary
 }: any) => {
   const fmt = (n: any) =>
     Number(n || 0).toLocaleString("en-US", {
@@ -121,6 +116,13 @@ export const HomeAutomationQuotationPage = ({
     >
       <div style={{ padding: "10mm 13mm 8mm" }}>
         <QHeader />
+        
+        {scopeSummary && (
+          <div style={{ marginBottom: "15px", background: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+             <h3 style={{ fontSize: "10px", color: accent, marginBottom: "6px", fontFamily: "'Montserrat',sans-serif", fontWeight: "700" }}>PROPOSED SCOPE</h3>
+             <div style={{ fontSize: "8px", color: "#334155", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>{scopeSummary}</div>
+          </div>
+        )}
 
         {/* ── Title Strip ── */}
         <div style={{ marginBottom: "10px" }}>

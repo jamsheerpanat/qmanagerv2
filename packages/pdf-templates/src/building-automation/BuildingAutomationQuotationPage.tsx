@@ -2,7 +2,7 @@ import React from "react";
 import { BAHeader, BAFooter } from "./BuildingAutomationAboutPage";
 
 export const BuildingAutomationQuotationPage = ({
-  items, subtotal, discount, tax, grandTotal, currency = "KWD",
+  items, subtotal, discount, tax, grandTotal, currency = "KWD", scopeSummary
 }: any) => {
   const fmt = (n: any) => Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 3, maximumFractionDigits: 3 });
   const accent = "#0369a1";
@@ -27,6 +27,14 @@ export const BuildingAutomationQuotationPage = ({
     <div className="pdf-page-flow" style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "white" }}>
       <div style={{ padding: "10mm 13mm 8mm" }}>
         <BAHeader pageTitle="Commercial Quotation" />
+        
+        {scopeSummary && (
+          <div style={{ marginBottom: "15px", background: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+             <h3 style={{ fontSize: "10px", color: accent, marginBottom: "6px", fontFamily: "'Montserrat',sans-serif", fontWeight: "700" }}>PROPOSED SCOPE</h3>
+             <div style={{ fontSize: "8px", color: "#334155", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>{scopeSummary}</div>
+          </div>
+        )}
+
         <div style={{ marginBottom: "10px" }}>
           <span style={{ fontSize: "5.5px", fontWeight: "700", letterSpacing: "1.8px", color: accent, textTransform: "uppercase", background: accentLight, padding: "2px 8px", borderRadius: "8px" }}>Quotation Items</span>
           <h2 style={{ fontSize: "15px", fontWeight: "800", color: "#0f172a", fontFamily: "'Montserrat',sans-serif", margin: "5px 0 0", letterSpacing: "-0.3px" }}>

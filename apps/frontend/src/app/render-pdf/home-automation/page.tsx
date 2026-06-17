@@ -96,7 +96,7 @@ function HomeAutomationRenderPageInner() {
 
         <HomeAutomationAboutPage />
 
-        <HomeAutomationScopePage items={data.items} scopeSummary={data.scopeSummary} />
+        {!data.scopeSummary && <HomeAutomationScopePage items={data.items} />}
 
         <HomeAutomationQuotationPage
           items={data.items}
@@ -105,6 +105,7 @@ function HomeAutomationRenderPageInner() {
           tax={data.tax}
           grandTotal={data.grandTotal}
           currency={data.currency}
+          scopeSummary={data.scopeSummary}
         />
 
         <HomeAutomationFinalPage

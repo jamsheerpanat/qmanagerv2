@@ -88,7 +88,7 @@ function SoftwareDevRenderPageInner() {
           projectLocation={data.projectLocation}
         />
         <SoftwareDevAboutPage />
-        <SoftwareDevScopePage scopeSummary={data.scopeSummary} />
+        {!data.scopeSummary && <SoftwareDevScopePage />}
         <SoftwareDevQuotationPage
           items={data.items}
           subtotal={data.subtotal}
@@ -96,6 +96,7 @@ function SoftwareDevRenderPageInner() {
           tax={data.tax}
           grandTotal={data.grandTotal}
           currency={data.currency}
+          scopeSummary={data.scopeSummary}
         />
         <SoftwareDevFinalPage
           terms={data.terms}
