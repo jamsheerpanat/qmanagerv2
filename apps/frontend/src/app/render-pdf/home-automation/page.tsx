@@ -206,7 +206,7 @@ function transformQuotation(q: any, docId: string) {
     terms: q.terms || [],
     paymentTerms: paymentTerm || "",
     validityPeriod: validityTerm || "",
-    deliveryTimeline: deliveryTerm || timelineTerm || "",
+    deliveryTimeline: deliveryTerm || "",
   };
 }
 
