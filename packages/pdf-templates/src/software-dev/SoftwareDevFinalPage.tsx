@@ -479,6 +479,7 @@ export const SoftwareDevFinalPage = ({
                         fontSize: "7.5px",
                         color: "#475569",
                         lineHeight: "1.4",
+                        whiteSpace: "pre-wrap",
                       }}
                     >
                       <strong>{t.category?.name || `${i + 1}.`}</strong>{" "}
