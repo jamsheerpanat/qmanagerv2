@@ -287,88 +287,98 @@ export const ITInfraScopePage = ({ scopeSummary }: { scopeSummary?: string }) =>
           marginBottom: "8px",
         }}
       />
-      <p style={{ fontSize: "8.5px", color: "#64748b", marginBottom: "10px", whiteSpace: "pre-wrap" }}>
-        {scopeSummary || "The proposed IT infrastructure solution can include the following systems and services based on the selected project scope and approved quotation items."}
-      </p>
-
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "0 12px",
-          flex: 1,
-        }}
-      >
-        <div>
-          {SCOPES.slice(0, 4).map((s) => (
-            <ScopeCard key={s.number} {...s} />
-          ))}
-        </div>
-        <div>
-          {SCOPES.slice(4).map((s) => (
-            <ScopeCard key={s.number} {...s} />
-          ))}
-          <div
-            style={{
-              background: "linear-gradient(135deg,#0c1a2e,#0c2d50)",
-              borderRadius: "8px",
-              padding: "10px 12px",
-              marginTop: "4px",
-            }}
-          >
-            <div
-              style={{
-                color: "#38bdf8",
-                fontSize: "8px",
-                fontWeight: "700",
-                letterSpacing: "1.5px",
-                textTransform: "uppercase",
-                marginBottom: "7px",
-              }}
-            >
-              📦 Deliverables
-            </div>
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column" as any,
-                gap: "3px",
-              }}
-            >
-              {DELIVERABLES.map((d, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: "5px",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "4px",
-                      height: "4px",
-                      borderRadius: "50%",
-                      background: "#0ea5e9",
-                      flexShrink: 0,
-                      marginTop: "3px",
-                    }}
-                  />
-                  <span
-                    style={{
-                      fontSize: "7.5px",
-                      color: "#bae6fd",
-                      lineHeight: "1.4",
-                    }}
-                  >
-                    {d}
-                  </span>
-                </div>
-              ))}
-            </div>
+      {scopeSummary ? (
+        <div style={{ flex: 1, marginTop: "4px" }}>
+          <div style={{ fontSize: "9px", color: "#334155", lineHeight: "1.8", whiteSpace: "pre-wrap" }}>
+            {scopeSummary}
           </div>
         </div>
-      </div>
+      ) : (
+        <>
+          <p style={{ fontSize: "8.5px", color: "#64748b", marginBottom: "10px" }}>
+            The proposed IT infrastructure solution can include the following systems and services based on the selected project scope and approved quotation items.
+          </p>
+
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "0 12px",
+              flex: 1,
+            }}
+          >
+            <div>
+              {SCOPES.slice(0, 4).map((s) => (
+                <ScopeCard key={s.number} {...s} />
+              ))}
+            </div>
+            <div>
+              {SCOPES.slice(4).map((s) => (
+                <ScopeCard key={s.number} {...s} />
+              ))}
+              <div
+                style={{
+                  background: "linear-gradient(135deg,#0c1a2e,#0c2d50)",
+                  borderRadius: "8px",
+                  padding: "10px 12px",
+                  marginTop: "4px",
+                }}
+              >
+                <div
+                  style={{
+                    color: "#38bdf8",
+                    fontSize: "8px",
+                    fontWeight: "700",
+                    letterSpacing: "1.5px",
+                    textTransform: "uppercase",
+                    marginBottom: "7px",
+                  }}
+                >
+                  📦 Deliverables
+                </div>
+                <div
+                  style={{
+                    display: "flex",
+                    flexDirection: "column" as any,
+                    gap: "3px",
+                  }}
+                >
+                  {DELIVERABLES.map((d, i) => (
+                    <div
+                      key={i}
+                      style={{
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: "5px",
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "4px",
+                          height: "4px",
+                          borderRadius: "50%",
+                          background: "#0ea5e9",
+                          flexShrink: 0,
+                          marginTop: "3px",
+                        }}
+                      />
+                      <span
+                        style={{
+                          fontSize: "7.5px",
+                          color: "#bae6fd",
+                          lineHeight: "1.4",
+                        }}
+                      >
+                        {d}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
 
       <ITFooter pageNum={2} />
     </div>

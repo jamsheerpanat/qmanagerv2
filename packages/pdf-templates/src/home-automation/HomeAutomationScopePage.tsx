@@ -414,87 +414,97 @@ export const HomeAutomationScopePage = ({ items = [], scopeSummary }: { items?: 
           }}
         />
 
-        <p style={{ fontSize: "9px", color: "#64748b", marginBottom: "14px", whiteSpace: "pre-wrap" }}>
-          {scopeSummary || "The proposed smart home automation solution can include the following systems based on the selected project scope and approved quotation items."}
-        </p>
-
-        {/* Scope sections - two column layout */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "0 16px",
-            flex: 1,
-          }}
-        >
-          <div>
-            {leftColumnScopes.map((s) => (
-              <ScopeSection key={s.number} {...s} />
-            ))}
-          </div>
-          <div>
-            {rightColumnScopes.map((s) => (
-              <ScopeSection key={s.number} {...s} />
-            ))}
-
-            {/* Deliverables */}
-            <div
-              style={{
-                background: "linear-gradient(135deg,#0f172a,#1e3a5f)",
-                borderRadius: "10px",
-                padding: "12px",
-                marginTop: "4px",
-              }}
-            >
-              <div
-                style={{
-                  color: "#60a5fa",
-                  fontSize: "8px",
-                  fontWeight: "700",
-                  letterSpacing: "2px",
-                  textTransform: "uppercase",
-                  marginBottom: "8px",
-                }}
-              >
-                📦 Deliverables
-              </div>
-              <div
-                style={{ display: "flex", flexWrap: "wrap" as any, gap: "4px" }}
-              >
-                {DELIVERABLES.map((d, i) => (
-                  <div
-                    key={i}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      width: "100%",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "4px",
-                        height: "4px",
-                        borderRadius: "50%",
-                        background: "#3b82f6",
-                        flexShrink: 0,
-                      }}
-                    />
-                    <span
-                      style={{
-                        fontSize: "8px",
-                        color: "#cbd5e1",
-                        lineHeight: "1.4",
-                      }}
-                    >
-                      {d}
-                    </span>
-                  </div>
-                ))}
-              </div>
+        {scopeSummary ? (
+          <div style={{ flex: 1, marginTop: "4px" }}>
+            <div style={{ fontSize: "9px", color: "#334155", lineHeight: "1.8", whiteSpace: "pre-wrap" }}>
+              {scopeSummary}
             </div>
           </div>
-        </div>
+        ) : (
+          <>
+            <p style={{ fontSize: "9px", color: "#64748b", marginBottom: "14px" }}>
+              The proposed smart home automation solution can include the following systems based on the selected project scope and approved quotation items.
+            </p>
+
+            {/* Scope sections - two column layout */}
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: "0 16px",
+                flex: 1,
+              }}
+            >
+              <div>
+                {leftColumnScopes.map((s) => (
+                  <ScopeSection key={s.number} {...s} />
+                ))}
+              </div>
+              <div>
+                {rightColumnScopes.map((s) => (
+                  <ScopeSection key={s.number} {...s} />
+                ))}
+
+                {/* Deliverables */}
+                <div
+                  style={{
+                    background: "linear-gradient(135deg,#0f172a,#1e3a5f)",
+                    borderRadius: "10px",
+                    padding: "12px",
+                    marginTop: "4px",
+                  }}
+                >
+                  <div
+                    style={{
+                      color: "#60a5fa",
+                      fontSize: "8px",
+                      fontWeight: "700",
+                      letterSpacing: "2px",
+                      textTransform: "uppercase",
+                      marginBottom: "8px",
+                    }}
+                  >
+                    📦 Deliverables
+                  </div>
+                  <div
+                    style={{ display: "flex", flexWrap: "wrap" as any, gap: "4px" }}
+                  >
+                    {DELIVERABLES.map((d, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "4px",
+                          width: "100%",
+                        }}
+                      >
+                        <div
+                          style={{
+                            width: "4px",
+                            height: "4px",
+                            borderRadius: "50%",
+                            background: "#3b82f6",
+                            flexShrink: 0,
+                          }}
+                        />
+                        <span
+                          style={{
+                            fontSize: "8px",
+                            color: "#cbd5e1",
+                            lineHeight: "1.4",
+                          }}
+                        >
+                          {d}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
         <InnerPageFooter pageNum={2} />
       </div>
