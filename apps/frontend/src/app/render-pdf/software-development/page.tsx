@@ -184,16 +184,9 @@ function transformQuotation(q: any, docId: string) {
     currency: q.currency || "KWD",
     scopeSummary: q.scopeSummary || "",
     terms: q.terms || [],
-    paymentTerms:
-      find("payment") ||
-      "50% advance upon project confirmation.\n40% upon completion of development and UAT.\n10% upon final deployment and handover.",
-    validityPeriod:
-      find("validity") ||
-      "This proposal is valid for 30 days from the date of issue.",
-    deliveryTimeline:
-      find("delivery") ||
-      find("timeline") ||
-      "To be confirmed upon project kickoff and advance payment receipt.",
+    paymentTerms: find("payment") || "",
+    validityPeriod: find("validity") || "",
+    deliveryTimeline: find("delivery") || find("timeline") || "",
   };
 }
 
@@ -216,11 +209,9 @@ function getSampleData(docId: string) {
     discount: 990.0,
     tax: 0,
     grandTotal: 18810.0,
-    paymentTerms:
-      "50% advance upon project confirmation.\n40% upon completion of development & UAT approval.\n10% upon final deployment and system handover.",
-    validityPeriod: `This proposal is valid for 30 days from ${today}.`,
-    deliveryTimeline:
-      "Estimated 12–16 weeks from project kickoff and advance payment receipt. Timeline is subject to scope confirmation and timely client feedback.",
+    paymentTerms: "",
+    validityPeriod: "",
+    deliveryTimeline: "",
     scopeSummary: "",
     terms: [],
     items: [
