@@ -64,7 +64,16 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
   const [insertIndex, setInsertIndex] = useState<number | null>(null);
 
   const [products, setProducts] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
+  const [isCreatingProduct, setIsCreatingProduct] = useState(false);
+  const [newProductForm, setNewProductForm] = useState<any>({
+    productName: "",
+    productCode: "",
+    categoryId: "",
+    sellingPrice: 0,
+    taxRate: 0,
+  });
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTab, setSelectedTab] = useState<"PRODUCT" | "SERVICE">("PRODUCT");
 
@@ -94,6 +103,35 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
     setIsItemModalOpen(false);
     setInsertIndex(null);
     setSearchQuery("");
+  };
+
+  const handleCreateProduct = async () => {
+    if (!formData.serviceTypeId) {
+      alert("Please select a Service Type first in Step 2.");
+      return;
+    }
+    if (!newProductForm.productName || !newProductForm.productCode || !newProductForm.categoryId) {
+      alert("Please fill in Name, Code, and Category.");
+      return;
+    }
+    try {
+      setIsSaving(true);
+      const res = await api.post("/catalog/products", {
+        ...newProductForm,
+        serviceTypeId: formData.serviceTypeId,
+        costPrice: 0,
+        minimumSellingPrice: 0,
+      });
+      const newProduct = res.data;
+      setProducts([newProduct, ...products]);
+      setIsCreatingProduct(false);
+      setNewProductForm({ productName: "", productCode: "", categoryId: "", sellingPrice: 0, taxRate: 0 });
+      handleSelectItem(newProduct, "PRODUCT");
+    } catch (e: any) {
+      alert("Failed to create product: " + (e.response?.data?.message || e.message));
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   // Product logic removed
@@ -162,6 +200,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
     serviceTypeId: "",
     projectTitle: "",
     projectLocation: "",
+    currency: "KWD",
     items: [],
     scopes: [],
     terms: [],
@@ -170,7 +209,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
 
   async function fetchData() {
     try {
-      const [custRes, servRes, servItemRes, termsRes, quoteRes, prodRes] =
+      const [custRes, servRes, servItemRes, termsRes, quoteRes, prodRes, catRes] =
         await Promise.all([
           api.get("/customers"),
           api.get("/catalog/service-types"),
@@ -178,12 +217,14 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
           api.get("/terms/templates"),
           api.get(`/quotations/${id}`),
           api.get("/catalog/products"),
+          api.get("/catalog/categories"),
         ]);
       setCustomers(custRes.data);
       setServiceTypes(servRes.data);
       setServiceItems(servItemRes.data);
       setTermsTemplates(termsRes.data);
       setProducts(prodRes.data);
+      setCategories(catRes.data);
       
       const q = quoteRes.data;
       setFormData({
@@ -191,6 +232,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
         serviceTypeId: q.serviceTypeId || "",
         projectTitle: q.projectTitle || "",
         projectLocation: q.projectLocation || "",
+        currency: q.currency || "KWD",
         items: q.items?.map((i: any) => ({
           itemType: i.itemType,
           productId: i.productId,
@@ -232,6 +274,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
         projectTitle: formData.projectTitle,
         projectLocation: formData.projectLocation,
         scopeSummary: formData.scopeSummary,
+        currency: formData.currency,
       });
 
       const itemsPayload = await Promise.all(formData.items.map(async (i: any) => {
@@ -353,6 +396,22 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                 placeholder="e.g. Dubai Main Branch"
               />
             </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">
+                Currency
+              </label>
+              <select
+                className="w-full border rounded-md p-2 bg-white"
+                value={formData.currency}
+                onChange={(e) => updateForm("currency", e.target.value)}
+              >
+                <option value="KWD">KWD</option>
+                <option value="AED">AED</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="SAR">SAR</option>
+              </select>
+            </div>
           </div>
         );
       case 2:
@@ -460,7 +519,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="text-right">
-                              <div className="font-semibold">{p.sellingPrice} AED</div>
+                              <div className="font-semibold">{p.sellingPrice} {formData.currency}</div>
                               <div className="text-xs text-gray-500">Tax: {p.taxRate}%</div>
                             </div>
                             <Button size="sm" onClick={() => handleSelectItem(p, 'PRODUCT')}>Add</Button>
@@ -481,7 +540,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                           </div>
                           <div className="flex items-center gap-4">
                             <div className="text-right">
-                              <div className="font-semibold">{s.defaultPrice} AED</div>
+                              <div className="font-semibold">{s.defaultPrice} {formData.currency}</div>
                               <div className="text-xs text-gray-500">Tax: {s.taxRate}%</div>
                             </div>
                             <Button size="sm" onClick={() => handleSelectItem(s, 'SERVICE')}>Add</Button>
@@ -495,10 +554,59 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                   <div className="text-sm text-gray-500">
                     Cannot find what you're looking for?
                   </div>
-                  <Button variant="outline" onClick={() => handleSelectItem({ productName: "New Custom Product", serviceName: "New Custom Service", shortDescription: "", description: "", sellingPrice: 0, defaultPrice: 0, taxRate: 0 }, selectedTab)}>
-                    Add Custom {selectedTab === 'PRODUCT' ? 'Product' : 'Service'}
+                  <Button variant="outline" onClick={() => setIsCreatingProduct(true)}>
+                    Create New {selectedTab === 'PRODUCT' ? 'Product' : 'Service'}
                   </Button>
                 </div>
+
+                {isCreatingProduct && selectedTab === 'PRODUCT' && (
+                  <div className="mt-4 p-4 border rounded-md bg-gray-50 space-y-3">
+                    <h4 className="font-semibold text-sm">Create New Product in Catalog</h4>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-xs font-medium">Product Name *</label>
+                        <Input size={1} className="h-8 text-sm" value={newProductForm.productName} onChange={e => setNewProductForm({...newProductForm, productName: e.target.value})} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium">Product Code *</label>
+                        <Input size={1} className="h-8 text-sm" value={newProductForm.productCode} onChange={e => setNewProductForm({...newProductForm, productCode: e.target.value})} />
+                      </div>
+                      <div className="col-span-2">
+                        <label className="text-xs font-medium">Category *</label>
+                        <select className="w-full border rounded-md p-1.5 text-sm bg-white" value={newProductForm.categoryId} onChange={e => setNewProductForm({...newProductForm, categoryId: e.target.value})}>
+                          <option value="">-- Select Category --</option>
+                          {categories.filter(c => c.serviceTypeId === formData.serviceTypeId).map(c => (
+                            <option key={c.id} value={c.id}>{c.name}</option>
+                          ))}
+                        </select>
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium">Selling Price ({formData.currency})</label>
+                        <Input size={1} type="number" className="h-8 text-sm" value={newProductForm.sellingPrice} onChange={e => setNewProductForm({...newProductForm, sellingPrice: Number(e.target.value)})} />
+                      </div>
+                      <div>
+                        <label className="text-xs font-medium">Tax Rate (%)</label>
+                        <Input size={1} type="number" className="h-8 text-sm" value={newProductForm.taxRate} onChange={e => setNewProductForm({...newProductForm, taxRate: Number(e.target.value)})} />
+                      </div>
+                    </div>
+                    <div className="flex gap-2 justify-end pt-2">
+                      <Button variant="ghost" size="sm" onClick={() => setIsCreatingProduct(false)}>Cancel</Button>
+                      <Button size="sm" disabled={isSaving} onClick={handleCreateProduct}>{isSaving ? 'Saving...' : 'Save & Select'}</Button>
+                    </div>
+                  </div>
+                )}
+                
+                {isCreatingProduct && selectedTab === 'SERVICE' && (
+                  <div className="mt-4 p-4 border rounded-md bg-gray-50 flex items-center justify-between">
+                    <span className="text-sm text-gray-600">To add a one-off custom service without saving to catalog:</span>
+                    <Button variant="outline" size="sm" onClick={() => {
+                      handleSelectItem({ productName: "New Custom Product", serviceName: "New Custom Service", shortDescription: "", description: "", sellingPrice: 0, defaultPrice: 0, taxRate: 0 }, selectedTab);
+                      setIsCreatingProduct(false);
+                    }}>
+                      Add Custom Service Line
+                    </Button>
+                  </div>
+                )}
               </DialogContent>
             </Dialog>
 
