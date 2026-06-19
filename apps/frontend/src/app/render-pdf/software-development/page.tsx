@@ -2,6 +2,7 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
+import {
   SoftwareDevCoverPage,
   SoftwareDevAboutPage,
   SoftwareDevCommercialFlow,
