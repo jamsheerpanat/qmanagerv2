@@ -100,43 +100,6 @@ export const SDFooter = ({ pageNum }: { pageNum?: number }) => (
   </div>
 );
 
-const ValueCard = ({
-  icon,
-  title,
-  text,
-}: {
-  icon: string;
-  title: string;
-  text: string;
-}) => (
-  <div
-    style={{
-      background: "white",
-      border: "1px solid #e2e8f0",
-      borderRadius: "10px",
-      padding: "12px 14px",
-      borderTop: "3px solid #6366f1",
-    }}
-  >
-    <div style={{ fontSize: "18px", marginBottom: "5px" }}>{icon}</div>
-    <div
-      style={{
-        fontWeight: "700",
-        fontSize: "9.5px",
-        color: "#1e1b4b",
-        marginBottom: "4px",
-        letterSpacing: "0.4px",
-        fontFamily: "'Montserrat', sans-serif",
-      }}
-    >
-      {title}
-    </div>
-    <div style={{ fontSize: "8.5px", color: "#64748b", lineHeight: "1.5" }}>
-      {text}
-    </div>
-  </div>
-);
-
 export const SoftwareDevAboutPage = () => (
   <div
     className="pdf-page"
@@ -174,13 +137,13 @@ export const SoftwareDevAboutPage = () => (
 
       <h2
         style={{
-          fontSize: "18px",
+          fontSize: "26px",
           fontWeight: "800",
           color: "#0f172a",
           lineHeight: "1.2",
-          letterSpacing: "-0.3px",
+          letterSpacing: "-0.5px",
           fontFamily: "'Montserrat', sans-serif",
-          marginBottom: "6px",
+          marginBottom: "12px",
         }}
       >
         CUSTOM SOFTWARE DEVELOPMENT
@@ -189,11 +152,11 @@ export const SoftwareDevAboutPage = () => (
       </h2>
       <div
         style={{
-          width: "50px",
-          height: "3px",
+          width: "80px",
+          height: "4px",
           background: "linear-gradient(90deg,#4f46e5,#818cf8)",
           borderRadius: "2px",
-          marginBottom: "12px",
+          marginBottom: "24px",
         }}
       />
 
@@ -201,18 +164,18 @@ export const SoftwareDevAboutPage = () => (
         style={{
           background: "white",
           borderRadius: "10px",
-          padding: "14px 16px",
+          padding: "32px 32px",
           border: "1px solid #e2e8f0",
-          marginBottom: "12px",
-          borderLeft: "4px solid #6366f1",
+          marginBottom: "32px",
+          borderLeft: "6px solid #6366f1",
         }}
       >
         <p
           style={{
-            fontSize: "9.5px",
+            fontSize: "13px",
             color: "#334155",
-            lineHeight: "1.7",
-            marginBottom: "7px",
+            lineHeight: "1.8",
+            marginBottom: "16px",
           }}
         >
           Octonics Innovations develops modern, secure, scalable, and
@@ -221,10 +184,10 @@ export const SoftwareDevAboutPage = () => (
         </p>
         <p
           style={{
-            fontSize: "9.5px",
+            fontSize: "13px",
             color: "#334155",
-            lineHeight: "1.7",
-            marginBottom: "7px",
+            lineHeight: "1.8",
+            marginBottom: "16px",
           }}
         >
           Our software development service focuses on building practical digital
@@ -234,10 +197,10 @@ export const SoftwareDevAboutPage = () => (
         </p>
         <p
           style={{
-            fontSize: "9.5px",
+            fontSize: "13px",
             color: "#334155",
-            lineHeight: "1.7",
-            marginBottom: "7px",
+            lineHeight: "1.8",
+            marginBottom: "16px",
           }}
         >
           We design and develop{" "}
@@ -249,10 +212,10 @@ export const SoftwareDevAboutPage = () => (
         </p>
         <p
           style={{
-            fontSize: "9.5px",
+            fontSize: "13px",
             color: "#334155",
-            lineHeight: "1.7",
-            marginBottom: "7px",
+            lineHeight: "1.8",
+            marginBottom: "16px",
           }}
         >
           Every system is designed with a strong focus on usability, security,
@@ -260,7 +223,7 @@ export const SoftwareDevAboutPage = () => (
           is to create software that is technically strong and easy for real
           users to operate every day.
         </p>
-        <p style={{ fontSize: "9.5px", color: "#334155", lineHeight: "1.7" }}>
+        <p style={{ fontSize: "13px", color: "#334155", lineHeight: "1.8" }}>
           Octonics Innovations supports the complete software lifecycle —
           requirement analysis, UI/UX planning, database design, development,
           testing, deployment, training, and ongoing support.
@@ -271,8 +234,8 @@ export const SoftwareDevAboutPage = () => (
       <div
         style={{
           display: "flex",
-          gap: "5px",
-          marginBottom: "12px",
+          gap: "10px",
+          marginBottom: "auto",
           flexWrap: "wrap" as any,
         }}
       >
@@ -291,57 +254,16 @@ export const SoftwareDevAboutPage = () => (
             style={{
               background: "linear-gradient(135deg, #1e1b4b, #4f46e5)",
               color: "white",
-              fontSize: "7.5px",
+              fontSize: "11px",
               fontWeight: "600",
-              padding: "3px 9px",
-              borderRadius: "4px",
-              letterSpacing: "0.3px",
+              padding: "6px 14px",
+              borderRadius: "6px",
+              letterSpacing: "0.5px",
             }}
           >
             {t}
           </span>
         ))}
-      </div>
-
-      {/* Value cards */}
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr 1fr",
-          gap: "8px",
-          marginBottom: "auto",
-        }}
-      >
-        <ValueCard
-          icon="🔧"
-          title="CUSTOM WORKFLOW"
-          text="Software designed around the client's real business process, not generic templates."
-        />
-        <ValueCard
-          icon="🎨"
-          title="MODERN UI/UX"
-          text="Clean, fast, responsive, and easy-to-use interfaces for daily operations."
-        />
-        <ValueCard
-          icon="⚡"
-          title="AUTOMATION"
-          text="Reduce repetitive manual work through smart workflows, notifications, and approvals."
-        />
-        <ValueCard
-          icon="📊"
-          title="DATA VISIBILITY"
-          text="Real-time dashboards and reports for better management decisions."
-        />
-        <ValueCard
-          icon="🔒"
-          title="SECURITY"
-          text="Role-based access, controlled permissions, audit logs, and secure authentication."
-        />
-        <ValueCard
-          icon="🚀"
-          title="SCALABILITY"
-          text="The system can grow with additional users, branches, modules, reports, and integrations."
-        />
       </div>
 
       <SDFooter pageNum={1} />
