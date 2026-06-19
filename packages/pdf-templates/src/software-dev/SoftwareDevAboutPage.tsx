@@ -170,28 +170,28 @@ export const SoftwareDevAboutPage = () => (
           borderLeft: "6px solid #6366f1",
         }}
       >
-        <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e1b4b", marginBottom: "8px", fontFamily: "'Montserrat', sans-serif" }}>About Us</h3>
+        <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#1e1b4b", marginBottom: "8px", fontFamily: "'Montserrat', sans-serif" }}>About Us</h3>
         <p
           style={{
-            fontSize: "11px",
+            fontSize: "11.5px",
             color: "#334155",
-            lineHeight: "1.7",
+            lineHeight: "1.8",
             marginBottom: "16px",
           }}
         >
-          Octonics Innovations is a premier Kuwait-based technology solutions provider specializing in Software Development, Smart Automation, and IT Infrastructure. We are an ISO-certified organization dedicated to delivering robust, scalable, and highly secure digital solutions tailored to meet the dynamic needs of modern businesses.
+          Octonics Innovations is a premier Kuwait-based technology solutions provider specializing in Custom Software Development, Smart Automation, and IT Infrastructure. We are an ISO-certified organization dedicated to delivering robust, scalable, and highly secure digital solutions tailored to meet the dynamic and complex needs of modern enterprises.
         </p>
 
-        <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e1b4b", marginBottom: "8px", fontFamily: "'Montserrat', sans-serif" }}>Our Vision</h3>
+        <h3 style={{ fontSize: "15px", fontWeight: "700", color: "#1e1b4b", marginBottom: "8px", fontFamily: "'Montserrat', sans-serif" }}>Our Vision</h3>
         <p
           style={{
-            fontSize: "11px",
+            fontSize: "11.5px",
             color: "#334155",
-            lineHeight: "1.7",
+            lineHeight: "1.8",
             marginBottom: "0px",
           }}
         >
-          To be the leading catalyst for digital transformation in the region, empowering organizations through innovative technology, seamless automation, and intelligent software systems that drive operational excellence and sustainable growth.
+          To be the leading catalyst for digital transformation in the region, empowering organizations through innovative technology, seamless workflow automation, and intelligent software systems that drive operational excellence, data security, and sustainable business growth.
         </p>
       </div>
 
@@ -201,7 +201,7 @@ export const SoftwareDevAboutPage = () => (
           display: "grid",
           gridTemplateColumns: "1fr 1fr",
           gap: "12px",
-          marginBottom: "auto",
+          marginBottom: "20px",
         }}
       >
         {[
@@ -220,6 +220,32 @@ export const SoftwareDevAboutPage = () => (
             </div>
           </div>
         ))}
+      </div>
+
+      <h3 style={{ fontSize: "16px", fontWeight: "800", color: "#0f172a", marginBottom: "12px", fontFamily: "'Montserrat', sans-serif" }}>Engineering & Technology Stack</h3>
+      <div
+        style={{
+          display: "flex",
+          gap: "10px",
+          marginBottom: "auto",
+        }}
+      >
+        <div style={{ flex: 1, background: "white", padding: "12px", borderRadius: "8px", border: "1px solid #e2e8f0", borderTop: "3px solid #4f46e5" }}>
+           <div style={{ fontSize: "9.5px", fontWeight: "700", color: "#1e1b4b", marginBottom: "4px" }}>Frontend & Mobile</div>
+           <div style={{ fontSize: "8.5px", color: "#64748b", lineHeight: "1.6" }}>React, Next.js, React Native, Tailwind CSS, TypeScript, Redux, Figma.</div>
+        </div>
+        <div style={{ flex: 1, background: "white", padding: "12px", borderRadius: "8px", border: "1px solid #e2e8f0", borderTop: "3px solid #10b981" }}>
+           <div style={{ fontSize: "9.5px", fontWeight: "700", color: "#1e1b4b", marginBottom: "4px" }}>Backend & Database</div>
+           <div style={{ fontSize: "8.5px", color: "#64748b", lineHeight: "1.6" }}>Node.js, NestJS, Python, PostgreSQL, MongoDB, Redis, GraphQL, Prisma.</div>
+        </div>
+        <div style={{ flex: 1, background: "white", padding: "12px", borderRadius: "8px", border: "1px solid #e2e8f0", borderTop: "3px solid #f59e0b" }}>
+           <div style={{ fontSize: "9.5px", fontWeight: "700", color: "#1e1b4b", marginBottom: "4px" }}>Cloud & DevOps</div>
+           <div style={{ fontSize: "8.5px", color: "#64748b", lineHeight: "1.6" }}>AWS, Docker, Kubernetes, CI/CD Pipelines, Nginx, Linux Server Administration.</div>
+        </div>
+        <div style={{ flex: 1, background: "white", padding: "12px", borderRadius: "8px", border: "1px solid #e2e8f0", borderTop: "3px solid #06b6d4" }}>
+           <div style={{ fontSize: "9.5px", fontWeight: "700", color: "#1e1b4b", marginBottom: "4px" }}>Architecture</div>
+           <div style={{ fontSize: "8.5px", color: "#64748b", lineHeight: "1.6" }}>Microservices, Serverless, REST APIs, WebSockets, Secure JWT Auth, OAuth2.</div>
+        </div>
       </div>
 
       <SDFooter pageNum={2} />
