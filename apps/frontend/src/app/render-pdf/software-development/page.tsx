@@ -2,12 +2,9 @@
 
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState, Suspense } from "react";
-import {
   SoftwareDevCoverPage,
   SoftwareDevAboutPage,
-  SoftwareDevScopePage,
-  SoftwareDevQuotationPage,
-  SoftwareDevFinalPage,
+  SoftwareDevCommercialFlow,
 } from "@qmanager/pdf-templates";
 
 const FontLoader = () => (
@@ -88,8 +85,7 @@ function SoftwareDevRenderPageInner() {
           projectLocation={data.projectLocation}
         />
         <SoftwareDevAboutPage />
-        {!data.scopeSummary && <SoftwareDevScopePage />}
-        <SoftwareDevQuotationPage
+        <SoftwareDevCommercialFlow
           items={data.items}
           subtotal={data.subtotal}
           discount={data.discount}
@@ -97,8 +93,6 @@ function SoftwareDevRenderPageInner() {
           grandTotal={data.grandTotal}
           currency={data.currency}
           scopeSummary={data.scopeSummary}
-        />
-        <SoftwareDevFinalPage
           terms={data.terms}
           paymentTerms={data.paymentTerms}
           validityPeriod={data.validityPeriod}

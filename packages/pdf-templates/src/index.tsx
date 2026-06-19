@@ -23,9 +23,7 @@ export {
 export {
   SoftwareDevCoverPage,
   SoftwareDevAboutPage,
-  SoftwareDevScopePage,
-  SoftwareDevQuotationPage,
-  SoftwareDevFinalPage,
+  SoftwareDevCommercialFlow,
 } from "./software-dev";
 
 // IT Infrastructure Template

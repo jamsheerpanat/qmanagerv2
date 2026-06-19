@@ -116,7 +116,7 @@ export const SoftwareDevAboutPage = () => (
         flexDirection: "column",
       }}
     >
-      <SDHeader pageTitle="About Software Development" />
+      <SDHeader pageTitle="About Octonics Innovations" />
 
       <div style={{ marginBottom: "10px" }}>
         <span
@@ -131,7 +131,7 @@ export const SoftwareDevAboutPage = () => (
             borderRadius: "4px",
           }}
         >
-          Page 1 — Our Solution
+          Page 2 — Company Profile
         </span>
       </div>
 
@@ -146,9 +146,9 @@ export const SoftwareDevAboutPage = () => (
           marginBottom: "12px",
         }}
       >
-        CUSTOM SOFTWARE DEVELOPMENT
+        OCTONICS INNOVATIONS
         <br />
-        <span style={{ color: "#4f46e5" }}>FOR MODERN BUSINESS OPERATIONS</span>
+        <span style={{ color: "#4f46e5" }}>EMPOWERING DIGITAL TRANSFORMATION</span>
       </h2>
       <div
         style={{
@@ -164,109 +164,65 @@ export const SoftwareDevAboutPage = () => (
         style={{
           background: "white",
           borderRadius: "10px",
-          padding: "32px 32px",
+          padding: "24px",
           border: "1px solid #e2e8f0",
-          marginBottom: "32px",
+          marginBottom: "24px",
           borderLeft: "6px solid #6366f1",
         }}
       >
+        <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e1b4b", marginBottom: "8px", fontFamily: "'Montserrat', sans-serif" }}>About Us</h3>
         <p
           style={{
-            fontSize: "13px",
+            fontSize: "11px",
             color: "#334155",
-            lineHeight: "1.8",
+            lineHeight: "1.7",
             marginBottom: "16px",
           }}
         >
-          Octonics Innovations develops modern, secure, scalable, and
-          user-friendly software solutions tailored to the exact workflow of
-          each business.
+          Octonics Innovations is a premier Kuwait-based technology solutions provider specializing in Software Development, Smart Automation, and IT Infrastructure. We are an ISO-certified organization dedicated to delivering robust, scalable, and highly secure digital solutions tailored to meet the dynamic needs of modern businesses.
         </p>
+
+        <h3 style={{ fontSize: "14px", fontWeight: "700", color: "#1e1b4b", marginBottom: "8px", fontFamily: "'Montserrat', sans-serif" }}>Our Vision</h3>
         <p
           style={{
-            fontSize: "13px",
+            fontSize: "11px",
             color: "#334155",
-            lineHeight: "1.8",
-            marginBottom: "16px",
+            lineHeight: "1.7",
+            marginBottom: "0px",
           }}
         >
-          Our software development service focuses on building practical digital
-          systems that reduce manual work, improve data accuracy, speed up
-          operations, and give management better visibility over daily business
-          activities.
-        </p>
-        <p
-          style={{
-            fontSize: "13px",
-            color: "#334155",
-            lineHeight: "1.8",
-            marginBottom: "16px",
-          }}
-        >
-          We design and develop{" "}
-          <strong>
-            web applications, mobile applications, ERP modules, CRM platforms,
-            quotation systems, invoice systems, inventory systems, dashboards,
-            reporting tools, portals, and custom workflow automation platforms.
-          </strong>
-        </p>
-        <p
-          style={{
-            fontSize: "13px",
-            color: "#334155",
-            lineHeight: "1.8",
-            marginBottom: "16px",
-          }}
-        >
-          Every system is designed with a strong focus on usability, security,
-          scalability, performance, and long-term maintainability. The objective
-          is to create software that is technically strong and easy for real
-          users to operate every day.
-        </p>
-        <p style={{ fontSize: "13px", color: "#334155", lineHeight: "1.8" }}>
-          Octonics Innovations supports the complete software lifecycle —
-          requirement analysis, UI/UX planning, database design, development,
-          testing, deployment, training, and ongoing support.
+          To be the leading catalyst for digital transformation in the region, empowering organizations through innovative technology, seamless automation, and intelligent software systems that drive operational excellence and sustainable growth.
         </p>
       </div>
 
-      {/* Tech stack */}
+      <h3 style={{ fontSize: "16px", fontWeight: "800", color: "#0f172a", marginBottom: "12px", fontFamily: "'Montserrat', sans-serif" }}>Our Core Expertise</h3>
       <div
         style={{
-          display: "flex",
-          gap: "10px",
+          display: "grid",
+          gridTemplateColumns: "1fr 1fr",
+          gap: "12px",
           marginBottom: "auto",
-          flexWrap: "wrap" as any,
         }}
       >
         {[
-          "React / Next.js",
-          "Node.js / NestJS",
-          "React Native",
-          "PostgreSQL",
-          "REST API",
-          "JWT Auth",
-          "PDF Generation",
-          "Cloud Deploy",
-        ].map((t) => (
-          <span
-            key={t}
-            style={{
-              background: "linear-gradient(135deg, #1e1b4b, #4f46e5)",
-              color: "white",
-              fontSize: "11px",
-              fontWeight: "600",
-              padding: "6px 14px",
-              borderRadius: "6px",
-              letterSpacing: "0.5px",
-            }}
-          >
-            {t}
-          </span>
+          { icon: "💻", title: "Custom Software Development", desc: "Web applications, ERP modules, CRM platforms, and tailored business software." },
+          { icon: "📱", title: "Mobile App Development", desc: "Native and cross-platform mobile applications for iOS and Android devices." },
+          { icon: "🏢", title: "Building & Home Automation", desc: "KNX-certified smart solutions for lighting, climate, and security control." },
+          { icon: "🌐", title: "IT Infrastructure & Networking", desc: "Robust data networks, server deployments, and enterprise connectivity." },
+          { icon: "🔒", title: "Surveillance & Access Control", desc: "Advanced CCTV systems, biometrics, and secure facility access management." },
+          { icon: "☁️", title: "Cloud & DevOps Services", desc: "Secure cloud hosting, CI/CD pipelines, and scalable application deployment." },
+        ].map((skill, index) => (
+          <div key={index} style={{ background: "white", padding: "14px", borderRadius: "8px", border: "1px solid #e2e8f0", display: "flex", gap: "10px" }}>
+            <div style={{ fontSize: "24px" }}>{skill.icon}</div>
+            <div>
+              <div style={{ fontSize: "11px", fontWeight: "700", color: "#1e1b4b", marginBottom: "4px" }}>{skill.title}</div>
+              <div style={{ fontSize: "9px", color: "#64748b", lineHeight: "1.5" }}>{skill.desc}</div>
+            </div>
+          </div>
         ))}
       </div>
 
-      <SDFooter pageNum={1} />
+      <SDFooter pageNum={2} />
     </div>
   </div>
 );

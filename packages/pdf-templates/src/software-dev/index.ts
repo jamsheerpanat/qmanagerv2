@@ -4,6 +4,4 @@ export {
   SDHeader,
   SDFooter,
 } from "./SoftwareDevAboutPage";
-export { SoftwareDevScopePage } from "./SoftwareDevScopePage";
-export { SoftwareDevQuotationPage } from "./SoftwareDevQuotationPage";
-export { SoftwareDevFinalPage } from "./SoftwareDevFinalPage";
+export { SoftwareDevCommercialFlow } from "./SoftwareDevCommercialFlow";
