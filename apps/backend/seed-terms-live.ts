@@ -190,6 +190,20 @@ async function main() {
   }
 
   console.log(`Terms & Conditions Master seeded successfully into REAL DB! Added/Updated ${addedCount} templates.`);
+
+  // 4. Update the main Company details
+  const company = await prisma.company.findFirst();
+  if (company) {
+    await prisma.company.update({
+      where: { id: company.id },
+      data: {
+        address: "Corporate Office\nOffice No. 5, 2nd Floor, Tower 3, 22 Street\nBlock 13, Qibla, Kuwait City",
+        phone: "+965 9924 0074",
+        email: "info@octonics.com"
+      }
+    });
+    console.log("Updated main company details in live database.");
+  }
 }
 
 main()

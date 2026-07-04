@@ -10,7 +10,7 @@ export const ModernInvoicePage = ({
   referenceNumber = "",
 
   companyName = "Octonics Co. W.L.L.",
-  companyAddress = "",
+  companyAddress = "Corporate Office\nOffice No. 5, 2nd Floor, Tower 3, 22 Street\nBlock 13, Qibla, Kuwait City",
   companyTaxNumber = "",
   companyEmail = "info@octonics.com",
   companyPhone = "+965 9924 0074",
@@ -133,7 +133,7 @@ export const ModernInvoicePage = ({
                 whiteSpace: "pre-wrap"
               }}
             >
-              {companyAddress || "Office 46, Hawally Arab Complex\nBlock 205, Hawally, Kuwait"}
+              {companyAddress || "Corporate Office\nOffice No. 5, 2nd Floor, Tower 3, 22 Street\nBlock 13, Qibla, Kuwait City"}
               
               <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "12px" }}>
                 {companyTaxNumber && <span><strong>VAT/TRN:</strong> {companyTaxNumber}</span>}
