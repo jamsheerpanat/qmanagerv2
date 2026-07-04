@@ -160,9 +160,7 @@ export const SoftwareDevCommercialFlow = ({
           
           {scopeSummary ? (
             <div style={{ marginTop: "4px", background: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-              <div style={{ fontSize: "9px", color: "#334155", lineHeight: "1.8", whiteSpace: "pre-wrap" }}>
-                {scopeSummary}
-              </div>
+              <div style={{ fontSize: "9px", color: "#334155", lineHeight: "1.8" }} dangerouslySetInnerHTML={{ __html: scopeSummary }}></div>
             </div>
           ) : (
             <>

@@ -31,7 +31,6 @@ const quillFormats = [
   "color",
   "background",
   "list",
-  "bullet",
   "link",
   "image",
 ];

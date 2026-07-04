@@ -416,9 +416,7 @@ export const HomeAutomationScopePage = ({ items = [], scopeSummary }: { items?: 
 
         {scopeSummary ? (
           <div style={{ flex: 1, marginTop: "4px" }}>
-            <div style={{ fontSize: "9px", color: "#334155", lineHeight: "1.8", whiteSpace: "pre-wrap" }}>
-              {scopeSummary}
-            </div>
+            <div style={{ fontSize: "9px", color: "#334155", lineHeight: "1.8" }} dangerouslySetInnerHTML={{ __html: scopeSummary }}></div>
           </div>
         ) : (
           <>

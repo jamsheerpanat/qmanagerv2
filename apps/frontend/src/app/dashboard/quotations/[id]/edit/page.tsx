@@ -22,6 +22,34 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Search } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import dynamic from "next/dynamic";
+import "react-quill-new/dist/quill.snow.css";
+
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
+
+const quillModules = {
+  toolbar: [
+    [{ header: [1, 2, 3, false] }],
+    ["bold", "italic", "underline", "strike"],
+    [{ color: [] }, { background: [] }],
+    [{ list: "ordered" }, { list: "bullet" }],
+    ["link", "image"],
+    ["clean"],
+  ],
+};
+
+const quillFormats = [
+  "header",
+  "bold",
+  "italic",
+  "underline",
+  "strike",
+  "color",
+  "background",
+  "list",
+  "link",
+  "image",
+];
 
 const STEPS = [
   "Customer & Lead",
@@ -827,10 +855,13 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
               <label className="block text-sm font-medium mb-1">
                 Scope of Work Summary <span className="text-red-500">*</span>
               </label>
-              <Textarea
-                className="min-h-[100px] text-sm"
+              <ReactQuill
+                theme="snow"
+                modules={quillModules}
+                formats={quillFormats}
                 value={formData.scopeSummary || ""}
-                onChange={(e) => updateForm("scopeSummary", e.target.value)}
+                onChange={(val) => updateForm("scopeSummary", val)}
+                className="bg-white mt-1"
                 placeholder="Briefly describe the overall scope of this project..."
               />
               <p className="text-xs text-gray-500 mt-1">

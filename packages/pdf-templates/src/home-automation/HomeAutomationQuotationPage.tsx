@@ -120,7 +120,7 @@ export const HomeAutomationQuotationPage = ({
         {scopeSummary && (
           <div style={{ marginBottom: "15px", background: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
              <h3 style={{ fontSize: "10px", color: accent, marginBottom: "6px", fontFamily: "'Montserrat',sans-serif", fontWeight: "700" }}>PROPOSED SCOPE</h3>
-             <div style={{ fontSize: "8px", color: "#334155", lineHeight: "1.6", whiteSpace: "pre-wrap" }}>{scopeSummary}</div>
+             <div style={{ fontSize: "8px", color: "#334155", lineHeight: "1.6" }} dangerouslySetInnerHTML={{ __html: scopeSummary }}></div>
           </div>
         )}
 
