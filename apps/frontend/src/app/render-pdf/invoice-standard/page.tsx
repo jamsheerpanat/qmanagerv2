@@ -92,11 +92,24 @@ function InvoiceStandardRenderPageInner() {
           invoiceNumber={data.invoiceNumber || "DRAFT"}
           invoiceDate={formattedDate}
           dueDate={formattedDueDate}
+          invoiceStatus={data.invoiceStatus}
+          paymentStatus={data.paymentStatus}
+          referenceNumber={data.quotation?.quotationNumber || ""}
+          
           companyName={data.company?.name || "Octonics Co. W.L.L."}
           companyAddress={data.company?.address || ""}
+          companyTaxNumber={data.company?.taxNumber || ""}
+          companyEmail={data.company?.email || ""}
+          companyPhone={data.company?.phone || ""}
+          companyBankAccounts={data.company?.bankAccounts || []}
+
           customerName={data.customer?.displayName}
           customerCompany={data.customer?.legalName}
           customerAddress={data.customer?.addressLine1 || data.customer?.area || ""}
+          customerTaxNumber={data.customer?.taxNumber || data.customer?.vatNumber || ""}
+          customerEmail={data.contact?.email || data.customer?.email || ""}
+          customerPhone={data.contact?.phone || data.customer?.phone || ""}
+
           items={data.items || []}
           subtotal={data.subtotal}
           discount={data.discountAmount}
@@ -106,6 +119,7 @@ function InvoiceStandardRenderPageInner() {
           balanceAmount={data.balanceAmount}
           currency={data.currency}
           notes={data.notes}
+          terms={data.terms}
           qrVerificationUrl={verifyUrl}
         />
       </div>

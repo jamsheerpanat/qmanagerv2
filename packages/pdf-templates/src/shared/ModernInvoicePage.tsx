@@ -5,9 +5,24 @@ export const ModernInvoicePage = ({
   invoiceNumber,
   invoiceDate,
   dueDate,
+  invoiceStatus = "DRAFT",
+  paymentStatus = "UNPAID",
+  referenceNumber = "",
+
+  companyName = "Octonics Co. W.L.L.",
+  companyAddress = "",
+  companyTaxNumber = "",
+  companyEmail = "info@octonics.com",
+  companyPhone = "+965 9924 0074",
+  companyBankAccounts = [],
+
   customerName,
   customerCompany,
   customerAddress,
+  customerTaxNumber = "",
+  customerEmail = "",
+  customerPhone = "",
+
   items = [],
   subtotal = 0,
   discount = 0,
@@ -17,10 +32,27 @@ export const ModernInvoicePage = ({
   balanceAmount = 0,
   currency = "KWD",
   notes = "",
+  terms = "",
   qrVerificationUrl = "",
-  companyName = "Octonics Co. W.L.L.",
-  companyAddress = "",
 }: any) => {
+  
+  // Status watermark colors
+  const getStatusColor = () => {
+    if (invoiceStatus === 'CANCELLED') return 'rgba(239, 68, 68, 0.1)'; // Red
+    if (balanceAmount <= 0.01 && paidAmount > 0) return 'rgba(16, 185, 129, 0.1)'; // Green PAID
+    if (invoiceStatus === 'DRAFT') return 'rgba(148, 163, 184, 0.1)'; // Gray
+    return 'rgba(59, 130, 246, 0.05)'; // Blue subtle for ISSUED/UNPAID
+  };
+
+  const getStatusText = () => {
+    if (invoiceStatus === 'CANCELLED') return 'CANCELLED';
+    if (balanceAmount <= 0.01 && paidAmount > 0) return 'PAID';
+    if (invoiceStatus === 'DRAFT') return 'DRAFT';
+    return '';
+  };
+
+  const watermarkText = getStatusText();
+
   return (
     <div
       className="pdf-page"
@@ -35,36 +67,46 @@ export const ModernInvoicePage = ({
         background: "#ffffff",
       }}
     >
-      {/* Next-Gen Top Banner Accent */}
+      {/* Top Banner Accent */}
       <div
         style={{
           position: "absolute",
           top: 0,
           left: 0,
           width: "100%",
-          height: "12px",
-          background: "linear-gradient(90deg, #0f172a 0%, #3b82f6 50%, #06b6d4 100%)",
+          height: "8px",
+          backgroundColor: "#0f172a",
         }}
       />
-      
-      {/* Background Graphic Accent (Very faint tech lines) */}
-      <div
-        style={{
-          position: "absolute",
-          top: "12px",
-          right: 0,
-          width: "400px",
-          height: "400px",
-          background: "radial-gradient(circle, rgba(59,130,246,0.03) 0%, rgba(255,255,255,0) 70%)",
-          zIndex: 0,
-          pointerEvents: "none",
-        }}
-      />
+
+      {/* Watermark (if applicable) */}
+      {watermarkText && (
+        <div
+          style={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%) rotate(-45deg)",
+            fontSize: "140px",
+            fontWeight: 900,
+            color: getStatusColor(),
+            zIndex: 0,
+            pointerEvents: "none",
+            whiteSpace: "nowrap",
+            letterSpacing: "10px",
+            border: `8px solid ${getStatusColor()}`,
+            padding: "20px 60px",
+            borderRadius: "24px"
+          }}
+        >
+          {watermarkText}
+        </div>
+      )}
 
       {/* Header Section */}
       <div
         style={{
-          paddingTop: "64px",
+          paddingTop: "50px",
           paddingLeft: "48px",
           paddingRight: "48px",
           display: "flex",
@@ -74,462 +116,341 @@ export const ModernInvoicePage = ({
           zIndex: 1,
         }}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "16px", maxWidth: "50%" }}>
           <img 
             src="/octonics-logo.png" 
-            alt="Octonics Logo" 
-            style={{ height: "48px", width: "auto", objectFit: "contain" }} 
+            alt="Logo" 
+            style={{ height: "48px", width: "auto", objectFit: "contain", objectPosition: "left" }} 
           />
-          <div
-            style={{
-              fontSize: "12px",
-              color: "#64748b",
-              lineHeight: "1.7",
-              letterSpacing: "0.02em",
-              borderLeft: "2px solid #e2e8f0",
-              paddingLeft: "16px"
-            }}
-          >
-            📍 Office 46, Hawally Arab Complex<br />
-            &nbsp;&nbsp;&nbsp;&nbsp;Block 205, Hawally, Kuwait<br />
-            ✉️ info@octonics.com<br />
-            📞 +965 9924 0074
+          <div>
+            <h2 style={{ margin: 0, fontSize: "16px", fontWeight: 800, color: "#0f172a" }}>{companyName}</h2>
+            <div
+              style={{
+                fontSize: "11px",
+                color: "#475569",
+                lineHeight: "1.6",
+                marginTop: "8px",
+                whiteSpace: "pre-wrap"
+              }}
+            >
+              {companyAddress || "Office 46, Hawally Arab Complex\nBlock 205, Hawally, Kuwait"}
+              
+              <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "12px" }}>
+                {companyTaxNumber && <span><strong>VAT/TRN:</strong> {companyTaxNumber}</span>}
+                {companyPhone && <span><strong>TEL:</strong> {companyPhone}</span>}
+                {companyEmail && <span><strong>EMAIL:</strong> {companyEmail}</span>}
+              </div>
+            </div>
           </div>
         </div>
         
         <div style={{ textAlign: "right" }}>
           <h1
             style={{
-              fontSize: "48px",
+              fontSize: "42px",
               fontWeight: 900,
               color: "#0f172a",
-              letterSpacing: "-1.5px",
-              margin: "0 0 4px 0",
+              letterSpacing: "-1px",
+              margin: "0 0 8px 0",
               textTransform: "uppercase",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "flex-end",
-              gap: "12px"
             }}
           >
             INVOICE
-            <span style={{ width: "8px", height: "8px", backgroundColor: "#3b82f6", borderRadius: "50%", display: "inline-block" }}></span>
           </h1>
-          <div
-            style={{
-              fontSize: "15px",
-              fontWeight: 700,
-              color: "#3b82f6",
-              marginBottom: "24px",
-              letterSpacing: "3px",
-              textTransform: "uppercase",
-            }}
-          >
-            #{invoiceNumber || "INV-0000"}
-          </div>
-          <div
-            style={{
-              fontSize: "13px",
-              color: "#475569",
-              display: "flex",
-              flexDirection: "column",
-              gap: "8px",
-              alignItems: "flex-end",
-            }}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", width: "180px", borderBottom: "1px solid #f1f5f9", paddingBottom: "6px" }}>
-              <span style={{ fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "1px" }}>Date</span>
-              <span style={{ color: "#0f172a", fontWeight: 600 }}>{invoiceDate}</span>
-            </div>
-            {dueDate && (
-              <div style={{ display: "flex", justifyContent: "space-between", width: "180px", borderBottom: "1px solid #f1f5f9", paddingBottom: "6px" }}>
-                <span style={{ fontWeight: 600, color: "#94a3b8", textTransform: "uppercase", fontSize: "11px", letterSpacing: "1px" }}>Due</span>
-                <span style={{ color: "#0f172a", fontWeight: 600 }}>{dueDate}</span>
-              </div>
-            )}
-          </div>
+          
+          <table style={{ marginLeft: "auto", fontSize: "12px", textAlign: "right", borderCollapse: "collapse" }}>
+            <tbody>
+              <tr>
+                <td style={{ padding: "4px 12px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", fontSize: "10px" }}>Invoice No.</td>
+                <td style={{ padding: "4px 0", fontWeight: 700, color: "#0f172a", fontSize: "14px" }}>{invoiceNumber || "INV-0000"}</td>
+              </tr>
+              <tr>
+                <td style={{ padding: "4px 12px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", fontSize: "10px" }}>Date</td>
+                <td style={{ padding: "4px 0", fontWeight: 600, color: "#0f172a" }}>{invoiceDate}</td>
+              </tr>
+              {dueDate && (
+                <tr>
+                  <td style={{ padding: "4px 12px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", fontSize: "10px" }}>Due Date</td>
+                  <td style={{ padding: "4px 0", fontWeight: 600, color: "#0f172a" }}>{dueDate}</td>
+                </tr>
+              )}
+              {referenceNumber && (
+                <tr>
+                  <td style={{ padding: "4px 12px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", fontSize: "10px" }}>Reference</td>
+                  <td style={{ padding: "4px 0", fontWeight: 600, color: "#0f172a" }}>{referenceNumber}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
 
-      {/* Customer & Company Details */}
+      <div style={{ paddingLeft: "48px", paddingRight: "48px", marginTop: "32px" }}>
+        <div style={{ height: "1px", backgroundColor: "#e2e8f0", width: "100%" }}></div>
+      </div>
+
+      {/* Customer Details */}
       <div
         style={{
-          marginTop: "64px",
+          marginTop: "32px",
           paddingLeft: "48px",
           paddingRight: "48px",
           display: "flex",
           justifyContent: "space-between",
           alignItems: "flex-start",
+          zIndex: 1,
         }}
       >
-        <div style={{ width: "50%", position: "relative" }}>
+        <div style={{ width: "55%" }}>
           <h3
             style={{
               fontSize: "11px",
-              fontWeight: 800,
-              color: "#3b82f6",
-              textTransform: "uppercase",
-              letterSpacing: "2px",
-              marginBottom: "16px",
-              margin: "0 0 16px 0",
-              display: "flex",
-              alignItems: "center",
-              gap: "8px"
-            }}
-          >
-            <span style={{ width: "16px", height: "1px", backgroundColor: "#3b82f6" }}></span>
-            Billed To
-          </h3>
-          <div
-            style={{
-              color: "#0f172a",
               fontWeight: 700,
-              fontSize: "20px",
-              letterSpacing: "-0.5px"
+              color: "#64748b",
+              textTransform: "uppercase",
+              letterSpacing: "1.5px",
+              margin: "0 0 12px 0",
             }}
           >
-            {customerName || "Valued Customer"}
+            Bill To
+          </h3>
+          <div style={{ color: "#0f172a", fontWeight: 800, fontSize: "16px", marginBottom: "4px" }}>
+            {customerCompany || customerName || "Valued Customer"}
           </div>
-          {customerCompany && (
-            <div style={{ color: "#475569", marginTop: "6px", fontWeight: 500 }}>
-              {customerCompany}
+          {customerCompany && customerName && (
+            <div style={{ color: "#334155", fontWeight: 600, fontSize: "13px", marginBottom: "4px" }}>
+              Attn: {customerName}
             </div>
           )}
           {customerAddress && (
-            <div
-              style={{
-                color: "#64748b",
-                fontSize: "13px",
-                marginTop: "6px",
-                whiteSpace: "pre-wrap",
-                lineHeight: "1.6"
-              }}
-            >
+            <div style={{ color: "#475569", fontSize: "12px", whiteSpace: "pre-wrap", lineHeight: "1.6", marginBottom: "6px" }}>
               {customerAddress}
             </div>
           )}
+          <div style={{ display: "flex", flexDirection: "column", gap: "2px", marginTop: "8px", fontSize: "11px", color: "#475569" }}>
+            {customerTaxNumber && <div><strong style={{ color: "#0f172a" }}>VAT/TRN:</strong> {customerTaxNumber}</div>}
+            {customerPhone && <div><strong style={{ color: "#0f172a" }}>Phone:</strong> {customerPhone}</div>}
+            {customerEmail && <div><strong style={{ color: "#0f172a" }}>Email:</strong> {customerEmail}</div>}
+          </div>
         </div>
         
-        <div style={{ width: "50%", display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
-          <h3
-            style={{
-              fontSize: "11px",
-              fontWeight: 800,
-              color: "#94a3b8",
-              textTransform: "uppercase",
-              letterSpacing: "2px",
-              marginBottom: "16px",
-              margin: "0 0 16px 0",
-            }}
-          >
-            Total Amount Due
+        <div style={{ width: "40%", backgroundColor: "#f8fafc", padding: "20px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
+          <h3 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "1.5px", margin: "0 0 12px 0" }}>
+            Payment Summary
           </h3>
-          <div
-            style={{
-              fontSize: "36px",
-              fontWeight: 900,
-              color: "#0f172a",
-              letterSpacing: "-1px",
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "6px"
-            }}
-          >
-            <span style={{ fontSize: "16px", color: "#64748b", marginTop: "6px" }}>{currency}</span>
-            {(balanceAmount || 0).toLocaleString(undefined, {
-              minimumFractionDigits: 3,
-              maximumFractionDigits: 3,
-            })}
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "13px" }}>
+            <span style={{ color: "#475569" }}>Total Amount:</span>
+            <span style={{ fontWeight: 700, color: "#0f172a" }}>{currency} {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 3 })}</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "13px" }}>
+            <span style={{ color: "#475569" }}>Paid Amount:</span>
+            <span style={{ fontWeight: 700, color: "#10b981" }}>{currency} {paidAmount.toLocaleString(undefined, { minimumFractionDigits: 3 })}</span>
+          </div>
+          <div style={{ height: "1px", backgroundColor: "#cbd5e1", margin: "12px 0" }}></div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <span style={{ color: "#0f172a", fontWeight: 800, fontSize: "14px" }}>Balance Due:</span>
+            <span style={{ fontWeight: 900, color: "#e11d48", fontSize: "18px" }}>{currency} {balanceAmount.toLocaleString(undefined, { minimumFractionDigits: 3 })}</span>
           </div>
         </div>
       </div>
 
-      {/* Invoice Items Table (Dark Header Tech Style) */}
-      <div style={{ marginTop: "56px", paddingLeft: "48px", paddingRight: "48px", flex: 1 }}>
-        <table style={{ width: "100%", textAlign: "left", borderCollapse: "separate", borderSpacing: 0 }}>
+      {/* Invoice Items Table - Highly Detailed */}
+      <div style={{ marginTop: "40px", paddingLeft: "48px", paddingRight: "48px", flex: 1, zIndex: 1 }}>
+        <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ backgroundColor: "#0f172a" }}>
-              <th
-                style={{
-                  padding: "16px 20px",
-                  fontWeight: 700,
-                  color: "#ffffff",
-                  fontSize: "11px",
-                  textTransform: "uppercase",
-                  letterSpacing: "1.5px",
-                  width: "50%",
-                  borderTopLeftRadius: "8px",
-                  borderBottomLeftRadius: "8px",
-                }}
-              >
-                Item Description
-              </th>
-              <th
-                style={{
-                  padding: "16px 20px",
-                  fontWeight: 700,
-                  color: "#ffffff",
-                  fontSize: "11px",
-                  textTransform: "uppercase",
-                  letterSpacing: "1.5px",
-                  textAlign: "center",
-                  width: "16.66%",
-                }}
-              >
-                Qty
-              </th>
-              <th
-                style={{
-                  padding: "16px 20px",
-                  fontWeight: 700,
-                  color: "#ffffff",
-                  fontSize: "11px",
-                  textTransform: "uppercase",
-                  letterSpacing: "1.5px",
-                  textAlign: "right",
-                  width: "16.66%",
-                }}
-              >
-                Unit Price
-              </th>
-              <th
-                style={{
-                  padding: "16px 20px",
-                  fontWeight: 700,
-                  color: "#ffffff",
-                  fontSize: "11px",
-                  textTransform: "uppercase",
-                  letterSpacing: "1.5px",
-                  textAlign: "right",
-                  width: "16.66%",
-                  borderTopRightRadius: "8px",
-                  borderBottomRightRadius: "8px",
-                }}
-              >
-                Total
-              </th>
+            <tr>
+              <th style={{ padding: "12px 16px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", borderTopLeftRadius: "6px" }}>#</th>
+              <th style={{ padding: "12px 16px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "10px", fontWeight: 700, textTransform: "uppercase" }}>Description</th>
+              <th style={{ padding: "12px 16px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", textAlign: "center" }}>Qty</th>
+              <th style={{ padding: "12px 16px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", textAlign: "right" }}>Price</th>
+              {tax > 0 && <th style={{ padding: "12px 16px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", textAlign: "right" }}>VAT</th>}
+              <th style={{ padding: "12px 16px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", textAlign: "right", borderTopRightRadius: "6px" }}>Total</th>
             </tr>
           </thead>
           <tbody>
-            {items.map((item: any, idx: number) => (
-              <tr key={idx} style={{ 
-                backgroundColor: idx % 2 === 0 ? "#ffffff" : "#f8fafc",
-              }}>
-                <td style={{ paddingTop: "20px", paddingBottom: "20px", paddingLeft: "20px", paddingRight: "20px", borderBottom: "1px solid #f1f5f9" }}>
-                  <div style={{ fontWeight: 600, color: "#0f172a", fontSize: "14px" }}>
-                    {item.sectionTitle || item.description || "Item"}
-                  </div>
-                  {item.sectionTitle && item.description && (
-                    <div style={{ fontSize: "13px", color: "#64748b", marginTop: "6px", lineHeight: "1.5" }}>
-                      {item.description}
-                    </div>
-                  )}
-                </td>
-                <td style={{ paddingTop: "20px", paddingBottom: "20px", textAlign: "center", borderBottom: "1px solid #f1f5f9", fontWeight: 500, color: "#475569" }}>
-                  {item.quantity || 1}
-                </td>
-                <td style={{ paddingTop: "20px", paddingBottom: "20px", textAlign: "right", borderBottom: "1px solid #f1f5f9", fontWeight: 500, color: "#475569" }}>
-                  {(item.unitPrice || 0).toLocaleString(undefined, {
-                    minimumFractionDigits: 3,
-                    maximumFractionDigits: 3,
-                  })}
-                </td>
-                <td style={{ paddingTop: "20px", paddingBottom: "20px", textAlign: "right", borderBottom: "1px solid #f1f5f9", fontWeight: 700, color: "#0f172a", paddingRight: "20px" }}>
-                  {(item.lineTotal || 0).toLocaleString(undefined, {
-                    minimumFractionDigits: 3,
-                    maximumFractionDigits: 3,
-                  })}
-                </td>
-              </tr>
-            ))}
+            {(() => {
+              let serial = 0;
+              return items.map((item: any, idx: number) => {
+                if (item.itemType === "SECTION_HEADING") {
+                  return (
+                    <tr key={idx} style={{ backgroundColor: "#e2e8f0", borderBottom: "1px solid #cbd5e1" }}>
+                      <td colSpan={tax > 0 ? 6 : 5} style={{ padding: "10px 16px", fontSize: "11px", fontWeight: 800, color: "#0f172a", textTransform: "uppercase", letterSpacing: "1px" }}>
+                        {item.sectionTitle || item.description || "Section"}
+                      </td>
+                    </tr>
+                  );
+                }
+                
+                serial++;
+                const itemName = item.sectionTitle || item.product?.productName || item.serviceItem?.serviceName || item.description || "Item";
+                const showDesc = item.description && item.description !== itemName && item.description !== "Item";
+
+                return (
+                  <tr key={idx} style={{ borderBottom: "1px solid #e2e8f0", backgroundColor: idx % 2 !== 0 ? "#f8fafc" : "#ffffff" }}>
+                    <td style={{ padding: "16px", fontSize: "12px", color: "#475569", verticalAlign: "top" }}>
+                      {serial}
+                    </td>
+                    <td style={{ padding: "16px", verticalAlign: "top" }}>
+                      <div style={{ fontWeight: 700, color: "#0f172a", fontSize: "13px" }}>
+                        {itemName}
+                      </div>
+                      {showDesc && (
+                        <div style={{ fontSize: "11px", color: "#475569", marginTop: "4px", lineHeight: "1.5", whiteSpace: "pre-wrap" }}>
+                          {item.description}
+                        </div>
+                      )}
+                    </td>
+                    <td style={{ padding: "16px", fontSize: "12px", color: "#0f172a", textAlign: "center", verticalAlign: "top", fontWeight: 600 }}>
+                      {item.quantity || 1} {item.unit !== "pcs" ? <span style={{ fontSize: "10px", color: "#64748b" }}>{item.unit}</span> : ""}
+                    </td>
+                    <td style={{ padding: "16px", fontSize: "12px", color: "#0f172a", textAlign: "right", verticalAlign: "top" }}>
+                      {(item.unitPrice || 0).toLocaleString(undefined, { minimumFractionDigits: 3 })}
+                    </td>
+                    {tax > 0 && (
+                      <td style={{ padding: "16px", fontSize: "12px", color: "#475569", textAlign: "right", verticalAlign: "top" }}>
+                        {item.taxAmount ? item.taxAmount.toLocaleString(undefined, { minimumFractionDigits: 3 }) : "-"}
+                        {item.taxRate ? <div style={{ fontSize: "9px", color: "#94a3b8" }}>({item.taxRate}%)</div> : null}
+                      </td>
+                    )}
+                    <td style={{ padding: "16px", fontSize: "13px", color: "#0f172a", textAlign: "right", verticalAlign: "top", fontWeight: 700 }}>
+                      {(item.lineTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 3 })}
+                    </td>
+                  </tr>
+                );
+              });
+            })()}
           </tbody>
         </table>
+
+        {/* Totals Section aligned right */}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
+          <div style={{ width: "320px" }}>
+            <table style={{ width: "100%", fontSize: "13px" }}>
+              <tbody>
+                <tr>
+                  <td style={{ padding: "8px 0", color: "#475569", fontWeight: 600 }}>Subtotal</td>
+                  <td style={{ padding: "8px 0", textAlign: "right", color: "#0f172a", fontWeight: 600 }}>
+                    {currency} {subtotal.toLocaleString(undefined, { minimumFractionDigits: 3 })}
+                  </td>
+                </tr>
+                {discount > 0 && (
+                  <tr>
+                    <td style={{ padding: "8px 0", color: "#ef4444", fontWeight: 600 }}>Discount</td>
+                    <td style={{ padding: "8px 0", textAlign: "right", color: "#ef4444", fontWeight: 600 }}>
+                      - {currency} {discount.toLocaleString(undefined, { minimumFractionDigits: 3 })}
+                    </td>
+                  </tr>
+                )}
+                {tax > 0 && (
+                  <tr>
+                    <td style={{ padding: "8px 0", color: "#475569", fontWeight: 600 }}>Total VAT</td>
+                    <td style={{ padding: "8px 0", textAlign: "right", color: "#0f172a", fontWeight: 600 }}>
+                      {currency} {tax.toLocaleString(undefined, { minimumFractionDigits: 3 })}
+                    </td>
+                  </tr>
+                )}
+                <tr>
+                  <td colSpan={2} style={{ padding: "8px 0" }}>
+                    <div style={{ height: "2px", backgroundColor: "#0f172a" }}></div>
+                  </td>
+                </tr>
+                <tr>
+                  <td style={{ padding: "12px 0", color: "#0f172a", fontWeight: 800, fontSize: "16px", textTransform: "uppercase" }}>Grand Total</td>
+                  <td style={{ padding: "12px 0", textAlign: "right", color: "#0f172a", fontWeight: 900, fontSize: "18px" }}>
+                    {currency} {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 3 })}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      {/* Totals & Notes Section */}
-      <div
-        style={{
-          marginTop: "40px",
-          paddingLeft: "48px",
-          paddingRight: "48px",
-          display: "flex",
-          justifyContent: "space-between",
-          pageBreakInside: "avoid",
-        }}
-      >
-        {/* Notes Section */}
-        <div style={{ width: "45%" }}>
-          {notes && (
-            <div style={{ 
-              backgroundColor: "#f8fafc", 
-              padding: "24px", 
-              borderRadius: "12px",
-              border: "1px dashed #cbd5e1"
-            }}>
-              <h4
-                style={{
-                  fontSize: "11px",
-                  fontWeight: 800,
-                  color: "#94a3b8",
-                  textTransform: "uppercase",
-                  letterSpacing: "1.5px",
-                  marginBottom: "12px",
-                  margin: "0 0 12px 0",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px"
-                }}
-              >
-                <span style={{ width: "4px", height: "12px", backgroundColor: "#94a3b8", borderRadius: "2px" }}></span>
-                Additional Notes
+      {/* Info Sections: Bank Details, Terms, Notes */}
+      <div style={{ paddingLeft: "48px", paddingRight: "48px", marginTop: "32px", display: "flex", gap: "32px", pageBreakInside: "avoid", zIndex: 1 }}>
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "24px" }}>
+          
+          {companyBankAccounts && companyBankAccounts.length > 0 && (
+            <div>
+              <h4 style={{ fontSize: "11px", fontWeight: 800, color: "#0f172a", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px 0", borderBottom: "1px solid #e2e8f0", paddingBottom: "4px" }}>
+                Bank Details for Transfer
               </h4>
-              <p style={{ fontSize: "13px", color: "#475569", whiteSpace: "pre-wrap", margin: 0, lineHeight: "1.6" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+                {companyBankAccounts.map((bank: any, idx: number) => (
+                  <div key={idx} style={{ fontSize: "10px", color: "#475569", backgroundColor: "#f8fafc", padding: "12px", borderRadius: "6px", border: "1px solid #e2e8f0", minWidth: "200px" }}>
+                    <div style={{ fontWeight: 700, color: "#0f172a", marginBottom: "4px", fontSize: "11px" }}>{bank.bankName}</div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}><span>Account Name:</span> <strong style={{color:"#0f172a"}}>{bank.accountName}</strong></div>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}><span>Account No:</span> <strong style={{color:"#0f172a"}}>{bank.accountNumber}</strong></div>
+                    {bank.iban && <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}><span>IBAN:</span> <strong style={{color:"#0f172a"}}>{bank.iban}</strong></div>}
+                    {bank.swiftCode && <div style={{ display: "flex", justifyContent: "space-between" }}><span>SWIFT:</span> <strong style={{color:"#0f172a"}}>{bank.swiftCode}</strong></div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {notes && (
+            <div>
+              <h4 style={{ fontSize: "11px", fontWeight: 800, color: "#0f172a", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px 0", borderBottom: "1px solid #e2e8f0", paddingBottom: "4px" }}>
+                Notes / Instructions
+              </h4>
+              <div style={{ fontSize: "11px", color: "#475569", whiteSpace: "pre-wrap", lineHeight: "1.6" }}>
                 {notes}
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* Next-Gen Totals Card Section */}
-        <div
-          style={{
-            width: "48%",
-            backgroundColor: "#ffffff",
-            padding: "32px",
-            borderRadius: "16px",
-            boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01)",
-            border: "1px solid #f1f5f9",
-            position: "relative",
-            overflow: "hidden"
-          }}
-        >
-          {/* Subtle Card Accent */}
-          <div style={{ position: "absolute", top: 0, right: 0, width: "100%", height: "4px", background: "linear-gradient(90deg, #3b82f6, #06b6d4)" }} />
-
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-            <span style={{ fontSize: "13px", color: "#64748b", fontWeight: 600 }}>Subtotal</span>
-            <span style={{ color: "#0f172a", fontWeight: 600, fontSize: "15px" }}>
-              {(subtotal || 0).toLocaleString(undefined, {
-                minimumFractionDigits: 3,
-                maximumFractionDigits: 3,
-              })}{" "}
-              <span style={{ fontSize: "12px", color: "#94a3b8" }}>{currency}</span>
-            </span>
-          </div>
-          {(discount || 0) > 0 && (
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px", color: "#ef4444" }}>
-              <span style={{ fontSize: "13px", fontWeight: 600 }}>Discount Applied</span>
-              <span style={{ fontWeight: 600, fontSize: "15px" }}>
-                -
-                {discount.toLocaleString(undefined, {
-                  minimumFractionDigits: 3,
-                  maximumFractionDigits: 3,
-                })}{" "}
-                <span style={{ fontSize: "12px", opacity: 0.7 }}>{currency}</span>
-              </span>
-            </div>
-          )}
-          {(tax || 0) > 0 && (
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "16px" }}>
-              <span style={{ fontSize: "13px", color: "#64748b", fontWeight: 600 }}>Estimated Tax</span>
-              <span style={{ color: "#0f172a", fontWeight: 600, fontSize: "15px" }}>
-                {tax.toLocaleString(undefined, {
-                  minimumFractionDigits: 3,
-                  maximumFractionDigits: 3,
-                })}{" "}
-                <span style={{ fontSize: "12px", color: "#94a3b8" }}>{currency}</span>
-              </span>
+              </div>
             </div>
           )}
 
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              paddingTop: "20px",
-              paddingBottom: "20px",
-              borderTop: "2px dashed #e2e8f0",
-              borderBottom: "2px dashed #e2e8f0",
-              marginTop: "20px",
-              marginBottom: "20px",
-            }}
-          >
-            <span style={{ fontWeight: 800, color: "#0f172a", fontSize: "16px", textTransform: "uppercase", letterSpacing: "1px" }}>Total Due</span>
-            <span style={{ fontWeight: 900, color: "#3b82f6", fontSize: "20px" }}>
-              {(grandTotal || 0).toLocaleString(undefined, {
-                minimumFractionDigits: 3,
-                maximumFractionDigits: 3,
-              })}{" "}
-              <span style={{ fontSize: "14px", color: "#94a3b8", fontWeight: 700 }}>{currency}</span>
-            </span>
-          </div>
-
-          {(paidAmount || 0) > 0 && (
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px", color: "#10b981" }}>
-              <span style={{ fontSize: "13px", fontWeight: 600, display: "flex", alignItems: "center", gap: "6px" }}>
-                <span style={{ width: "6px", height: "6px", backgroundColor: "#10b981", borderRadius: "50%" }}></span>
-                Amount Paid
-              </span>
-              <span style={{ fontWeight: 700, fontSize: "15px" }}>
-                {paidAmount.toLocaleString(undefined, {
-                  minimumFractionDigits: 3,
-                  maximumFractionDigits: 3,
-                })}{" "}
-                <span style={{ fontSize: "12px", opacity: 0.8 }}>{currency}</span>
-              </span>
+          {terms && (
+            <div>
+              <h4 style={{ fontSize: "11px", fontWeight: 800, color: "#0f172a", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px 0", borderBottom: "1px solid #e2e8f0", paddingBottom: "4px" }}>
+                Terms & Conditions
+              </h4>
+              <div style={{ fontSize: "10px", color: "#64748b", whiteSpace: "pre-wrap", lineHeight: "1.5" }}>
+                {terms}
+              </div>
             </div>
           )}
 
-          {(paidAmount || 0) > 0 && (
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "12px", padding: "16px", backgroundColor: "#f8fafc", borderRadius: "8px" }}>
-              <span style={{ fontSize: "14px", fontWeight: 700, color: "#0f172a", textTransform: "uppercase", letterSpacing: "1px" }}>Remaining</span>
-              <span style={{ fontSize: "18px", fontWeight: 900, color: "#0f172a" }}>
-                {(balanceAmount || 0).toLocaleString(undefined, {
-                  minimumFractionDigits: 3,
-                  maximumFractionDigits: 3,
-                })}{" "}
-                <span style={{ fontSize: "13px", color: "#94a3b8" }}>{currency}</span>
-              </span>
-            </div>
-          )}
         </div>
       </div>
 
       {/* Footer / QR Verification */}
       <div
         style={{
-          marginTop: "auto",
+          marginTop: "32px",
           paddingLeft: "48px",
           paddingRight: "48px",
-          paddingBottom: "40px",
+          paddingBottom: "32px",
           paddingTop: "32px",
           display: "flex",
           alignItems: "flex-end",
           justifyContent: "space-between",
+          borderTop: "1px solid #e2e8f0",
+          zIndex: 1,
+          pageBreakInside: "avoid"
         }}
       >
-        <div style={{ fontSize: "11px", color: "#94a3b8", maxWidth: "384px", lineHeight: "1.6" }}>
-          This document is system-generated and does not require a physical signature.<br/>
-          If you have any questions, contact us at <strong style={{ color: "#64748b" }}>info@octonics.com</strong>
+        <div style={{ fontSize: "10px", color: "#94a3b8", maxWidth: "400px", lineHeight: "1.5" }}>
+          <strong>{companyName}</strong><br/>
+          This is a computer-generated document. No signature is required. <br/>
+          For queries related to this invoice, please contact {companyEmail}
         </div>
 
         {qrVerificationUrl && (
-          <div style={{ display: "flex", alignItems: "center", gap: "16px", textAlign: "right" }}>
-            <div style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", textAlign: "right" }}>
+            <div style={{ fontSize: "9px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600 }}>
               Scan to Verify<br />
-              <span style={{ color: "#3b82f6" }}>Authenticity</span>
+              <strong style={{ color: "#0f172a" }}>Authenticity</strong>
             </div>
             <div
               style={{
-                padding: "8px",
+                padding: "6px",
                 backgroundColor: "white",
-                borderRadius: "12px",
-                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
                 border: "1px solid #e2e8f0",
+                borderRadius: "8px"
               }}
             >
-              <QRCodeSVG value={qrVerificationUrl} size={56} level="M" />
+              <QRCodeSVG value={qrVerificationUrl} size={48} level="M" />
             </div>
           </div>
         )}

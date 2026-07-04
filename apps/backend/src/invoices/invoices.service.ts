@@ -55,7 +55,7 @@ export class InvoicesService {
   ) {
     const q = await this.prisma.quotation.findUnique({
       where: { id: quotationId },
-      include: { items: true, terms: true },
+      include: { items: { include: { product: true, serviceItem: true } }, terms: true },
     });
 
     if (!q) throw new NotFoundException('Quotation not found');
@@ -90,7 +90,8 @@ export class InvoicesService {
         itemType: i.itemType,
         productId: i.productId,
         serviceItemId: i.serviceItemId,
-        description: i.description || 'Item',
+        sectionTitle: i.sectionTitle,
+        description: i.description || '',
         quantity: i.quantity,
         unit: i.unit,
         unitPrice: i.unitPrice,
@@ -134,11 +135,18 @@ export class InvoicesService {
     const invoice = await this.prisma.invoice.findUnique({
       where: { id },
       include: {
-        company: true,
+        company: {
+          include: {
+            bankAccounts: true
+          }
+        },
         customer: true,
         contact: true,
         quotation: { select: { quotationNumber: true } },
-        items: { orderBy: { sortOrder: 'asc' } },
+        items: {
+          orderBy: { sortOrder: 'asc' },
+          include: { product: true, serviceItem: true }
+        },
         payments: {
           include: { receipt: true },
           orderBy: { paymentDate: 'desc' },
