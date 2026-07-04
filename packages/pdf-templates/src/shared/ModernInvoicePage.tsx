@@ -36,22 +36,24 @@ export const ModernInvoicePage = ({
   qrVerificationUrl = "",
 }: any) => {
   
-  // Status watermark colors
-  const getStatusColor = () => {
-    if (invoiceStatus === 'CANCELLED') return 'rgba(239, 68, 68, 0.1)'; // Red
-    if (balanceAmount <= 0.01 && paidAmount > 0) return 'rgba(16, 185, 129, 0.1)'; // Green PAID
-    if (invoiceStatus === 'DRAFT') return 'rgba(148, 163, 184, 0.1)'; // Gray
-    return 'rgba(59, 130, 246, 0.05)'; // Blue subtle for ISSUED/UNPAID
+  // Status Colors
+  const isPaid = balanceAmount <= 0.01 && paidAmount > 0;
+  
+  const getBadgeColors = () => {
+    if (invoiceStatus === 'CANCELLED') return { bg: '#fee2e2', text: '#b91c1c' };
+    if (isPaid) return { bg: '#d1fae5', text: '#047857' };
+    if (invoiceStatus === 'DRAFT') return { bg: '#f1f5f9', text: '#475569' };
+    return { bg: '#e0e7ff', text: '#4338ca' };
   };
 
   const getStatusText = () => {
     if (invoiceStatus === 'CANCELLED') return 'CANCELLED';
-    if (balanceAmount <= 0.01 && paidAmount > 0) return 'PAID';
+    if (isPaid) return 'PAID IN FULL';
     if (invoiceStatus === 'DRAFT') return 'DRAFT';
-    return '';
+    return 'ISSUED';
   };
 
-  const watermarkText = getStatusText();
+  const badge = getBadgeColors();
 
   return (
     <div
@@ -59,260 +61,199 @@ export const ModernInvoicePage = ({
       style={{
         fontFamily: "'Inter', sans-serif",
         color: "#1e293b",
-        position: "relative",
         display: "flex",
         flexDirection: "column",
         height: "100%",
         width: "100%",
-        background: "#ffffff",
+        background: "#fafaf9", // very subtle warm gray background
+        position: "relative"
       }}
     >
-      {/* Top Banner Accent */}
-      <div
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          width: "100%",
-          height: "8px",
-          backgroundColor: "#0f172a",
-        }}
-      />
+      {/* Background Accent Graphics */}
+      <div style={{ position: 'absolute', top: 0, right: 0, width: '400px', height: '400px', background: 'radial-gradient(circle, rgba(67, 56, 202, 0.03) 0%, rgba(250, 250, 249, 0) 70%)', zIndex: 0 }}></div>
 
-      {/* Watermark (if applicable) */}
-      {watermarkText && (
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%) rotate(-45deg)",
-            fontSize: "140px",
-            fontWeight: 900,
-            color: getStatusColor(),
-            zIndex: 0,
-            pointerEvents: "none",
-            whiteSpace: "nowrap",
-            letterSpacing: "10px",
-            border: `8px solid ${getStatusColor()}`,
-            padding: "20px 60px",
-            borderRadius: "24px"
-          }}
-        >
-          {watermarkText}
-        </div>
-      )}
-
-      {/* Header Section */}
-      <div
-        style={{
-          paddingTop: "50px",
-          paddingLeft: "48px",
-          paddingRight: "48px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <div style={{ display: "flex", flexDirection: "column", gap: "16px", maxWidth: "50%" }}>
+      {/* HEADER SECTION - Brand & Invoice Meta */}
+      <div style={{ padding: "48px 48px 32px 48px", display: "flex", justifyContent: "space-between", zIndex: 1 }}>
+        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
           <img 
             src="/octonics-logo.png" 
             alt="Logo" 
-            style={{ height: "48px", width: "auto", objectFit: "contain", objectPosition: "left" }} 
+            style={{ height: "42px", width: "auto", objectFit: "contain", objectPosition: "left" }} 
           />
-          <div>
-            <h2 style={{ margin: 0, fontSize: "16px", fontWeight: 800, color: "#0f172a" }}>{companyName}</h2>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#475569",
-                lineHeight: "1.6",
-                marginTop: "8px",
-                whiteSpace: "pre-wrap"
-              }}
-            >
-              {companyAddress || "Corporate Office\nOffice No. 5, 2nd Floor, Tower 3, 22 Street\nBlock 13, Qibla, Kuwait City"}
-              
-              <div style={{ marginTop: "6px", display: "flex", flexWrap: "wrap", gap: "12px" }}>
-                {companyTaxNumber && <span><strong>VAT/TRN:</strong> {companyTaxNumber}</span>}
-                {companyPhone && <span><strong>TEL:</strong> {companyPhone}</span>}
-                {companyEmail && <span><strong>EMAIL:</strong> {companyEmail}</span>}
+          <div style={{ marginTop: "12px" }}>
+            <h2 style={{ margin: 0, fontSize: "14px", fontWeight: 800, color: "#0f172a", letterSpacing: "0.5px" }}>{companyName}</h2>
+            <div style={{ fontSize: "10px", color: "#64748b", lineHeight: "1.6", marginTop: "6px", whiteSpace: "pre-wrap" }}>
+              {companyAddress}
+              <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "3px" }}>
+                {companyTaxNumber && <div><span style={{ fontWeight: 600 }}>VAT/TRN:</span> {companyTaxNumber}</div>}
+                {companyPhone && <div><span style={{ fontWeight: 600 }}>TEL:</span> {companyPhone}</div>}
+                {companyEmail && <div><span style={{ fontWeight: 600 }}>EMAIL:</span> {companyEmail}</div>}
               </div>
             </div>
           </div>
         </div>
-        
-        <div style={{ textAlign: "right" }}>
-          <h1
-            style={{
-              fontSize: "42px",
-              fontWeight: 900,
-              color: "#0f172a",
-              letterSpacing: "-1px",
-              margin: "0 0 8px 0",
-              textTransform: "uppercase",
-            }}
-          >
+
+        <div style={{ textAlign: "right", display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+          <div style={{ 
+            display: "inline-block", 
+            padding: "6px 16px", 
+            borderRadius: "20px", 
+            backgroundColor: badge.bg, 
+            color: badge.text, 
+            fontSize: "10px", 
+            fontWeight: 800, 
+            letterSpacing: "1px",
+            marginBottom: "16px"
+          }}>
+            {getStatusText()}
+          </div>
+          
+          <h1 style={{ fontSize: "48px", fontWeight: 900, color: "#1e1b4b", letterSpacing: "-2px", margin: "0 0 16px 0", lineHeight: "1" }}>
             INVOICE
           </h1>
+
+          <div style={{ display: "flex", gap: "24px", textAlign: "right" }}>
+            <div>
+              <div style={{ fontSize: "8px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Invoice Number</div>
+              <div style={{ fontSize: "12px", fontWeight: 700, color: "#0f172a" }}>{invoiceNumber || "INV-0000"}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: "8px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Date of Issue</div>
+              <div style={{ fontSize: "12px", fontWeight: 700, color: "#0f172a" }}>{invoiceDate}</div>
+            </div>
+          </div>
           
-          <table style={{ marginLeft: "auto", fontSize: "12px", textAlign: "right", borderCollapse: "collapse" }}>
-            <tbody>
-              <tr>
-                <td style={{ padding: "4px 12px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", fontSize: "10px" }}>Invoice No.</td>
-                <td style={{ padding: "4px 0", fontWeight: 700, color: "#0f172a", fontSize: "14px" }}>{invoiceNumber || "INV-0000"}</td>
-              </tr>
-              <tr>
-                <td style={{ padding: "4px 12px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", fontSize: "10px" }}>Date</td>
-                <td style={{ padding: "4px 0", fontWeight: 600, color: "#0f172a" }}>{invoiceDate}</td>
-              </tr>
+          {(dueDate || referenceNumber) && (
+            <div style={{ display: "flex", gap: "24px", textAlign: "right", marginTop: "12px" }}>
               {dueDate && (
-                <tr>
-                  <td style={{ padding: "4px 12px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", fontSize: "10px" }}>Due Date</td>
-                  <td style={{ padding: "4px 0", fontWeight: 600, color: "#0f172a" }}>{dueDate}</td>
-                </tr>
+                <div>
+                  <div style={{ fontSize: "8px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Due Date</div>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "#0f172a" }}>{dueDate}</div>
+                </div>
               )}
               {referenceNumber && (
-                <tr>
-                  <td style={{ padding: "4px 12px", color: "#64748b", fontWeight: 600, textTransform: "uppercase", fontSize: "10px" }}>Reference</td>
-                  <td style={{ padding: "4px 0", fontWeight: 600, color: "#0f172a" }}>{referenceNumber}</td>
-                </tr>
+                <div>
+                  <div style={{ fontSize: "8px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Reference</div>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "#0f172a" }}>{referenceNumber}</div>
+                </div>
               )}
-            </tbody>
-          </table>
+            </div>
+          )}
         </div>
       </div>
 
-      <div style={{ paddingLeft: "48px", paddingRight: "48px", marginTop: "32px" }}>
-        <div style={{ height: "1px", backgroundColor: "#e2e8f0", width: "100%" }}></div>
-      </div>
-
-      {/* Customer Details */}
-      <div
-        style={{
-          marginTop: "32px",
-          paddingLeft: "48px",
-          paddingRight: "48px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          zIndex: 1,
-        }}
-      >
-        <div style={{ width: "55%" }}>
-          <h3
-            style={{
-              fontSize: "11px",
-              fontWeight: 700,
-              color: "#64748b",
-              textTransform: "uppercase",
-              letterSpacing: "1.5px",
-              margin: "0 0 12px 0",
-            }}
-          >
-            Bill To
-          </h3>
-          <div style={{ color: "#0f172a", fontWeight: 800, fontSize: "16px", marginBottom: "4px" }}>
+      {/* BILL TO & SUMMARY CARDS */}
+      <div style={{ padding: "0 48px", display: "flex", gap: "24px", zIndex: 1, marginTop: "16px" }}>
+        
+        {/* Bill To Card */}
+        <div style={{ flex: 1, backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "16px", padding: "24px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.02)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "16px" }}>
+            <div style={{ width: "24px", height: "24px", borderRadius: "6px", backgroundColor: "#f1f5f9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <h3 style={{ fontSize: "10px", fontWeight: 800, color: "#475569", textTransform: "uppercase", letterSpacing: "1px", margin: 0 }}>Billed To</h3>
+          </div>
+          
+          <div style={{ color: "#0f172a", fontWeight: 800, fontSize: "16px", marginBottom: "4px", letterSpacing: "-0.5px" }}>
             {customerCompany || customerName || "Valued Customer"}
           </div>
           {customerCompany && customerName && (
-            <div style={{ color: "#334155", fontWeight: 600, fontSize: "13px", marginBottom: "4px" }}>
-              Attn: {customerName}
+            <div style={{ color: "#4338ca", fontWeight: 700, fontSize: "12px", marginBottom: "8px" }}>
+              {customerName}
             </div>
           )}
           {customerAddress && (
-            <div style={{ color: "#475569", fontSize: "12px", whiteSpace: "pre-wrap", lineHeight: "1.6", marginBottom: "6px" }}>
+            <div style={{ color: "#64748b", fontSize: "11px", whiteSpace: "pre-wrap", lineHeight: "1.5", marginBottom: "12px" }}>
               {customerAddress}
             </div>
           )}
-          <div style={{ display: "flex", flexDirection: "column", gap: "2px", marginTop: "8px", fontSize: "11px", color: "#475569" }}>
-            {customerTaxNumber && <div><strong style={{ color: "#0f172a" }}>VAT/TRN:</strong> {customerTaxNumber}</div>}
-            {customerPhone && <div><strong style={{ color: "#0f172a" }}>Phone:</strong> {customerPhone}</div>}
-            {customerEmail && <div><strong style={{ color: "#0f172a" }}>Email:</strong> {customerEmail}</div>}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px", marginTop: "12px", fontSize: "10px", color: "#64748b" }}>
+            {customerTaxNumber && <div><div style={{ fontSize: "8px", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "2px" }}>VAT/TRN</div><strong style={{ color: "#0f172a" }}>{customerTaxNumber}</strong></div>}
+            {customerPhone && <div><div style={{ fontSize: "8px", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "2px" }}>Phone</div><strong style={{ color: "#0f172a" }}>{customerPhone}</strong></div>}
+            {customerEmail && <div style={{ gridColumn: "span 2" }}><div style={{ fontSize: "8px", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "2px" }}>Email</div><strong style={{ color: "#0f172a" }}>{customerEmail}</strong></div>}
           </div>
         </div>
-        
-        <div style={{ width: "40%", backgroundColor: "#f8fafc", padding: "20px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
-          <h3 style={{ fontSize: "11px", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "1.5px", margin: "0 0 12px 0" }}>
-            Payment Summary
-          </h3>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "13px" }}>
-            <span style={{ color: "#475569" }}>Total Amount:</span>
-            <span style={{ fontWeight: 700, color: "#0f172a" }}>{currency} {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 3 })}</span>
+
+        {/* Amount Summary Card */}
+        <div style={{ width: "280px", backgroundColor: "#1e1b4b", borderRadius: "16px", padding: "24px", color: "#ffffff", display: "flex", flexDirection: "column", justifyContent: "space-between", boxShadow: "0 10px 15px -3px rgba(30, 27, 75, 0.2)" }}>
+          <div>
+            <h3 style={{ fontSize: "10px", fontWeight: 700, color: "#a5b4fc", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 16px 0" }}>
+              Payment Summary
+            </h3>
+            <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px", fontSize: "12px", borderBottom: "1px solid rgba(255,255,255,0.1)", paddingBottom: "12px" }}>
+              <span style={{ color: "#c7d2fe" }}>Total Amount</span>
+              <span style={{ fontWeight: 600 }}>{currency} {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 3 })}</span>
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: "12px" }}>
+              <span style={{ color: "#c7d2fe" }}>Amount Paid</span>
+              <span style={{ fontWeight: 600, color: "#34d399" }}>{currency} {paidAmount.toLocaleString(undefined, { minimumFractionDigits: 3 })}</span>
+            </div>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px", fontSize: "13px" }}>
-            <span style={{ color: "#475569" }}>Paid Amount:</span>
-            <span style={{ fontWeight: 700, color: "#10b981" }}>{currency} {paidAmount.toLocaleString(undefined, { minimumFractionDigits: 3 })}</span>
-          </div>
-          <div style={{ height: "1px", backgroundColor: "#cbd5e1", margin: "12px 0" }}></div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-            <span style={{ color: "#0f172a", fontWeight: 800, fontSize: "14px" }}>Balance Due:</span>
-            <span style={{ fontWeight: 900, color: "#e11d48", fontSize: "18px" }}>{currency} {balanceAmount.toLocaleString(undefined, { minimumFractionDigits: 3 })}</span>
+          
+          <div style={{ marginTop: "24px", backgroundColor: "rgba(255,255,255,0.05)", padding: "16px", borderRadius: "12px" }}>
+            <div style={{ fontSize: "10px", color: "#a5b4fc", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Balance Due</div>
+            <div style={{ fontWeight: 900, color: "#ffffff", fontSize: "24px", letterSpacing: "-1px" }}>
+              {currency} {balanceAmount.toLocaleString(undefined, { minimumFractionDigits: 3 })}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Invoice Items Table - Highly Detailed */}
+      {/* ITEMS TABLE */}
       <div style={{ marginTop: "40px", paddingLeft: "48px", paddingRight: "48px", flex: 1, zIndex: 1 }}>
         <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
           <thead>
             <tr>
-              <th style={{ padding: "12px 16px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", borderTopLeftRadius: "6px" }}>#</th>
-              <th style={{ padding: "12px 16px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "10px", fontWeight: 700, textTransform: "uppercase" }}>Description</th>
-              <th style={{ padding: "12px 16px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", textAlign: "center" }}>Qty</th>
-              <th style={{ padding: "12px 16px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", textAlign: "right" }}>Price</th>
-              {tax > 0 && <th style={{ padding: "12px 16px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", textAlign: "right" }}>VAT</th>}
-              <th style={{ padding: "12px 16px", backgroundColor: "#0f172a", color: "#ffffff", fontSize: "10px", fontWeight: 700, textTransform: "uppercase", textAlign: "right", borderTopRightRadius: "6px" }}>Total</th>
+              <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", borderBottom: "2px solid #e2e8f0" }}>Description</th>
+              <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "center", borderBottom: "2px solid #e2e8f0", width: "10%" }}>Qty</th>
+              <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "right", borderBottom: "2px solid #e2e8f0", width: "15%" }}>Price</th>
+              {tax > 0 && <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "right", borderBottom: "2px solid #e2e8f0", width: "15%" }}>VAT</th>}
+              <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "right", borderBottom: "2px solid #e2e8f0", width: "15%" }}>Total</th>
             </tr>
           </thead>
           <tbody>
             {(() => {
-              let serial = 0;
               return items.map((item: any, idx: number) => {
                 if (item.itemType === "SECTION_HEADING") {
                   return (
-                    <tr key={idx} style={{ backgroundColor: "#e2e8f0", borderBottom: "1px solid #cbd5e1" }}>
-                      <td colSpan={tax > 0 ? 6 : 5} style={{ padding: "10px 16px", fontSize: "11px", fontWeight: 800, color: "#0f172a", textTransform: "uppercase", letterSpacing: "1px" }}>
-                        {item.sectionTitle || item.description || "Section"}
+                    <tr key={idx}>
+                      <td colSpan={tax > 0 ? 5 : 4} style={{ padding: "24px 0 8px 0", borderBottom: "1px solid #e2e8f0" }}>
+                        <div style={{ fontSize: "10px", fontWeight: 800, color: "#4338ca", textTransform: "uppercase", letterSpacing: "1.5px" }}>
+                          {item.sectionTitle || item.description || "Section"}
+                        </div>
                       </td>
                     </tr>
                   );
                 }
                 
-                serial++;
                 const itemName = item.sectionTitle || item.product?.productName || item.serviceItem?.serviceName || item.description || "Item";
                 const showDesc = item.description && item.description !== itemName && item.description !== "Item";
 
                 return (
-                  <tr key={idx} style={{ borderBottom: "1px solid #e2e8f0", backgroundColor: idx % 2 !== 0 ? "#f8fafc" : "#ffffff" }}>
-                    <td style={{ padding: "16px", fontSize: "12px", color: "#475569", verticalAlign: "top" }}>
-                      {serial}
-                    </td>
-                    <td style={{ padding: "16px", verticalAlign: "top" }}>
-                      <div style={{ fontWeight: 700, color: "#0f172a", fontSize: "13px" }}>
+                  <tr key={idx}>
+                    <td style={{ padding: "16px 0", borderBottom: "1px dashed #e2e8f0", verticalAlign: "top" }}>
+                      <div style={{ fontWeight: 700, color: "#0f172a", fontSize: "12px", marginBottom: showDesc ? "4px" : "0" }}>
                         {itemName}
                       </div>
                       {showDesc && (
-                        <div style={{ fontSize: "11px", color: "#475569", marginTop: "4px", lineHeight: "1.5", whiteSpace: "pre-wrap" }}>
+                        <div style={{ fontSize: "10px", color: "#64748b", lineHeight: "1.5", whiteSpace: "pre-wrap", maxWidth: "90%" }}>
                           {item.description}
                         </div>
                       )}
                     </td>
-                    <td style={{ padding: "16px", fontSize: "12px", color: "#0f172a", textAlign: "center", verticalAlign: "top", fontWeight: 600 }}>
-                      {item.quantity || 1} {item.unit !== "pcs" ? <span style={{ fontSize: "10px", color: "#64748b" }}>{item.unit}</span> : ""}
+                    <td style={{ padding: "16px 0", fontSize: "12px", color: "#334155", textAlign: "center", verticalAlign: "top", borderBottom: "1px dashed #e2e8f0", fontWeight: 600 }}>
+                      {item.quantity || 1} <span style={{ fontSize: "9px", color: "#94a3b8", fontWeight: 500 }}>{item.unit}</span>
                     </td>
-                    <td style={{ padding: "16px", fontSize: "12px", color: "#0f172a", textAlign: "right", verticalAlign: "top" }}>
+                    <td style={{ padding: "16px 0", fontSize: "12px", color: "#334155", textAlign: "right", verticalAlign: "top", borderBottom: "1px dashed #e2e8f0" }}>
                       {(item.unitPrice || 0).toLocaleString(undefined, { minimumFractionDigits: 3 })}
                     </td>
                     {tax > 0 && (
-                      <td style={{ padding: "16px", fontSize: "12px", color: "#475569", textAlign: "right", verticalAlign: "top" }}>
+                      <td style={{ padding: "16px 0", fontSize: "12px", color: "#334155", textAlign: "right", verticalAlign: "top", borderBottom: "1px dashed #e2e8f0" }}>
                         {item.taxAmount ? item.taxAmount.toLocaleString(undefined, { minimumFractionDigits: 3 }) : "-"}
-                        {item.taxRate ? <div style={{ fontSize: "9px", color: "#94a3b8" }}>({item.taxRate}%)</div> : null}
+                        {item.taxRate ? <div style={{ fontSize: "8px", color: "#94a3b8", marginTop: "2px" }}>({item.taxRate}%)</div> : null}
                       </td>
                     )}
-                    <td style={{ padding: "16px", fontSize: "13px", color: "#0f172a", textAlign: "right", verticalAlign: "top", fontWeight: 700 }}>
+                    <td style={{ padding: "16px 0", fontSize: "12px", color: "#0f172a", textAlign: "right", verticalAlign: "top", borderBottom: "1px dashed #e2e8f0", fontWeight: 700 }}>
                       {(item.lineTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 3 })}
                     </td>
                   </tr>
@@ -322,41 +263,41 @@ export const ModernInvoicePage = ({
           </tbody>
         </table>
 
-        {/* Totals Section aligned right */}
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "20px" }}>
-          <div style={{ width: "320px" }}>
-            <table style={{ width: "100%", fontSize: "13px" }}>
+        {/* Totals Breakdown */}
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "24px" }}>
+          <div style={{ width: "300px", backgroundColor: "#ffffff", border: "1px solid #e2e8f0", borderRadius: "12px", padding: "20px", boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)" }}>
+            <table style={{ width: "100%", fontSize: "12px" }}>
               <tbody>
                 <tr>
-                  <td style={{ padding: "8px 0", color: "#475569", fontWeight: 600 }}>Subtotal</td>
-                  <td style={{ padding: "8px 0", textAlign: "right", color: "#0f172a", fontWeight: 600 }}>
+                  <td style={{ padding: "6px 0", color: "#64748b", fontWeight: 500 }}>Subtotal</td>
+                  <td style={{ padding: "6px 0", textAlign: "right", color: "#0f172a", fontWeight: 600 }}>
                     {currency} {subtotal.toLocaleString(undefined, { minimumFractionDigits: 3 })}
                   </td>
                 </tr>
                 {discount > 0 && (
                   <tr>
-                    <td style={{ padding: "8px 0", color: "#ef4444", fontWeight: 600 }}>Discount</td>
-                    <td style={{ padding: "8px 0", textAlign: "right", color: "#ef4444", fontWeight: 600 }}>
+                    <td style={{ padding: "6px 0", color: "#ef4444", fontWeight: 500 }}>Discount</td>
+                    <td style={{ padding: "6px 0", textAlign: "right", color: "#ef4444", fontWeight: 600 }}>
                       - {currency} {discount.toLocaleString(undefined, { minimumFractionDigits: 3 })}
                     </td>
                   </tr>
                 )}
                 {tax > 0 && (
                   <tr>
-                    <td style={{ padding: "8px 0", color: "#475569", fontWeight: 600 }}>Total VAT</td>
-                    <td style={{ padding: "8px 0", textAlign: "right", color: "#0f172a", fontWeight: 600 }}>
+                    <td style={{ padding: "6px 0", color: "#64748b", fontWeight: 500 }}>Total VAT</td>
+                    <td style={{ padding: "6px 0", textAlign: "right", color: "#0f172a", fontWeight: 600 }}>
                       {currency} {tax.toLocaleString(undefined, { minimumFractionDigits: 3 })}
                     </td>
                   </tr>
                 )}
                 <tr>
-                  <td colSpan={2} style={{ padding: "8px 0" }}>
-                    <div style={{ height: "2px", backgroundColor: "#0f172a" }}></div>
+                  <td colSpan={2} style={{ padding: "12px 0" }}>
+                    <div style={{ height: "1px", backgroundColor: "#e2e8f0" }}></div>
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ padding: "12px 0", color: "#0f172a", fontWeight: 800, fontSize: "16px", textTransform: "uppercase" }}>Grand Total</td>
-                  <td style={{ padding: "12px 0", textAlign: "right", color: "#0f172a", fontWeight: 900, fontSize: "18px" }}>
+                  <td style={{ padding: "4px 0", color: "#0f172a", fontWeight: 800, fontSize: "13px", textTransform: "uppercase", letterSpacing: "0.5px" }}>Grand Total</td>
+                  <td style={{ padding: "4px 0", textAlign: "right", color: "#4338ca", fontWeight: 900, fontSize: "16px" }}>
                     {currency} {grandTotal.toLocaleString(undefined, { minimumFractionDigits: 3 })}
                   </td>
                 </tr>
@@ -367,22 +308,29 @@ export const ModernInvoicePage = ({
       </div>
 
       {/* Info Sections: Bank Details, Terms, Notes */}
-      <div style={{ paddingLeft: "48px", paddingRight: "48px", marginTop: "32px", display: "flex", gap: "32px", pageBreakInside: "avoid", zIndex: 1 }}>
+      <div style={{ paddingLeft: "48px", paddingRight: "48px", marginTop: "40px", display: "flex", gap: "32px", pageBreakInside: "avoid", zIndex: 1 }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "24px" }}>
           
           {companyBankAccounts && companyBankAccounts.length > 0 && (
             <div>
-              <h4 style={{ fontSize: "11px", fontWeight: 800, color: "#0f172a", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px 0", borderBottom: "1px solid #e2e8f0", paddingBottom: "4px" }}>
-                Bank Details for Transfer
-              </h4>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <div style={{ width: "16px", height: "16px", borderRadius: "4px", backgroundColor: "#e0e7ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#4338ca" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                </div>
+                <h4 style={{ fontSize: "10px", fontWeight: 800, color: "#1e1b4b", textTransform: "uppercase", letterSpacing: "1px", margin: 0 }}>
+                  Payment Details
+                </h4>
+              </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
                 {companyBankAccounts.map((bank: any, idx: number) => (
-                  <div key={idx} style={{ fontSize: "10px", color: "#475569", backgroundColor: "#f8fafc", padding: "12px", borderRadius: "6px", border: "1px solid #e2e8f0", minWidth: "200px" }}>
-                    <div style={{ fontWeight: 700, color: "#0f172a", marginBottom: "4px", fontSize: "11px" }}>{bank.bankName}</div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}><span>Account Name:</span> <strong style={{color:"#0f172a"}}>{bank.accountName}</strong></div>
-                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}><span>Account No:</span> <strong style={{color:"#0f172a"}}>{bank.accountNumber}</strong></div>
-                    {bank.iban && <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2px" }}><span>IBAN:</span> <strong style={{color:"#0f172a"}}>{bank.iban}</strong></div>}
-                    {bank.swiftCode && <div style={{ display: "flex", justifyContent: "space-between" }}><span>SWIFT:</span> <strong style={{color:"#0f172a"}}>{bank.swiftCode}</strong></div>}
+                  <div key={idx} style={{ backgroundColor: "#ffffff", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0", minWidth: "220px", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
+                    <div style={{ fontWeight: 800, color: "#0f172a", marginBottom: "8px", fontSize: "11px", letterSpacing: "0.5px" }}>{bank.bankName}</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "4px 12px", fontSize: "10px", color: "#64748b" }}>
+                      <span style={{ fontWeight: 600 }}>Name:</span> <span style={{ color: "#0f172a", fontWeight: 500 }}>{bank.accountName}</span>
+                      <span style={{ fontWeight: 600 }}>Account:</span> <span style={{ color: "#0f172a", fontWeight: 500, fontFamily: "monospace", fontSize: "11px" }}>{bank.accountNumber}</span>
+                      {bank.iban && <><span style={{ fontWeight: 600 }}>IBAN:</span> <span style={{ color: "#0f172a", fontWeight: 500, fontFamily: "monospace", fontSize: "11px" }}>{bank.iban}</span></>}
+                      {bank.swiftCode && <><span style={{ fontWeight: 600 }}>SWIFT:</span> <span style={{ color: "#0f172a", fontWeight: 500 }}>{bank.swiftCode}</span></>}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -391,10 +339,10 @@ export const ModernInvoicePage = ({
 
           {notes && (
             <div>
-              <h4 style={{ fontSize: "11px", fontWeight: 800, color: "#0f172a", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px 0", borderBottom: "1px solid #e2e8f0", paddingBottom: "4px" }}>
-                Notes / Instructions
+              <h4 style={{ fontSize: "10px", fontWeight: 800, color: "#1e1b4b", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px 0" }}>
+                Notes
               </h4>
-              <div style={{ fontSize: "11px", color: "#475569", whiteSpace: "pre-wrap", lineHeight: "1.6" }}>
+              <div style={{ fontSize: "10px", color: "#475569", whiteSpace: "pre-wrap", lineHeight: "1.6", backgroundColor: "#ffffff", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0" }}>
                 {notes}
               </div>
             </div>
@@ -402,10 +350,10 @@ export const ModernInvoicePage = ({
 
           {terms && (
             <div>
-              <h4 style={{ fontSize: "11px", fontWeight: 800, color: "#0f172a", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px 0", borderBottom: "1px solid #e2e8f0", paddingBottom: "4px" }}>
+              <h4 style={{ fontSize: "10px", fontWeight: 800, color: "#1e1b4b", textTransform: "uppercase", letterSpacing: "1px", margin: "0 0 8px 0" }}>
                 Terms & Conditions
               </h4>
-              <div style={{ fontSize: "10px", color: "#64748b", whiteSpace: "pre-wrap", lineHeight: "1.5" }}>
+              <div style={{ fontSize: "9px", color: "#64748b", whiteSpace: "pre-wrap", lineHeight: "1.6" }}>
                 {terms}
               </div>
             </div>
@@ -417,40 +365,42 @@ export const ModernInvoicePage = ({
       {/* Footer / QR Verification */}
       <div
         style={{
-          marginTop: "32px",
+          marginTop: "48px",
           paddingLeft: "48px",
           paddingRight: "48px",
           paddingBottom: "32px",
-          paddingTop: "32px",
+          paddingTop: "24px",
           display: "flex",
           alignItems: "flex-end",
           justifyContent: "space-between",
           borderTop: "1px solid #e2e8f0",
           zIndex: 1,
-          pageBreakInside: "avoid"
+          pageBreakInside: "avoid",
+          backgroundColor: "#ffffff"
         }}
       >
-        <div style={{ fontSize: "10px", color: "#94a3b8", maxWidth: "400px", lineHeight: "1.5" }}>
-          <strong>{companyName}</strong><br/>
-          This is a computer-generated document. No signature is required. <br/>
-          For queries related to this invoice, please contact {companyEmail}
+        <div style={{ fontSize: "9px", color: "#94a3b8", maxWidth: "400px", lineHeight: "1.6" }}>
+          <strong style={{ color: "#475569" }}>{companyName}</strong><br/>
+          This is a system-generated document and does not require a physical signature. <br/>
+          For inquiries, please contact <span style={{ color: "#4338ca", fontWeight: 600 }}>{companyEmail}</span>.
         </div>
 
         {qrVerificationUrl && (
           <div style={{ display: "flex", alignItems: "center", gap: "12px", textAlign: "right" }}>
-            <div style={{ fontSize: "9px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600 }}>
+            <div style={{ fontSize: "8px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600 }}>
               Scan to Verify<br />
-              <strong style={{ color: "#0f172a" }}>Authenticity</strong>
+              <strong style={{ color: "#0f172a", fontSize: "10px" }}>Authenticity</strong>
             </div>
             <div
               style={{
-                padding: "6px",
+                padding: "8px",
                 backgroundColor: "white",
                 border: "1px solid #e2e8f0",
-                borderRadius: "8px"
+                borderRadius: "10px",
+                boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
               }}
             >
-              <QRCodeSVG value={qrVerificationUrl} size={48} level="M" />
+              <QRCodeSVG value={qrVerificationUrl} size={42} level="M" />
             </div>
           </div>
         )}
