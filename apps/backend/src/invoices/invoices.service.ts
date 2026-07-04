@@ -91,7 +91,9 @@ export class InvoicesService {
         productId: i.productId,
         serviceItemId: i.serviceItemId,
         sectionTitle: i.sectionTitle,
-        description: i.description || '',
+        description: i.itemType === 'SECTION_HEADING' 
+          ? (i.sectionTitle || 'Section')
+          : (i.description || i.product?.productName || i.serviceItem?.serviceName || i.sectionTitle || 'Item'),
         quantity: i.quantity,
         unit: i.unit,
         unitPrice: i.unitPrice,
