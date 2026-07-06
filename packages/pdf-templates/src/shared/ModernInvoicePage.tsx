@@ -325,37 +325,31 @@ export const ModernInvoicePage = ({
       <div style={{ paddingLeft: "48px", paddingRight: "48px", marginTop: "40px", display: "flex", gap: "32px", pageBreakInside: "avoid", zIndex: 1 }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "24px" }}>
           
-          <div>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
-              <div style={{ width: "16px", height: "16px", borderRadius: "4px", backgroundColor: "#e0e7ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#4338ca" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+          {companyBankAccounts && companyBankAccounts.length > 0 && (
+            <div>
+              <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
+                <div style={{ width: "16px", height: "16px", borderRadius: "4px", backgroundColor: "#e0e7ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#4338ca" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
+                </div>
+                <h4 style={{ fontSize: "10px", fontWeight: 800, color: "#1e1b4b", textTransform: "uppercase", letterSpacing: "1px", margin: 0 }}>
+                  Payment Details
+                </h4>
               </div>
-              <h4 style={{ fontSize: "10px", fontWeight: 800, color: "#1e1b4b", textTransform: "uppercase", letterSpacing: "1px", margin: 0 }}>
-                Bank Account Certificate
-              </h4>
-            </div>
-            <div style={{ backgroundColor: "#ffffff", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
-              <div style={{ fontSize: "10px", color: "#475569", lineHeight: "1.6" }}>
-                This is to certify that Mr./Mrs./Ms.<br/>
-                <strong style={{ color: "#0f172a", fontSize: "11px" }}>OCTONICS INNOVATION CO FOR TECHNICAL AND COMPUTER AND SERVICES</strong><br/>
-                Civil ID: <br/>
-                Maintaining an account with us since <strong style={{ color: "#0f172a" }}>13-11-2025</strong><br/>
-                With the following details:
-              </div>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px", marginTop: "12px", marginBottom: "12px", padding: "12px", backgroundColor: "#f8fafc", borderRadius: "8px" }}>
-                <div><span style={{ fontWeight: 600, color: "#64748b", fontSize: "9px", textTransform: "uppercase" }}>Account Number</span><br/><strong style={{ color: "#0f172a", fontFamily: "monospace", fontSize: "11px" }}>9621507010</strong></div>
-                <div><span style={{ fontWeight: 600, color: "#64748b", fontSize: "9px", textTransform: "uppercase" }}>Account Type</span><br/><strong style={{ color: "#0f172a", fontSize: "11px" }}>C/A - Normal</strong></div>
-                <div><span style={{ fontWeight: 600, color: "#64748b", fontSize: "9px", textTransform: "uppercase" }}>Account Currency</span><br/><strong style={{ color: "#0f172a", fontSize: "11px" }}>Kuwaiti Dinar</strong></div>
-                <div><span style={{ fontWeight: 600, color: "#64748b", fontSize: "9px", textTransform: "uppercase" }}>Swift Code</span><br/><strong style={{ color: "#0f172a", fontSize: "11px" }}>COMBKWKW</strong></div>
-                <div style={{ gridColumn: "span 2" }}><span style={{ fontWeight: 600, color: "#64748b", fontSize: "9px", textTransform: "uppercase" }}>IBAN Number</span><br/><strong style={{ color: "#0f172a", fontFamily: "monospace", fontSize: "11px" }}>KW16COMB0000509621507100414015</strong></div>
-                <div style={{ gridColumn: "span 2" }}><span style={{ fontWeight: 600, color: "#64748b", fontSize: "9px", textTransform: "uppercase" }}>Submitted To</span><br/><strong style={{ color: "#0f172a", fontSize: "11px" }}>Mycon Germany</strong></div>
-              </div>
-              <div style={{ fontSize: "9px", color: "#64748b", lineHeight: "1.5", fontStyle: "italic" }}>
-                Which is in operation up to the certificate date.<br/>
-                This certificate is issued at the request of our customer without any liability or risk on our behalf.
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
+                {companyBankAccounts.map((bank: any, idx: number) => (
+                  <div key={idx} style={{ backgroundColor: "#ffffff", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0", minWidth: "220px", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
+                    <div style={{ fontWeight: 800, color: "#0f172a", marginBottom: "8px", fontSize: "11px", letterSpacing: "0.5px" }}>{bank.bankName}</div>
+                    <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "4px 12px", fontSize: "10px", color: "#64748b" }}>
+                      <span style={{ fontWeight: 600 }}>Name:</span> <span style={{ color: "#0f172a", fontWeight: 500 }}>{bank.accountName}</span>
+                      <span style={{ fontWeight: 600 }}>Account:</span> <span style={{ color: "#0f172a", fontWeight: 500, fontFamily: "monospace", fontSize: "11px" }}>{bank.accountNumber}</span>
+                      {bank.iban && <><span style={{ fontWeight: 600 }}>IBAN:</span> <span style={{ color: "#0f172a", fontWeight: 500, fontFamily: "monospace", fontSize: "11px" }}>{bank.iban}</span></>}
+                      {bank.swiftCode && <><span style={{ fontWeight: 600 }}>SWIFT:</span> <span style={{ color: "#0f172a", fontWeight: 500 }}>{bank.swiftCode}</span></>}
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
+          )}
 
           {notes && (
             <div>
