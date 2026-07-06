@@ -144,7 +144,8 @@ export class InvoicesService {
         },
         customer: true,
         contact: true,
-        quotation: { select: { quotationNumber: true } },
+        quotation: { select: { quotationNumber: true, projectTitle: true } },
+        serviceType: true,
         items: {
           orderBy: { sortOrder: 'asc' },
           include: { product: true, serviceItem: true }

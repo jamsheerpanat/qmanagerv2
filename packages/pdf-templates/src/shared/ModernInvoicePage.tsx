@@ -2,6 +2,8 @@ import React from "react";
 import { QRCodeSVG } from "qrcode.react";
 
 export const ModernInvoicePage = ({
+  projectName = "",
+  sectionName = "",
   invoiceNumber,
   invoiceDate,
   dueDate,
@@ -123,8 +125,20 @@ export const ModernInvoicePage = ({
             </div>
           </div>
           
-          {(dueDate || referenceNumber) && (
-            <div style={{ display: "flex", gap: "24px", textAlign: "right", marginTop: "12px" }}>
+          {(dueDate || referenceNumber || projectName || sectionName) && (
+            <div style={{ display: "flex", gap: "24px", textAlign: "right", marginTop: "12px", justifyContent: "flex-end", flexWrap: "wrap" }}>
+              {projectName && (
+                <div>
+                  <div style={{ fontSize: "8px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Project</div>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "#0f172a" }}>{projectName}</div>
+                </div>
+              )}
+              {sectionName && (
+                <div>
+                  <div style={{ fontSize: "8px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Section</div>
+                  <div style={{ fontSize: "12px", fontWeight: 700, color: "#0f172a" }}>{sectionName}</div>
+                </div>
+              )}
               {dueDate && (
                 <div>
                   <div style={{ fontSize: "8px", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "4px" }}>Due Date</div>

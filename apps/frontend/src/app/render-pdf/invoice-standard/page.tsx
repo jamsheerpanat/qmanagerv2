@@ -89,6 +89,8 @@ function InvoiceStandardRenderPageInner() {
       <FontLoader />
       <div className="pdf-container print:bg-white bg-gray-200 flex flex-col">
         <ModernInvoicePage
+          projectName={data.quotation?.projectTitle || data.projectName || ""}
+          sectionName={data.serviceType?.name || ""}
           invoiceNumber={data.invoiceNumber || "DRAFT"}
           invoiceDate={formattedDate}
           dueDate={formattedDueDate}
