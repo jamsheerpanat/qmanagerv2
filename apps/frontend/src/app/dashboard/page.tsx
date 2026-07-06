@@ -39,11 +39,15 @@ import { format } from "date-fns";
 const STATUS_CLASS: Record<string, string> = {
   DRAFT: "status-draft",
   PENDING_REVIEW: "status-pending",
+  PENDING_APPROVAL: "status-pending",
   APPROVED: "status-approved",
   REJECTED: "status-rejected",
-  CONVERTED: "status-converted",
+  CONVERTED_TO_INVOICE: "status-converted",
   EXPIRED: "status-expired",
-  SENT: "status-review",
+  SENT_TO_CUSTOMER: "status-review",
+  ACCEPTED: "status-approved",
+  REVISED: "status-review",
+  CANCELLED: "status-rejected",
 };
 function StatusPill({ status }: { status: string }) {
   return (

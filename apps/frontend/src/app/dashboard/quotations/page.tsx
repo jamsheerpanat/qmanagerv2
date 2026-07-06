@@ -18,11 +18,15 @@ import Link from "next/link";
 const STATUS_META: Record<string, { label: string; cls: string }> = {
   DRAFT: { label: "Draft", cls: "status-draft" },
   PENDING_REVIEW: { label: "Pending Review", cls: "status-pending" },
+  PENDING_APPROVAL: { label: "Pending Approval", cls: "status-pending" },
   APPROVED: { label: "Approved", cls: "status-approved" },
   REJECTED: { label: "Rejected", cls: "status-rejected" },
-  CONVERTED: { label: "Converted", cls: "status-converted" },
+  CONVERTED_TO_INVOICE: { label: "Invoiced", cls: "status-converted" },
   EXPIRED: { label: "Expired", cls: "status-expired" },
-  SENT: { label: "Sent", cls: "status-review" },
+  SENT_TO_CUSTOMER: { label: "Sent", cls: "status-review" },
+  ACCEPTED: { label: "Accepted", cls: "status-approved" },
+  REVISED: { label: "Revised", cls: "status-review" },
+  CANCELLED: { label: "Cancelled", cls: "status-rejected" },
 };
 
 function StatusPill({ status }: { status: string }) {
@@ -80,9 +84,12 @@ export default function QuotationsPage() {
     "ALL",
     "DRAFT",
     "PENDING_REVIEW",
+    "PENDING_APPROVAL",
     "APPROVED",
-    "SENT",
-    "CONVERTED",
+    "SENT_TO_CUSTOMER",
+    "CONVERTED_TO_INVOICE",
+    "ACCEPTED",
+    "REVISED",
     "REJECTED",
     "EXPIRED",
   ];

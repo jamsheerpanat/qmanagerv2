@@ -580,7 +580,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                 
                 <div className="pt-4 border-t flex justify-between items-center">
                   <div className="text-sm text-gray-500">
-                    Cannot find what you're looking for?
+                    Cannot find what you&apos;re looking for?
                   </div>
                   <Button variant="outline" onClick={() => setIsCreatingProduct(true)}>
                     Create New {selectedTab === 'PRODUCT' ? 'Product' : 'Service'}
