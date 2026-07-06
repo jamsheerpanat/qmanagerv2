@@ -38,6 +38,18 @@ export const ModernInvoicePage = ({
   qrVerificationUrl = "",
 }: any) => {
   
+  const displayBankAccounts = companyBankAccounts && companyBankAccounts.length > 0 
+    ? companyBankAccounts 
+    : [
+        {
+          bankName: "Commercial Bank of Kuwait",
+          accountName: "OCTONICS INNOVATION CO FOR TECHNICAL AND COMPUTER AND SERVICES",
+          accountNumber: "9621507010",
+          iban: "KW16COMB0000509621507100414015",
+          swiftCode: "COMBKWKW"
+        }
+      ];
+
   // Status Colors
   const isPaid = balanceAmount <= 0.01 && paidAmount > 0;
   
@@ -325,7 +337,7 @@ export const ModernInvoicePage = ({
       <div style={{ paddingLeft: "48px", paddingRight: "48px", marginTop: "40px", display: "flex", gap: "32px", pageBreakInside: "avoid", zIndex: 1 }}>
         <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "24px" }}>
           
-          {companyBankAccounts && companyBankAccounts.length > 0 && (
+          {displayBankAccounts && displayBankAccounts.length > 0 && (
             <div>
               <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "12px" }}>
                 <div style={{ width: "16px", height: "16px", borderRadius: "4px", backgroundColor: "#e0e7ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -336,7 +348,7 @@ export const ModernInvoicePage = ({
                 </h4>
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "16px" }}>
-                {companyBankAccounts.map((bank: any, idx: number) => (
+                {displayBankAccounts.map((bank: any, idx: number) => (
                   <div key={idx} style={{ backgroundColor: "#ffffff", padding: "16px", borderRadius: "12px", border: "1px solid #e2e8f0", minWidth: "220px", boxShadow: "0 1px 2px 0 rgba(0, 0, 0, 0.05)" }}>
                     <div style={{ fontWeight: 800, color: "#0f172a", marginBottom: "8px", fontSize: "11px", letterSpacing: "0.5px" }}>{bank.bankName}</div>
                     <div style={{ display: "grid", gridTemplateColumns: "auto 1fr", gap: "4px 12px", fontSize: "10px", color: "#64748b" }}>
