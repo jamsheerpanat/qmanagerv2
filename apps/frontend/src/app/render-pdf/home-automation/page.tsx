@@ -32,7 +32,7 @@ function HomeAutomationRenderPageInner() {
     const load = async () => {
       if (!quotationId) {
         // Use rich sample data for preview/testing
-        setData(getSampleData(docId));
+        setData(getSampleData());
         setLoading(false);
         return;
       }
@@ -45,10 +45,10 @@ function HomeAutomationRenderPageInner() {
           const json = await res.json();
           setData(transformQuotation(json, docId));
         } else {
-          setData(getSampleData(docId));
+          setData(getSampleData());
         }
       } catch {
-        setData(getSampleData(docId));
+        setData(getSampleData());
       } finally {
         setLoading(false);
       }

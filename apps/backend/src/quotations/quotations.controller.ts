@@ -134,15 +134,14 @@ export class QuotationsController {
     @Body('recipientEmail') email: string,
     @Req() req: any,
   ) {
-    return this.quotationsService.sendQuotation(id, email, req.user?.id);
+    return this.quotationsService.sendQuotation(id, email);
   }
 
   @RequirePermissions('quotations.generate_pdf')
   @Post(':id/generate-pdf')
   async generatePdf(@Param('id') id: string, @Req() req: any, @Res() res: any) {
     const pdfBuffer = await this.quotationsService.generatePdf(
-      id,
-      req.user?.id,
+      id
     );
     res.set({
       'Content-Type': 'application/pdf',
@@ -155,7 +154,7 @@ export class QuotationsController {
   @RequirePermissions('quotations.send')
   @Post(':id/generate-share-link')
   generateShareLink(@Param('id') id: string, @Req() req: any) {
-    return this.quotationsService.generateShareLink(id, req.user?.id);
+    return this.quotationsService.generateShareLink(id);
   }
 
   @RequirePermissions('quotations.view')

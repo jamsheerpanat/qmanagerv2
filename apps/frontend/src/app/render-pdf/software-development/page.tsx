@@ -27,7 +27,7 @@ function SoftwareDevRenderPageInner() {
   useEffect(() => {
     const load = async () => {
       if (!quotationId) {
-        setData(getSampleData(docId));
+        setData(getSampleData());
         setLoading(false);
         return;
       }
@@ -39,10 +39,10 @@ function SoftwareDevRenderPageInner() {
         setData(
           res.ok
             ? transformQuotation(await res.json(), docId)
-            : getSampleData(docId),
+            : getSampleData(),
         );
       } catch {
-        setData(getSampleData(docId));
+        setData(getSampleData());
       } finally {
         setLoading(false);
       }
