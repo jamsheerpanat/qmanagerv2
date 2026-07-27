@@ -11,7 +11,7 @@ npx ts-node seed-terms-live.ts
 pm2 restart qmanager2-api
 cd ../frontend
 echo "NEXT_PUBLIC_APP_URL=https://qmanager2.octolabs.cloud" > .env
-npm install
-npm run build
+pnpm install
+pnpm run build
 pm2 restart qmanager2-web
 echo "Successfully deployed!"
