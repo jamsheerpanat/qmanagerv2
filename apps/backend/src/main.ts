@@ -5,38 +5,44 @@ import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { json, urlencoded } from 'express';
 
+import * as fs from 'fs';
+
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bodyParser: false });
+  try {
+    const app = await NestFactory.create(AppModule, { bodyParser: false });
 
-  app.use(json({ limit: '50mb' }));
-  app.use(urlencoded({ extended: true, limit: '50mb' }));
+    app.use(json({ limit: '50mb' }));
+    app.use(urlencoded({ extended: true, limit: '50mb' }));
 
-  // Security Hardening
-  const httpAdapter = app.getHttpAdapter().getInstance();
-  httpAdapter.set('trust proxy', 1);
-  app.use(helmet());
-  app.enableCors({
-    origin: '*', // For production, this should be restricted
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
-  });
+    // Security Hardening
+    const httpAdapter = app.getHttpAdapter().getInstance();
+    httpAdapter.set('trust proxy', 1);
+    app.use(helmet());
+    app.enableCors({
+      origin: '*', // For production, this should be restricted
+      methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+      credentials: true,
+    });
 
-  app.use(
-    rateLimit({
-      windowMs: 15 * 60 * 1000, // 15 minutes
-      max: 1000, // limit each IP to 1000 requests per windowMs
-      message: 'Too many requests from this IP, please try again later.',
-    }),
-  );
+    app.use(
+      rateLimit({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        max: 1000, // limit each IP to 1000 requests per windowMs
+        message: 'Too many requests from this IP, please try again later.',
+      }),
+    );
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-    }),
-  );
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+      }),
+    );
 
-  const port = process.env.PORT || 3001;
-  await app.listen(port);
+    const port = process.env.PORT || 3001;
+    await app.listen(port);
+  } catch (err) {
+    fs.writeFileSync('crash.log', String(err) + (err.stack ? '\n' + err.stack : ''));
+  }
 }
 bootstrap();
