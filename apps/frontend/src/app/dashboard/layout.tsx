@@ -194,7 +194,7 @@ export default function DashboardLayout({
   const { user, logout } = useAuthStore();
   const router = useRouter();
   const pathname = usePathname();
-  const [searchOpen, setSearchOpen] = useState(false);
+  const [] = useState(false);
 
   useEffect(() => {
     if (!user) router.push("/login");

@@ -24,7 +24,13 @@ export class PortalService {
       where: { token },
       include: {
         quotation: {
-          include: { items: true, company: true, customer: true, terms: true, serviceType: true },
+          include: {
+            items: true,
+            company: true,
+            customer: true,
+            terms: true,
+            serviceType: true,
+          },
         },
       },
     });

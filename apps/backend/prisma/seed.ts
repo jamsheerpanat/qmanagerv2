@@ -336,7 +336,13 @@ async function main() {
     { name: 'CCTV Cameras', stId: cctvST?.id },
     { name: 'Software Licenses', stId: swDevST?.id },
     { name: 'Consulting Hours', stId: swDevST?.id },
+    { name: 'Hardware Devices', stId: swDevST?.id },
+    { name: 'Printers & Scanners', stId: swDevST?.id },
+    { name: 'Cloud Subscriptions', stId: swDevST?.id },
+    { name: 'UI/UX Design', stId: swDevST?.id },
+    { name: 'Maintenance Contracts', stId: swDevST?.id },
   ];
+
 
   const pCatsMap = new Map<string, any>();
   for (const pc of productCats) {

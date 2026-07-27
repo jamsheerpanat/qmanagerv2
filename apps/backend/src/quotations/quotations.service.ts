@@ -49,7 +49,7 @@ export class QuotationsService {
 
     const prefix = company.quotationPrefix || 'QTN';
     const year = new Date().getFullYear();
-    
+
     // Find the latest quotation to determine the next sequence number safely
     const lastQuotation = await this.prisma.quotation.findFirst({
       where: {
@@ -139,9 +139,9 @@ export class QuotationsService {
         serviceType: true,
         company: true,
         branch: true,
-        items: { 
+        items: {
           orderBy: { sortOrder: 'asc' },
-          include: { product: true, serviceItem: true }
+          include: { product: true, serviceItem: true },
         },
         scopes: { orderBy: { sortOrder: 'asc' } },
         terms: { orderBy: { sortOrder: 'asc' }, include: { category: true } },
@@ -550,7 +550,7 @@ export class QuotationsService {
     };
   }
 
-  async sendQuotation(id: string, recipientEmail: string, userId: string) {
+  async sendQuotation(id: string, recipientEmail: string) {
     const q = await this.findOne(id);
     const token = crypto.randomBytes(32).toString('hex');
 
@@ -611,7 +611,10 @@ export class QuotationsService {
         });
         this.logger.log(`Quotation email sent to ${recipientEmail}`);
       } catch (err) {
-        this.logger.error(`Failed to send SMTP email to ${recipientEmail}`, err instanceof Error ? err.stack : String(err));
+        this.logger.error(
+          `Failed to send SMTP email to ${recipientEmail}`,
+          err instanceof Error ? err.stack : String(err),
+        );
       }
     } else {
       this.logger.warn(
@@ -622,7 +625,7 @@ export class QuotationsService {
     return { success: true, token };
   }
 
-  async generateShareLink(id: string, userId: string) {
+  async generateShareLink(id: string) {
     const q = await this.findOne(id);
     const token = crypto.randomBytes(32).toString('hex');
 
@@ -654,7 +657,7 @@ export class QuotationsService {
     return { success: true, token, portalLink };
   }
 
-  async generatePdf(id: string, userId: string): Promise<Buffer> {
+  async generatePdf(id: string): Promise<Buffer> {
     const q = await this.findOne(id);
 
     // Call the synchronous PDF generation

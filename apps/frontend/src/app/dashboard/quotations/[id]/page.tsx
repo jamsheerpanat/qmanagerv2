@@ -43,7 +43,7 @@ export default function QuotationDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { user } = useAuthStore();
+  const { } = useAuthStore();
   const [quotation, setQuotation] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("details");
@@ -101,7 +101,7 @@ export default function QuotationDetailPage({
   }, [activeTab, quotation?.parentQuotationId, id, diffData]);
 
 
-  async function handleAction(action: string, payload: any = {}) {
+  async function handleAction(action: string, ) {
     try {
       if (action === "submit") {
         await api.post(`/quotations/${id}/submit-for-approval`);

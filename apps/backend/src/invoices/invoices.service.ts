@@ -55,7 +55,10 @@ export class InvoicesService {
   ) {
     const q = await this.prisma.quotation.findUnique({
       where: { id: quotationId },
-      include: { items: { include: { product: true, serviceItem: true } }, terms: true },
+      include: {
+        items: { include: { product: true, serviceItem: true } },
+        terms: true,
+      },
     });
 
     if (!q) throw new NotFoundException('Quotation not found');
@@ -91,9 +94,14 @@ export class InvoicesService {
         productId: i.productId,
         serviceItemId: i.serviceItemId,
         sectionTitle: i.sectionTitle,
-        description: i.itemType === 'SECTION_HEADING' 
-          ? (i.sectionTitle || 'Section')
-          : (i.description || i.product?.productName || i.serviceItem?.serviceName || i.sectionTitle || 'Item'),
+        description:
+          i.itemType === 'SECTION_HEADING'
+            ? i.sectionTitle || 'Section'
+            : i.description ||
+              i.product?.productName ||
+              i.serviceItem?.serviceName ||
+              i.sectionTitle ||
+              'Item',
         quantity: i.quantity,
         unit: i.unit,
         unitPrice: i.unitPrice,
@@ -139,8 +147,8 @@ export class InvoicesService {
       include: {
         company: {
           include: {
-            bankAccounts: true
-          }
+            bankAccounts: true,
+          },
         },
         customer: true,
         contact: true,
@@ -148,7 +156,7 @@ export class InvoicesService {
         serviceType: true,
         items: {
           orderBy: { sortOrder: 'asc' },
-          include: { product: true, serviceItem: true }
+          include: { product: true, serviceItem: true },
         },
         payments: {
           include: { receipt: true },
@@ -169,7 +177,7 @@ export class InvoicesService {
       );
     }
 
-    const { items, ...updateData } = dto;
+    const { ...updateData } = dto;
     await this.prisma.invoice.update({
       where: { id },
       data: updateData as any,
@@ -349,7 +357,7 @@ export class InvoicesService {
     return this.findOne(id);
   }
 
-  async generatePdf(id: string, userId: string): Promise<Buffer> {
+  async generatePdf(id: string): Promise<Buffer> {
     const inv = await this.findOne(id);
 
     const pdfBuffer = await this.pdfService.generatePdfSync(

@@ -72,7 +72,7 @@ export const ITInfraCoverPage = ({
       style={{
         position: "relative",
         zIndex: 10,
-        height: "297mm",
+        height: "100%",
         padding: "16mm 18mm",
         display: "flex",
         flexDirection: "column",

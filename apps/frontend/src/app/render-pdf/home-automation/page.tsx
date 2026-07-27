@@ -212,7 +212,7 @@ function transformQuotation(q: any, docId: string) {
 }
 
 /** Rich sample data for preview mode */
-function getSampleData(docId: string) {
+function getSampleData() {
   return {
     projectName: "Villa Automation — Al Nuzha Residence",
     customerName: "Mr. Khalid Al-Rashidi",

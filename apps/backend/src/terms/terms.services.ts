@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -65,7 +65,7 @@ export class TermsGroupsService {
   }
 
   async create(data: any) {
-    const { templateIds, id, ...rest } = data;
+    const { templateIds, ...rest } = data;
     if (rest.id === '') delete rest.id;
     return this.prisma.termsGroup.create({
       data: {
@@ -81,7 +81,7 @@ export class TermsGroupsService {
     const { templateIds, ...rest } = data;
     const updateData: any = { ...rest };
     if (updateData.id) delete updateData.id;
-    
+
     if (templateIds) {
       updateData.templates = {
         set: templateIds.map((tid: string) => ({ id: tid })),

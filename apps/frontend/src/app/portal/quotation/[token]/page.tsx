@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef, use } from "react";
 import SignatureCanvas from "react-signature-canvas";
 import { format } from "date-fns";
-import { CheckCircle, XCircle, Shield, Sparkles, ChevronDown, Hash, Calendar, Clock, MapPin, Phone, Mail, Building2, FileText, RotateCcw } from "lucide-react";
+import { CheckCircle, XCircle, Shield, ChevronDown, MapPin, RotateCcw } from "lucide-react";
 import { getTemplateData } from "./templateData";
 import { t, type Lang } from "./translations";
 
@@ -212,7 +212,7 @@ export default function P({ params }: { params: Promise<{ token: string }> }) {
           <div key={si} className="mb-4">
             {(sections.length>1||sec.title!=="General")&&<div className="text-xs font-bold text-sky-500 tracking-wide mb-2 flex items-center gap-2"><span className="w-1 h-4 bg-sky-500 rounded-full"/>{sec.title}</div>}
             <div className="space-y-2">
-              {sec.items.map((it:any,ii:number)=>(
+              {sec.items.map((it:any,)=>(
                 <div key={it.id} className="glass rounded-xl p-3.5 hover:border-sky-500/20 transition-all">
                   <div className="flex justify-between items-start gap-3">
                     <div className="flex-1 min-w-0">

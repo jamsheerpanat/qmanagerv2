@@ -11,7 +11,15 @@ import {
 } from './terms.controllers';
 
 @Module({
-  controllers: [TermsCategoriesController, TermsTemplatesController, TermsGroupsController],
-  providers: [TermsCategoriesService, TermsTemplatesService, TermsGroupsService],
+  controllers: [
+    TermsCategoriesController,
+    TermsTemplatesController,
+    TermsGroupsController,
+  ],
+  providers: [
+    TermsCategoriesService,
+    TermsTemplatesService,
+    TermsGroupsService,
+  ],
 })
 export class TermsModule {}

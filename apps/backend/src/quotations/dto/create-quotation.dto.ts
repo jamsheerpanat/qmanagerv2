@@ -1,4 +1,3 @@
-import { Type } from 'class-transformer';
 import {
   IsString,
   IsOptional,
@@ -9,7 +8,7 @@ import {
   IsArray,
   ValidateNested,
 } from 'class-validator';
-import { QuotationStatus, ItemType, DiscountType } from '@prisma/client';
+import { ItemType, DiscountType } from '@prisma/client';
 
 export class CreateQuotationDto {
   @IsUUID()

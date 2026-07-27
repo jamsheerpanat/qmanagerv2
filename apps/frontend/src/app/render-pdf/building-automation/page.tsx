@@ -194,7 +194,7 @@ function transformQuotation(q: any, docId: string) {
   };
 }
 
-function getSampleData(docId: string) {
+function getSampleData() {
   const today = new Date().toLocaleDateString("en-GB", {
     day: "2-digit",
     month: "long",
