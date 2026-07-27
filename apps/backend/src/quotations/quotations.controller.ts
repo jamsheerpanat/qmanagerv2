@@ -140,9 +140,7 @@ export class QuotationsController {
   @RequirePermissions('quotations.generate_pdf')
   @Post(':id/generate-pdf')
   async generatePdf(@Param('id') id: string, @Req() req: any, @Res() res: any) {
-    const pdfBuffer = await this.quotationsService.generatePdf(
-      id
-    );
+    const pdfBuffer = await this.quotationsService.generatePdf(id);
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename=quotation-${id}.pdf`,
