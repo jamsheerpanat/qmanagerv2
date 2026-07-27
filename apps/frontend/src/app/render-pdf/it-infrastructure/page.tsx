@@ -72,7 +72,7 @@ function ITInfraRenderPageInner() {
     );
   if (!data) return null;
 
-  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}`;
+  const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/portal/quotation/${data.token || data.id}`;
 
   return (
     <>
