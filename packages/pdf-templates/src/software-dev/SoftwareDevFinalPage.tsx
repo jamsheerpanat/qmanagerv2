@@ -668,7 +668,6 @@ export const SoftwareDevFinalPage = ({
                 background: "linear-gradient(135deg,#1e1b4b,#312e81)",
                 borderRadius: "10px",
                 padding: "14px",
-                marginTop: "auto",
               }}
             >
               <div

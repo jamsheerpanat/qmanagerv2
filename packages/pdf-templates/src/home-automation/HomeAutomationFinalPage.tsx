@@ -731,13 +731,11 @@ export const HomeAutomationFinalPage = ({
               </div>
             </div>
 
-            {/* Final company footer */}
             <div
               style={{
                 background: "linear-gradient(135deg,#0f172a,#1e3a5f)",
                 borderRadius: "10px",
                 padding: "14px",
-                marginTop: "auto",
               }}
             >
               <div

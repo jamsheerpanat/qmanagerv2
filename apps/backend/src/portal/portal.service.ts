@@ -20,7 +20,7 @@ export class PortalService {
     ipAddress?: string,
     userAgent?: string,
   ) {
-    const share = await this.prisma.quotationShare.findUnique({
+    let share: any = await this.prisma.quotationShare.findUnique({
       where: { token },
       include: {
         quotation: {
@@ -35,7 +35,37 @@ export class PortalService {
       },
     });
 
-    if (!share) throw new NotFoundException('Invalid or expired link');
+    if (!share) {
+      const quotation = await this.prisma.quotation.findUnique({
+        where: { id: token },
+        include: {
+          items: true,
+          company: true,
+          customer: true,
+          terms: true,
+          serviceType: true,
+        },
+      });
+
+      if (!quotation) throw new NotFoundException('Invalid or expired link');
+
+      await this.notificationsService.createNotification({
+        companyId: quotation.companyId,
+        title: 'Quotation Viewed via QR',
+        message: `Quotation ${quotation.quotationNumber} was viewed via document QR code.`,
+        type: NotificationType.QUOTATION,
+        referenceId: quotation.id,
+      });
+
+      return {
+        id: 'qr-scan-mock-share',
+        token: quotation.id,
+        quotationId: quotation.id,
+        quotation,
+        recipientEmail: '',
+        sentAt: quotation.createdAt,
+      };
+    }
 
     if (share.expiresAt && share.expiresAt < new Date()) {
       throw new ForbiddenException('This link has expired');
@@ -162,7 +192,7 @@ export class PortalService {
     ipAddress?: string,
     userAgent?: string,
   ) {
-    const share = await this.prisma.invoiceShare.findUnique({
+    let share: any = await this.prisma.invoiceShare.findUnique({
       where: { token },
       include: {
         invoice: {
@@ -176,7 +206,36 @@ export class PortalService {
       },
     });
 
-    if (!share) throw new NotFoundException('Invalid or expired link');
+    if (!share) {
+      const invoice = await this.prisma.invoice.findUnique({
+        where: { id: token },
+        include: {
+          items: true,
+          company: true,
+          customer: true,
+          payments: { orderBy: { paymentDate: 'desc' } },
+        },
+      });
+
+      if (!invoice) throw new NotFoundException('Invalid or expired link');
+
+      await this.notificationsService.createNotification({
+        companyId: invoice.companyId,
+        title: 'Invoice Viewed via QR',
+        message: `Invoice ${invoice.invoiceNumber} was viewed via document QR code.`,
+        type: NotificationType.INVOICE,
+        referenceId: invoice.id,
+      });
+
+      return {
+        id: 'qr-scan-mock-share',
+        token: invoice.id,
+        invoiceId: invoice.id,
+        invoice,
+        recipientEmail: '',
+        sentAt: invoice.createdAt,
+      };
+    }
 
     const updateData: any = { viewedAt: new Date(), lastViewedAt: new Date() };
     if (!share.firstViewedAt) updateData.firstViewedAt = new Date();

@@ -665,7 +665,6 @@ export const BuildingAutomationFinalPage = ({
                 background: "linear-gradient(135deg,#0c2340,#0c3560)",
                 borderRadius: "10px",
                 padding: "14px",
-                marginTop: "auto",
               }}
             >
               <div

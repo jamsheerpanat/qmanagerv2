@@ -624,7 +624,6 @@ export const ITInfraFinalPage = ({
                 background: "linear-gradient(135deg,#0c1a2e,#0c2d50)",
                 borderRadius: "10px",
                 padding: "14px",
-                marginTop: "auto",
               }}
             >
               <div
