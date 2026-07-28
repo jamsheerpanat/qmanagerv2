@@ -271,16 +271,16 @@ export const ModernInvoicePage = ({
                       {item.quantity || 1} <span style={{ fontSize: "9px", color: "#94a3b8", fontWeight: 500 }}>{item.unit}</span>
                     </td>
                     <td style={{ padding: "16px 0", fontSize: "12px", color: "#334155", textAlign: "right", verticalAlign: "top", borderBottom: "1px dashed #e2e8f0" }}>
-                      {(item.unitPrice || 0).toLocaleString(undefined, { minimumFractionDigits: 3 })}
+                      {(item.unitPrice || 0).toLocaleString(undefined, { minimumFractionDigits: 3 })} <span style={{ fontSize: "9px", color: "#94a3b8", marginLeft: "4px" }}>{currency}</span>
                     </td>
                     {tax > 0 && (
                       <td style={{ padding: "16px 0", fontSize: "12px", color: "#334155", textAlign: "right", verticalAlign: "top", borderBottom: "1px dashed #e2e8f0" }}>
-                        {item.taxAmount ? item.taxAmount.toLocaleString(undefined, { minimumFractionDigits: 3 }) : "-"}
+                        {item.taxAmount ? item.taxAmount.toLocaleString(undefined, { minimumFractionDigits: 3 }) : "-"} {item.taxAmount ? <span style={{ fontSize: "9px", color: "#94a3b8", marginLeft: "4px" }}>{currency}</span> : null}
                         {item.taxRate ? <div style={{ fontSize: "8px", color: "#94a3b8", marginTop: "2px" }}>({item.taxRate}%)</div> : null}
                       </td>
                     )}
                     <td style={{ padding: "16px 0", fontSize: "12px", color: "#0f172a", textAlign: "right", verticalAlign: "top", borderBottom: "1px dashed #e2e8f0", fontWeight: 700 }}>
-                      {(item.lineTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 3 })}
+                      {(item.lineTotal || 0).toLocaleString(undefined, { minimumFractionDigits: 3 })} <span style={{ fontSize: "9px", color: "#94a3b8", marginLeft: "4px" }}>{currency}</span>
                     </td>
                   </tr>
                 );
@@ -392,41 +392,48 @@ export const ModernInvoicePage = ({
       <div
         style={{
           marginTop: "48px",
-          paddingLeft: "48px",
-          paddingRight: "48px",
-          paddingBottom: "32px",
-          paddingTop: "24px",
+          marginLeft: "48px",
+          marginRight: "48px",
+          marginBottom: "32px",
+          padding: "24px",
           display: "flex",
-          alignItems: "flex-end",
+          alignItems: "center",
           justifyContent: "space-between",
-          borderTop: "1px solid #e2e8f0",
+          background: "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)",
+          borderRadius: "16px",
+          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
           zIndex: 1,
           pageBreakInside: "avoid",
-          backgroundColor: "#ffffff"
+          color: "#ffffff"
         }}
       >
-        <div style={{ fontSize: "9px", color: "#94a3b8", maxWidth: "400px", lineHeight: "1.6" }}>
-          <strong style={{ color: "#475569" }}>{companyName}</strong><br/>
-          This is a system-generated document and does not require a physical signature. <br/>
-          For inquiries, please contact <span style={{ color: "#4338ca", fontWeight: 600 }}>{companyEmail}</span>.
+        <div style={{ fontSize: "10px", color: "#cbd5e1", maxWidth: "400px", lineHeight: "1.6" }}>
+          <strong style={{ color: "#f8fafc", fontSize: "12px", letterSpacing: "0.5px" }}>{companyName}</strong><br/>
+          <div style={{ marginTop: "6px" }}>
+            This is a system-generated document and does not require a physical signature. <br/>
+            For inquiries, please contact <span style={{ color: "#38bdf8", fontWeight: 600 }}>{companyEmail}</span>.
+          </div>
         </div>
 
         {qrVerificationUrl && (
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", textAlign: "right" }}>
-            <div style={{ fontSize: "8px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "16px", textAlign: "right" }}>
+            <div style={{ fontSize: "9px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "1px", fontWeight: 600 }}>
               Scan to Verify<br />
-              <strong style={{ color: "#0f172a", fontSize: "10px" }}>Authenticity</strong>
+              <strong style={{ color: "#f8fafc", fontSize: "11px" }}>Authenticity</strong>
             </div>
             <div
               style={{
                 padding: "8px",
-                backgroundColor: "white",
-                border: "1px solid #e2e8f0",
-                borderRadius: "10px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.02)"
+                backgroundColor: "rgba(255, 255, 255, 1)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                borderRadius: "12px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)"
               }}
             >
-              <QRCodeSVG value={qrVerificationUrl} size={42} level="M" />
+              <QRCodeSVG value={qrVerificationUrl} size={50} level="M" />
             </div>
           </div>
         )}

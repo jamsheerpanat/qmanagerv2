@@ -78,8 +78,8 @@ export const SoftwareDevQuotationPage = ({
                   <td style={cell({ textAlign: "center", color: "#0f172a", fontWeight: "700", fontSize: "7px" })}>
                     {item.quantity || 0}<div style={{ fontSize: "5px", color: "#94a3b8", fontWeight: "400" }}>{item.unit || "pcs"}</div>
                   </td>
-                  <td style={cell({ textAlign: "right", color: "#475569", fontSize: "7px", fontVariantNumeric: "tabular-nums" })}>{fmt(item.unitPrice)}</td>
-                  <td style={cell({ textAlign: "right", fontWeight: "700", color: "#0f172a", fontSize: "7px", fontVariantNumeric: "tabular-nums" })}>{fmt(lineTotal)}</td>
+                  <td style={cell({ textAlign: "right", color: "#475569", fontSize: "7px", fontVariantNumeric: "tabular-nums" })}>{fmt(item.unitPrice)} <span style={{ fontSize: "5px", color: "#94a3b8" }}>{currency}</span></td>
+                  <td style={cell({ textAlign: "right", fontWeight: "700", color: "#0f172a", fontSize: "7px", fontVariantNumeric: "tabular-nums" })}>{fmt(lineTotal)} <span style={{ fontSize: "5px", color: "#94a3b8" }}>{currency}</span></td>
                 </tr>
               );
             })}

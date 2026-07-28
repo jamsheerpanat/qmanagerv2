@@ -332,7 +332,7 @@ export const HomeAutomationQuotationPage = ({
                       fontVariantNumeric: "tabular-nums",
                     })}
                   >
-                    {fmt(item.unitPrice)}
+                    {fmt(item.unitPrice)} <span style={{ fontSize: "5px", color: "#94a3b8" }}>{currency}</span>
                   </td>
 
                   {/* Total */}
@@ -345,7 +345,7 @@ export const HomeAutomationQuotationPage = ({
                       fontVariantNumeric: "tabular-nums",
                     })}
                   >
-                    {fmt(lineTotal)}
+                    {fmt(lineTotal)} <span style={{ fontSize: "5px", color: "#94a3b8" }}>{currency}</span>
                   </td>
                 </tr>
               );
