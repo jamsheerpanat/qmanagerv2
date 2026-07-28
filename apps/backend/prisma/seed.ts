@@ -226,6 +226,31 @@ async function main() {
       slug: 'general-trading',
       defaultQuotationTemplateId: templatesMap.get('General Trading Quotation'),
     },
+    {
+      name: 'Audio Visual Systems',
+      slug: 'audio-visual-systems',
+      defaultQuotationTemplateId: templatesMap.get('IT Infrastructure Proposal'),
+    },
+    {
+      name: 'Fire Alarm Systems',
+      slug: 'fire-alarm-systems',
+      defaultQuotationTemplateId: templatesMap.get('IT Infrastructure Proposal'),
+    },
+    {
+      name: 'Networking & Wi-Fi',
+      slug: 'networking-wifi',
+      defaultQuotationTemplateId: templatesMap.get('IT Infrastructure Proposal'),
+    },
+    {
+      name: 'Digital Marketing',
+      slug: 'digital-marketing',
+      defaultQuotationTemplateId: templatesMap.get('Software Development Proposal'),
+    },
+    {
+      name: 'Electrical Works',
+      slug: 'electrical-works',
+      defaultQuotationTemplateId: templatesMap.get('AMC / Maintenance Proposal'),
+    },
   ];
 
   for (const st of serviceTypes) {
@@ -332,9 +357,19 @@ async function main() {
 
   const productCats = [
     { name: 'Smart Home Devices', stId: smartHomeST?.id },
+    { name: 'Lighting Control', stId: smartHomeST?.id },
+    { name: 'Smart Locks & Sensors', stId: smartHomeST?.id },
     { name: 'Network Switches', stId: itInfraST?.id },
+    { name: 'Network Cables & Accessories', stId: itInfraST?.id },
+    { name: 'Server Racks & Cabinets', stId: itInfraST?.id },
+    { name: 'Audio Visual Equipment', stId: itInfraST?.id },
     { name: 'CCTV Cameras', stId: cctvST?.id },
+    { name: 'Access Control Systems', stId: cctvST?.id },
+    { name: 'NVR & Storage', stId: cctvST?.id },
+    { name: 'Video Intercom', stId: cctvST?.id },
     { name: 'Software Licenses', stId: swDevST?.id },
+    { name: 'Web Hosting & Domains', stId: swDevST?.id },
+    { name: 'API Integrations', stId: swDevST?.id },
     { name: 'Consulting Hours', stId: swDevST?.id },
     { name: 'Hardware Devices', stId: swDevST?.id },
     { name: 'Printers & Scanners', stId: swDevST?.id },
