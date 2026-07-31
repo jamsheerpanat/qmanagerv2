@@ -231,10 +231,11 @@ export const ModernInvoicePage = ({
           <thead>
             <tr>
               <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", borderBottom: "2px solid #e2e8f0" }}>Description</th>
-              <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "center", borderBottom: "2px solid #e2e8f0", width: "10%" }}>Qty</th>
-              <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "right", borderBottom: "2px solid #e2e8f0", width: "15%" }}>Price</th>
-              {tax > 0 && <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "right", borderBottom: "2px solid #e2e8f0", width: "15%" }}>VAT</th>}
-              <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "right", borderBottom: "2px solid #e2e8f0", width: "15%" }}>Total</th>
+              <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "center", borderBottom: "2px solid #e2e8f0", width: "8%" }}>Qty</th>
+              <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "right", borderBottom: "2px solid #e2e8f0", width: "12%" }}>Price</th>
+              <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "right", borderBottom: "2px solid #e2e8f0", width: "12%" }}>Discount</th>
+              {tax > 0 && <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "right", borderBottom: "2px solid #e2e8f0", width: "12%" }}>VAT</th>}
+              <th style={{ padding: "0 0 12px 0", color: "#94a3b8", fontSize: "9px", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", textAlign: "right", borderBottom: "2px solid #e2e8f0", width: "12%" }}>Total</th>
             </tr>
           </thead>
           <tbody>
@@ -243,7 +244,7 @@ export const ModernInvoicePage = ({
                 if (item.itemType === "SECTION_HEADING") {
                   return (
                     <tr key={idx}>
-                      <td colSpan={tax > 0 ? 5 : 4} style={{ padding: "24px 0 8px 0", borderBottom: "1px solid #e2e8f0" }}>
+                      <td colSpan={tax > 0 ? 6 : 5} style={{ padding: "24px 0 8px 0", borderBottom: "1px solid #e2e8f0" }}>
                         <div style={{ fontSize: "10px", fontWeight: 800, color: "#4338ca", textTransform: "uppercase", letterSpacing: "1.5px" }}>
                           {item.sectionTitle || item.description || "Section"}
                         </div>
@@ -272,6 +273,13 @@ export const ModernInvoicePage = ({
                     </td>
                     <td style={{ padding: "16px 0", fontSize: "12px", color: "#334155", textAlign: "right", verticalAlign: "top", borderBottom: "1px dashed #e2e8f0" }}>
                       {(item.unitPrice || 0).toLocaleString(undefined, { minimumFractionDigits: 3 })} <span style={{ fontSize: "9px", color: "#94a3b8", marginLeft: "4px" }}>{currency}</span>
+                    </td>
+                    <td style={{ padding: "16px 0", fontSize: "12px", color: "#ef4444", textAlign: "right", verticalAlign: "top", borderBottom: "1px dashed #e2e8f0" }}>
+                      {item.discountAmount > 0 ? (
+                        <>
+                          -{(item.discountAmount || 0).toLocaleString(undefined, { minimumFractionDigits: 3 })} <span style={{ fontSize: "9px", color: "#f87171", marginLeft: "4px" }}>{currency}</span>
+                        </>
+                      ) : "-"}
                     </td>
                     {tax > 0 && (
                       <td style={{ padding: "16px 0", fontSize: "12px", color: "#334155", textAlign: "right", verticalAlign: "top", borderBottom: "1px dashed #e2e8f0" }}>

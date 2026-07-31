@@ -46,7 +46,7 @@ export const ITInfraQuotationPage = ({
         <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "7.5px", border: "1px solid #e2e8f0", borderRadius: "5px", overflow: "hidden" }}>
           <thead>
             <tr style={{ background: darkGrad, color: "#fff" }}>
-              {[{ label: "#", w: "3.5%", align: "center" as const },{ label: "Item / Product", w: "27%", align: "left" as const },{ label: "Description", w: "30%", align: "left" as const },{ label: "Brand", w: "8%", align: "center" as const },{ label: "Qty", w: "5.5%", align: "center" as const },{ label: "Unit Price", w: "13%", align: "right" as const },{ label: "Total", w: "13%", align: "right" as const }].map((h) => (
+              {[{ label: "#", w: "3.5%", align: "center" as const },{ label: "Item / Product", w: "22%", align: "left" as const },{ label: "Description", w: "27%", align: "left" as const },{ label: "Brand", w: "8%", align: "center" as const },{ label: "Qty", w: "5%", align: "center" as const },{ label: "Unit Price", w: "11%", align: "right" as const },{ label: "Discount", w: "9%", align: "right" as const },{ label: "Total", w: "14.5%", align: "right" as const }].map((h) => (
                 <th key={h.label} style={{ padding: "6px 7px", fontWeight: "600", letterSpacing: "0.5px", fontSize: "6px", textTransform: "uppercase", textAlign: h.align, width: h.w }}>{h.label}</th>
               ))}
             </tr>
@@ -54,7 +54,7 @@ export const ITInfraQuotationPage = ({
           <tbody>
             {(items || []).map((item: any, idx: number) => {
               if (item.itemType === "SECTION_HEADING") {
-                return (<tr key={idx} style={{ breakInside: "avoid", pageBreakInside: "avoid" }}><td colSpan={7} style={{ padding: "5px 8px", fontWeight: "700", color: accent, fontSize: "7px", letterSpacing: "0.4px", background: accentLight, borderLeft: `2.5px solid ${accent}`, borderBottom: "1px solid #bae6fd" }}>{item.sectionTitle}</td></tr>);
+                return (<tr key={idx} style={{ breakInside: "avoid", pageBreakInside: "avoid" }}><td colSpan={8} style={{ padding: "5px 8px", fontWeight: "700", color: accent, fontSize: "7px", letterSpacing: "0.4px", background: accentLight, borderLeft: `2.5px solid ${accent}`, borderBottom: "1px solid #bae6fd" }}>{item.sectionTitle}</td></tr>);
               }
               serial++;
               const lineTotal = (item.quantity || 0) * (item.unitPrice || 0) - (item.discountAmount || 0);
@@ -79,11 +79,12 @@ export const ITInfraQuotationPage = ({
                     {item.quantity || 0}<div style={{ fontSize: "5px", color: "#94a3b8", fontWeight: "400" }}>{item.unit || "pcs"}</div>
                   </td>
                   <td style={cell({ textAlign: "right", color: "#475569", fontSize: "7px", fontVariantNumeric: "tabular-nums" })}>{fmt(item.unitPrice)} <span style={{ fontSize: "5px", color: "#94a3b8" }}>{currency}</span></td>
+                  <td style={cell({ textAlign: "right", color: "#ef4444", fontSize: "7px", fontVariantNumeric: "tabular-nums" })}>{item.discountAmount > 0 ? <>-{fmt(item.discountAmount)} <span style={{ fontSize: "5px", color: "#f87171" }}>{currency}</span></> : "—"}</td>
                   <td style={cell({ textAlign: "right", fontWeight: "700", color: "#0f172a", fontSize: "7px", fontVariantNumeric: "tabular-nums" })}>{fmt(lineTotal)} <span style={{ fontSize: "5px", color: "#94a3b8" }}>{currency}</span></td>
                 </tr>
               );
             })}
-            {(!items || items.length === 0) && <tr><td colSpan={7} style={{ padding: "20px", textAlign: "center", color: "#94a3b8", fontSize: "8px" }}>No items defined.</td></tr>}
+            {(!items || items.length === 0) && <tr><td colSpan={8} style={{ padding: "20px", textAlign: "center", color: "#94a3b8", fontSize: "8px" }}>No items defined.</td></tr>}
           </tbody>
         </table>
 

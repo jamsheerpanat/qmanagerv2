@@ -753,15 +753,21 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                               />
                             )}
                             <div className="min-w-0 flex-1">
-                              <div className="font-medium text-gray-900 break-words whitespace-normal max-w-[300px]">
-                                {item.sectionTitle || item.description}
-                              </div>
-                              {item.sectionTitle &&
-                                item.sectionTitle !== item.description && (
-                                  <div className="text-xs text-gray-500 truncate mt-0.5 max-w-[300px]">
-                                    {item.description}
-                                  </div>
-                                )}
+                              {item.sectionTitle && (
+                                <div className="font-medium text-gray-900 break-words whitespace-normal max-w-[300px]">
+                                  {item.sectionTitle}
+                                </div>
+                              )}
+                              <Input
+                                className="h-7 text-xs mt-1 w-full max-w-[300px]"
+                                value={item.description || ""}
+                                onChange={(e) => {
+                                  const newItems = [...formData.items];
+                                  newItems[idx].description = e.target.value;
+                                  updateForm("items", newItems);
+                                }}
+                                placeholder="Short description..."
+                              />
                             </div>
                           </div>
                         </td>

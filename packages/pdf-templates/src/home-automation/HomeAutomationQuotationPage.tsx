@@ -180,12 +180,13 @@ export const HomeAutomationQuotationPage = ({
             <tr style={{ background: darkGrad, color: "#fff" }}>
               {[
                 { label: "#", w: "3.5%", align: "center" as const },
-                { label: "Item / Product", w: "27%", align: "left" as const },
-                { label: "Description", w: "30%", align: "left" as const },
+                { label: "Item / Product", w: "22%", align: "left" as const },
+                { label: "Description", w: "27%", align: "left" as const },
                 { label: "Brand", w: "8%", align: "center" as const },
-                { label: "Qty", w: "5.5%", align: "center" as const },
-                { label: "Unit Price", w: "13%", align: "right" as const },
-                { label: "Total", w: "13%", align: "right" as const },
+                { label: "Qty", w: "5%", align: "center" as const },
+                { label: "Unit Price", w: "11%", align: "right" as const },
+                { label: "Discount", w: "9%", align: "right" as const },
+                { label: "Total", w: "14.5%", align: "right" as const },
               ].map((h) => (
                 <th
                   key={h.label}
@@ -219,7 +220,7 @@ export const HomeAutomationQuotationPage = ({
                     }}
                   >
                     <td
-                      colSpan={7}
+                      colSpan={8}
                       style={{
                         padding: "5px 8px",
                         fontWeight: "700",
@@ -335,6 +336,22 @@ export const HomeAutomationQuotationPage = ({
                     {fmt(item.unitPrice)} <span style={{ fontSize: "5px", color: "#94a3b8" }}>{currency}</span>
                   </td>
 
+                  {/* Discount */}
+                  <td
+                    style={cell({
+                      textAlign: "right",
+                      color: "#ef4444",
+                      fontSize: "7px",
+                      fontVariantNumeric: "tabular-nums",
+                    })}
+                  >
+                    {item.discountAmount > 0 ? (
+                      <>
+                        -{fmt(item.discountAmount)} <span style={{ fontSize: "5px", color: "#f87171" }}>{currency}</span>
+                      </>
+                    ) : "—"}
+                  </td>
+
                   {/* Total */}
                   <td
                     style={cell({
@@ -354,7 +371,7 @@ export const HomeAutomationQuotationPage = ({
             {/* Empty state */}
             {(!items || items.length === 0) && (
               <tr>
-                <td colSpan={7} style={{ padding: "20px", textAlign: "center", color: "#94a3b8", fontSize: "8px" }}>
+                <td colSpan={8} style={{ padding: "20px", textAlign: "center", color: "#94a3b8", fontSize: "8px" }}>
                   No items defined for this quotation.
                 </td>
               </tr>
