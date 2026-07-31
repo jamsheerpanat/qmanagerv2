@@ -25,6 +25,8 @@ export default function CreateDirectInvoicePage() {
     notes: "",
     terms: "",
     items: [],
+    discountType: "PERCENTAGE",
+    discountValue: 0,
   });
 
   async function fetchData() {
@@ -110,6 +112,8 @@ export default function CreateDirectInvoicePage() {
           : undefined,
         notes: formData.notes,
         terms: formData.terms,
+        discountType: formData.discountType,
+        discountValue: Number(formData.discountValue),
         items: formData.items.map((item: any) => ({
           ...item,
           quantity: Number(item.quantity),
@@ -136,16 +140,35 @@ export default function CreateDirectInvoicePage() {
       const qty = Number(item.quantity) || 0;
       const price = Number(item.unitPrice) || 0;
       const taxRate = Number(item.taxRate) || 0;
+      
+      let itemDiscountAmount = 0;
+      if (item.discountValue) {
+        if (item.discountType === "PERCENTAGE") {
+          itemDiscountAmount = (qty * price) * (item.discountValue / 100);
+        } else {
+          itemDiscountAmount = Number(item.discountValue);
+        }
+      }
 
-      const lineTotal = qty * price;
+      const lineTotal = (qty * price) - itemDiscountAmount;
       subtotal += lineTotal;
       taxAmount += lineTotal * (taxRate / 100);
     });
 
+    let discountAmount = 0;
+    if (formData.discountValue) {
+      if (formData.discountType === "PERCENTAGE") {
+        discountAmount = subtotal * (formData.discountValue / 100);
+      } else {
+        discountAmount = Number(formData.discountValue);
+      }
+    }
+
     return {
       subtotal,
+      discountAmount,
       taxAmount,
-      grandTotal: subtotal + taxAmount,
+      grandTotal: subtotal - discountAmount + taxAmount,
     };
   };
 
@@ -210,10 +233,11 @@ export default function CreateDirectInvoicePage() {
                 <table className="w-full text-sm text-left min-w-[600px]">
                   <thead className="bg-gray-50 text-gray-700">
                     <tr>
-                      <th className="p-3 w-[40%]">Description</th>
-                      <th className="p-3 w-[15%]">Qty</th>
-                      <th className="p-3 w-[20%]">Price</th>
-                      <th className="p-3 w-[15%]">Tax %</th>
+                      <th className="p-3 w-[30%]">Description</th>
+                      <th className="p-3 w-[12%]">Qty</th>
+                      <th className="p-3 w-[15%]">Price</th>
+                      <th className="p-3 w-[22%]">Discount</th>
+                      <th className="p-3 w-[11%]">Tax %</th>
                       <th className="p-3 w-[10%]"></th>
                     </tr>
                   </thead>
@@ -245,9 +269,27 @@ export default function CreateDirectInvoicePage() {
                             className="p-2"
                             value={item.unitPrice}
                             onChange={(e) =>
-                              updateItem(idx, "unitPrice", e.target.value)
+                              updateItem(idx, "unitPrice", Number(e.target.value))
                             }
                           />
+                        </td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-1">
+                            <select
+                              className="h-8 p-1 border rounded w-14 text-xs bg-white"
+                              value={item.discountType || "PERCENTAGE"}
+                              onChange={(e) => updateItem(idx, "discountType", e.target.value)}
+                            >
+                              <option value="PERCENTAGE">%</option>
+                              <option value="FLAT_AMOUNT">Flat</option>
+                            </select>
+                            <Input
+                              type="number"
+                              className="h-8 p-1 flex-1 text-xs"
+                              value={item.discountValue || 0}
+                              onChange={(e) => updateItem(idx, "discountValue", Number(e.target.value))}
+                            />
+                          </div>
                         </td>
                         <td className="p-3">
                           <Input
@@ -273,7 +315,7 @@ export default function CreateDirectInvoicePage() {
                     {formData.items.length === 0 && (
                       <tr>
                         <td
-                          colSpan={5}
+                          colSpan={6}
                           className="p-8 text-center text-gray-500"
                         >
                           No items added to invoice.
@@ -397,6 +439,38 @@ export default function CreateDirectInvoicePage() {
                   <span className="font-medium">
                     {totals.subtotal.toLocaleString()} {formData.currency}
                   </span>
+                </div>
+                
+                <div className="pt-3 pb-3 border-y my-3 space-y-3">
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className="block text-xs font-medium mb-1 text-gray-500">Discount Type</label>
+                      <select
+                        className="w-full border rounded p-1.5 bg-white text-sm"
+                        value={formData.discountType || "PERCENTAGE"}
+                        onChange={(e) => updateForm("discountType", e.target.value)}
+                      >
+                        <option value="PERCENTAGE">Percentage (%)</option>
+                        <option value="FLAT_AMOUNT">Flat Amount</option>
+                      </select>
+                    </div>
+                    <div className="flex-1">
+                      <label className="block text-xs font-medium mb-1 text-gray-500">Value</label>
+                      <Input
+                        type="number"
+                        min="0"
+                        className="h-8 text-sm p-1.5"
+                        value={formData.discountValue || 0}
+                        onChange={(e) => updateForm("discountValue", Number(e.target.value))}
+                      />
+                    </div>
+                  </div>
+                  {totals.discountAmount > 0 && (
+                    <div className="flex justify-between text-red-600">
+                      <span>Discount</span>
+                      <span>- {totals.discountAmount.toLocaleString()} {formData.currency}</span>
+                    </div>
+                  )}
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-500">Tax</span>

@@ -98,6 +98,14 @@ export class CreateInvoiceDto {
   terms?: string;
 
   @IsOptional()
+  @IsEnum(DiscountType)
+  discountType?: DiscountType;
+
+  @IsOptional()
+  @IsNumber()
+  discountValue?: number;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => InvoiceItemDto)

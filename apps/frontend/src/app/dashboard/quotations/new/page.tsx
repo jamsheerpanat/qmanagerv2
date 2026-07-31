@@ -230,6 +230,8 @@ export default function CreateQuotationWizard() {
     scopes: [],
     terms: [],
     scopeSummary: "",
+    discountType: "PERCENTAGE",
+    discountValue: 0,
   });
 
   async function fetchData() {
@@ -279,6 +281,8 @@ export default function CreateQuotationWizard() {
         projectLocation: formData.projectLocation,
         scopeSummary: formData.scopeSummary,
         currency: formData.currency,
+        discountType: formData.discountType,
+        discountValue: Number(formData.discountValue),
       });
 
       if (formData.items.length > 0) {
@@ -618,9 +622,10 @@ export default function CreateQuotationWizard() {
                 <thead className="bg-gray-50 text-gray-700">
                   <tr>
                     <th className="p-3">Description</th>
-                    <th className="p-3 w-28">Qty</th>
-                    <th className="p-3 w-36">Unit Price</th>
-                    <th className="p-3 w-24">Tax %</th>
+                    <th className="p-3 w-24">Qty</th>
+                    <th className="p-3 w-28">Unit Price</th>
+                    <th className="p-3 w-36">Discount</th>
+                    <th className="p-3 w-20">Tax %</th>
                     <th className="p-3 w-20"></th>
                   </tr>
                 </thead>
@@ -632,7 +637,7 @@ export default function CreateQuotationWizard() {
                           key={idx}
                           className="bg-blue-50 border-b border-blue-100"
                         >
-                          <td colSpan={4} className="p-3">
+                          <td colSpan={5} className="p-3">
                             <div className="flex items-center">
                               <span className="text-blue-600 font-bold mr-2">
                                 ▸
@@ -757,6 +762,32 @@ export default function CreateQuotationWizard() {
                             }}
                           />
                         </td>
+                        <td className="p-3">
+                          <div className="flex items-center gap-1">
+                            <select
+                              className="h-8 p-1 border rounded w-14 text-xs"
+                              value={item.discountType || "PERCENTAGE"}
+                              onChange={(e) => {
+                                const newItems = [...formData.items];
+                                newItems[idx].discountType = e.target.value;
+                                updateForm("items", newItems);
+                              }}
+                            >
+                              <option value="PERCENTAGE">%</option>
+                              <option value="FLAT_AMOUNT">Flat</option>
+                            </select>
+                            <Input
+                              type="number"
+                              className="h-8 p-1 flex-1 text-xs"
+                              value={item.discountValue || 0}
+                              onChange={(e) => {
+                                const newItems = [...formData.items];
+                                newItems[idx].discountValue = Number(e.target.value);
+                                updateForm("items", newItems);
+                              }}
+                            />
+                          </div>
+                        </td>
                         <td className="p-3 text-gray-600">{item.taxRate}%</td>
                         <td className="p-3 flex gap-1 justify-end items-center">
                           <Button
@@ -809,7 +840,7 @@ export default function CreateQuotationWizard() {
                   })}
                   {formData.items.length === 0 && (
                     <tr>
-                      <td colSpan={5} className="p-4 text-center text-gray-500">
+                      <td colSpan={6} className="p-4 text-center text-gray-500">
                         No items added yet.
                       </td>
                     </tr>
@@ -1005,6 +1036,32 @@ export default function CreateQuotationWizard() {
               <p>
                 <strong>Total Items:</strong> {formData.items.length}
               </p>
+
+              <div className="pt-4 mt-4 border-t border-blue-200">
+                <h4 className="font-semibold mb-2 text-gray-700">Global Discount (Optional)</h4>
+                <div className="flex gap-4">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium mb-1 text-gray-600">Discount Type</label>
+                    <select
+                      className="w-full border rounded-md p-2 bg-white"
+                      value={formData.discountType || "PERCENTAGE"}
+                      onChange={(e) => updateForm("discountType", e.target.value)}
+                    >
+                      <option value="PERCENTAGE">Percentage (%)</option>
+                      <option value="FLAT_AMOUNT">Flat Amount</option>
+                    </select>
+                  </div>
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium mb-1 text-gray-600">Discount Value</label>
+                    <Input
+                      type="number"
+                      min="0"
+                      value={formData.discountValue || 0}
+                      onChange={(e) => updateForm("discountValue", Number(e.target.value))}
+                    />
+                  </div>
+                </div>
+              </div>
 
               <div className="pt-4 mt-4 border-t border-blue-200">
                 <p className="text-sm text-gray-600">
