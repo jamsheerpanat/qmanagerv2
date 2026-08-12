@@ -15,13 +15,19 @@ struct QManagerApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                // .privacyShield() must be applied *before* the environment
+                // injections. Environment flows outside-in, so a modifier
+                // placed after `.environment(session)` sits outside that
+                // injection and cannot read SessionStore — which crashed the
+                // app on launch with "No Observable object of type
+                // SessionStore found".
+                .privacyShield()
                 .environment(session)
                 .environment(lock)
                 .environment(catalog)
                 .environment(recents)
                 .environment(quickActions)
                 .tint(Brand.primary)
-                .privacyShield()
                 .task {
                     await session.restore()
                     quickActions.register()
