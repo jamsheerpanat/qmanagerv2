@@ -1,4 +1,12 @@
-import { Controller, Get, Query, Req, UseGuards, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  Query,
+  Req,
+  UseGuards,
+  Res,
+} from '@nestjs/common';
 import { ReportsService } from './reports.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
@@ -23,8 +31,11 @@ export class ReportsController {
   @Get(':type')
   @RequirePermissions('reports.view')
   async getReport(
+    // The report type is the path segment (/reports/quotations). It used to be
+    // read from `@Query('type')`, which no caller sends — so every report threw
+    // "Report type undefined not implemented".
+    @Param('type') type: string,
     @Req() req: any,
-    @Query('type') type: string,
     @Query() filters: any,
     @Res() res: any,
   ) {

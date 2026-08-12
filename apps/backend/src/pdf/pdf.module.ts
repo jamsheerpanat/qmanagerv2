@@ -33,6 +33,9 @@ const pdfQueueEnabled = process.env.ENABLE_PDF_QUEUE === '1';
     InternalRenderGuard,
     ...(pdfQueueEnabled ? [PdfProcessor] : []),
   ],
-  exports: [PdfService, InternalRenderGuard],
+  // JwtModule is re-exported because `@UseGuards(InternalRenderGuard)`
+  // instantiates the guard in the *consuming* module (quotations/invoices),
+  // so JwtService has to be resolvable from there too.
+  exports: [PdfService, InternalRenderGuard, JwtModule],
 })
 export class PdfModule {}
