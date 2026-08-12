@@ -21,6 +21,7 @@ struct QManagerApp: App {
                 .environment(recents)
                 .environment(quickActions)
                 .tint(Brand.primary)
+                .privacyShield()
                 .task {
                     await session.restore()
                     quickActions.register()

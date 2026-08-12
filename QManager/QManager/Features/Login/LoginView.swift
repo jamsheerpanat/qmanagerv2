@@ -158,6 +158,14 @@ struct ServerSettingsView: View {
     @State private var urlText = AppConfig.baseURL.absoluteString
     @State private var validationError: String?
 
+    /// Pointing the app at an attacker-controlled host would hand them the
+    /// user's credentials, so anything other than production is called out.
+    /// The field stays editable — staging and self-hosting are legitimate.
+    private var isProductionHost: Bool {
+        URL(string: urlText.trimmingCharacters(in: .whitespacesAndNewlines))?.host()
+            == AppConfig.productionBaseURL.host()
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -173,6 +181,22 @@ struct ServerSettingsView: View {
                         Text(validationError).foregroundStyle(.red)
                     } else {
                         Text("The address of the QManager API, without a trailing slash.")
+                    }
+                }
+
+                if !isProductionHost {
+                    Section {
+                        Label {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Not the official server").font(.subheadline.weight(.semibold))
+                                Text("Only sign in here if you set this address up yourself. Your credentials are sent to whatever server is configured.")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        } icon: {
+                            Image(systemName: "exclamationmark.shield.fill")
+                                .foregroundStyle(.orange)
+                        }
                     }
                 }
 
@@ -203,10 +227,25 @@ struct ServerSettingsView: View {
         guard
             let url = URL(string: trimmed),
             let scheme = url.scheme?.lowercased(),
-            scheme == "http" || scheme == "https",
-            url.host() != nil
+            let host = url.host()
         else {
-            validationError = "Enter a full URL including http:// or https://"
+            validationError = "Enter a full URL including https://"
+            return
+        }
+
+        #if DEBUG
+        // Plain HTTP is tolerated only for a developer machine, and only in
+        // Debug — the Release ATS policy would refuse the connection anyway.
+        let isAllowed = scheme == "https"
+            || (scheme == "http" && (host == "localhost" || host == "127.0.0.1"))
+        let message = "Use https://, or http:// with localhost for development."
+        #else
+        let isAllowed = scheme == "https"
+        let message = "The server address must use https://."
+        #endif
+
+        guard isAllowed else {
+            validationError = message
             return
         }
 

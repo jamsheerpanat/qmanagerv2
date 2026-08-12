@@ -3,24 +3,19 @@
 <plist version="1.0">
 <dict>
 	<!--
-	  App Transport Security stays on. The only relaxation is plain HTTP to
-	  localhost, so the app can be pointed at a developer machine running
-	  `pnpm dev` (API on :3001) without weakening security for real hosts.
+	  RELEASE configuration.
+
+	  App Transport Security is left fully enabled: no exception domains, no
+	  arbitrary loads. Shipping builds talk to the production API over HTTPS
+	  only, and ServerSettingsView refuses non-HTTPS addresses in Release.
+
+	  The localhost cleartext exception lives in Config/Info-Debug.plist so it
+	  cannot reach the App Store.
 	-->
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
 		<false/>
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>localhost</key>
-			<dict>
-				<key>NSExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-			</dict>
-		</dict>
 	</dict>
 </dict>
 </plist>

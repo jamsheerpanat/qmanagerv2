@@ -14,7 +14,21 @@ actor ResponseCache {
     init() {
         let caches = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
         directory = caches.appendingPathComponent("api-responses", isDirectory: true)
-        try? FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        try? FileManager.default.createDirectory(
+            at: directory,
+            withIntermediateDirectories: true,
+            // Cached quotations and invoices are commercial data. Without this
+            // they inherit the default protection class and are readable while
+            // the device is locked after first unlock.
+            attributes: [.protectionKey: FileProtectionType.completeUnlessOpen]
+        )
+
+        // Never back the cache up — it is reconstructable from the API, and
+        // syncing business data into iCloud backups is needless exposure.
+        var resourceValues = URLResourceValues()
+        resourceValues.isExcludedFromBackup = true
+        var mutableDirectory = directory
+        try? mutableDirectory.setResourceValues(resourceValues)
     }
 
     private func url(for key: String) -> URL {
@@ -41,7 +55,7 @@ actor ResponseCache {
     }
 
     func store(_ data: Data, for key: String) {
-        try? data.write(to: url(for: key), options: .atomic)
+        try? data.write(to: url(for: key), options: [.atomic, .completeFileProtectionUnlessOpen])
     }
 
     /// Called on sign-out — cached business data must not outlive the session.

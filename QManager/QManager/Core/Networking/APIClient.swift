@@ -393,7 +393,13 @@ actor APIClient {
         do {
             return try Self.decoder.decode(T.self, from: data)
         } catch {
+            // The raw decoding error names fields and can echo values back into
+            // the UI, so it is only surfaced in development builds.
+            #if DEBUG
             throw APIError.decoding(String(describing: error))
+            #else
+            throw APIError.decoding("")
+            #endif
         }
     }
 

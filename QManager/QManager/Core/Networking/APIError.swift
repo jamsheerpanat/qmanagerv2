@@ -44,7 +44,7 @@ nonisolated enum APIError: LocalizedError, Equatable {
     /// Detail worth showing under the headline, when there is any.
     var failureHint: String? {
         switch self {
-        case .decoding(let detail): detail
+        case .decoding(let detail): detail.nilIfBlank
         case .invalidURL: "Settings › Server"
         case .apiNotReachable: "The address must include any path the API is mounted under."
         default: nil
