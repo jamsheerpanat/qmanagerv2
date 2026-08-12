@@ -2,10 +2,51 @@ import SwiftUI
 
 // MARK: - Brand
 
-enum Brand {
-    /// Matches the web app's default brand colour (#1a56db).
-    static let primary = Color(red: 0.102, green: 0.337, blue: 0.859)
-    static let deep = Color(red: 0.047, green: 0.102, blue: 0.184)
+/// Palette sampled directly from the QManager wordmark (navy #103C6A to teal
+/// #0D9FAC). Every colour lives in the asset catalog with a light and a dark
+/// variant, so the whole app adapts without a single `colorScheme` check.
+nonisolated enum Brand {
+    static let primary = Color("BrandPrimary")
+    static let accent = Color("BrandAccent")
+    static let deep = Color("BrandDeep")
+    static let tint = Color("BrandTint")
+    static let surface = Color("Surface")
+    static let surfaceRaised = Color("SurfaceRaised")
+
+    /// The logo's own gradient, reused for headers and the app icon.
+    static let gradient = LinearGradient(
+        colors: [Color("BrandPrimary"), Color("BrandAccent")],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
+
+    static let deepGradient = LinearGradient(
+        colors: [Color("BrandDeep"), Color("BrandPrimary")],
+        startPoint: .top,
+        endPoint: .bottom
+    )
+}
+
+/// The QManager wordmark.
+///
+/// The artwork is a navy-to-teal gradient on white, so its navy half vanishes
+/// against a dark background. `mono` forces the white silhouette, and dark mode
+/// selects it automatically.
+struct LogoMark: View {
+    var width: CGFloat = 200
+    var mono = false
+
+    @Environment(\.colorScheme) private var colorScheme
+
+    private var usesMono: Bool { mono || colorScheme == .dark }
+
+    var body: some View {
+        Image(usesMono ? "logo-mono" : "logo-full")
+            .resizable()
+            .scaledToFit()
+            .frame(width: width)
+            .accessibilityLabel("QManager by Octonics Innovations")
+    }
 }
 
 // MARK: - Status chip
@@ -72,7 +113,7 @@ struct MetricTile: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(14)
-        .background(.background.secondary, in: RoundedRectangle(cornerRadius: 14))
+        .cardSurface(cornerRadius: 16)
     }
 }
 
@@ -251,7 +292,7 @@ struct Card<Content: View>: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(.background.secondary, in: RoundedRectangle(cornerRadius: 16))
+        .cardSurface(cornerRadius: 18)
     }
 }
 
@@ -261,9 +302,13 @@ struct Avatar: View {
     let name: String
     var size: CGFloat = 36
 
-    /// Deterministic colour per name, same idea as the web sidebar.
+    /// Deterministic colour per name, same idea as the web sidebar — but drawn
+    /// from the brand ramp so avatars never clash with the palette.
     private var tint: Color {
-        let palette: [Color] = [.blue, .purple, .teal, .green, .orange, .red, .indigo]
+        let palette: [Color] = [
+            Brand.primary, Brand.tint, Brand.accent,
+            Brand.primary.opacity(0.85), Brand.tint.opacity(0.85),
+        ]
         let hash = name.unicodeScalars.reduce(0) { ($0 &* 31 &+ Int($1.value)) & 0xFFFFFF }
         return palette[abs(hash) % palette.count]
     }
@@ -280,5 +325,38 @@ struct Avatar: View {
             .foregroundStyle(.white)
             .frame(width: size, height: size)
             .background(tint.gradient, in: RoundedRectangle(cornerRadius: size * 0.28))
+    }
+}
+
+
+// MARK: - Surfaces
+
+private struct CardSurface: ViewModifier {
+    let cornerRadius: CGFloat
+
+    func body(content: Content) -> some View {
+        content
+            .background(Brand.surfaceRaised, in: RoundedRectangle(cornerRadius: cornerRadius))
+            .overlay(
+                RoundedRectangle(cornerRadius: cornerRadius)
+                    .strokeBorder(Brand.primary.opacity(0.07))
+            )
+            .shadow(color: Brand.deep.opacity(0.06), radius: 10, y: 3)
+    }
+}
+
+extension View {
+    /// A raised card. `.background.secondary` reads almost identically to the
+    /// grouped background, which left every card invisible; an explicit brand
+    /// surface plus a hairline border and soft shadow gives real separation.
+    func cardSurface(cornerRadius: CGFloat = 16) -> some View {
+        modifier(CardSurface(cornerRadius: cornerRadius))
+    }
+
+    /// Screen background, and enough bottom inset to clear the tab bar.
+    func screenSurface() -> some View {
+        self
+            .background(Brand.surface)
+            .scrollContentBackground(.hidden)
     }
 }

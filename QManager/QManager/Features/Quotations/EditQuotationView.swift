@@ -271,7 +271,7 @@ struct CompareRevisionsView: View {
             }
             .padding(16)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Brand.surface)
     }
 
     private func revisionColumn(_ title: String, amount: Double, tint: Color) -> some View {

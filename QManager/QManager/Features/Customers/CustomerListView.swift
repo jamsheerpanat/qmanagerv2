@@ -220,7 +220,7 @@ struct CustomerDetailView: View {
                     }
                     .padding(16)
                 }
-                .background(Color(.systemGroupedBackground))
+                .background(Brand.surface)
             } else if let error = model.loadError {
                 ErrorState(error: error) { Task { await model.load() } }
             } else {

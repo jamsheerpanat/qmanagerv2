@@ -39,16 +39,23 @@ final class CatalogStore {
             async let categories = api.get("catalog/categories", as: [ProductCategory].self)
             async let serviceItems = api.get("catalog/service-items", as: [ServiceItem].self)
 
+            // Terms require their own permission, so a user without terms.view
+            // still gets a usable wizard rather than a hard failure. Kicked off
+            // with the rest so all seven requests overlap.
+            async let termsTemplates = (try? await api.get(
+                "terms/templates", as: [TermsTemplate].self
+            )) ?? []
+            async let termsGroups = (try? await api.get(
+                "terms/groups", as: [TermsGroup].self
+            )) ?? []
+
             self.customers = try await customers
             self.serviceTypes = try await serviceTypes
             self.products = try await products
             self.categories = try await categories
             self.serviceItems = try await serviceItems
-
-            // Terms require their own permission, so a user without terms.view
-            // should still get a usable wizard rather than a hard failure.
-            termsTemplates = (try? await api.get("terms/templates", as: [TermsTemplate].self)) ?? []
-            termsGroups = (try? await api.get("terms/groups", as: [TermsGroup].self)) ?? []
+            self.termsTemplates = await termsTemplates
+            self.termsGroups = await termsGroups
 
             error = nil
             hasLoaded = true

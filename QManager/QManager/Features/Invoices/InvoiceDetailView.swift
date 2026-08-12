@@ -185,7 +185,7 @@ struct InvoiceDetailView: View {
             }
             .padding(16)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Brand.surface)
     }
 
     private func header(_ invoice: Invoice) -> some View {

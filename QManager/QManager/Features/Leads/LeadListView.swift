@@ -235,7 +235,7 @@ struct LeadDetailView: View {
             }
             .padding(16)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Brand.surface)
         .navigationTitle(lead.enquiryNumber)
         .navigationBarTitleDisplayMode(.inline)
     }

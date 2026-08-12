@@ -81,18 +81,28 @@ final class GlobalSearchModel {
         isLoading = true
         defer { isLoading = false }
 
-        if can(.quotationsView) {
-            quotations = (try? await api.get("quotations", as: [Quotation].self, cacheKey: "quotations")) ?? quotations
-        }
-        if can(.invoicesView) {
-            invoices = (try? await api.get("invoices", as: [Invoice].self, cacheKey: "invoices")) ?? invoices
-        }
-        if can(.customersView) {
-            customers = (try? await api.get("customers", as: [Customer].self, cacheKey: "customers")) ?? customers
-        }
-        if can(.leadsView) {
-            leads = (try? await api.get("leads", as: [Lead].self, cacheKey: "leads")) ?? leads
-        }
+        // Resolve permissions first: the closure is not Sendable, so it cannot
+        // be captured by the concurrent child tasks below.
+        let canQuotations = can(.quotationsView)
+        let canInvoices = can(.invoicesView)
+        let canCustomers = can(.customersView)
+        let canLeads = can(.leadsView)
+
+        // All four are independent; overlapping them turns four round trips
+        // into one wall-clock wait.
+        async let freshQuotations: [Quotation]? = canQuotations
+            ? try? await api.get("quotations", as: [Quotation].self, cacheKey: "quotations") : nil
+        async let freshInvoices: [Invoice]? = canInvoices
+            ? try? await api.get("invoices", as: [Invoice].self, cacheKey: "invoices") : nil
+        async let freshCustomers: [Customer]? = canCustomers
+            ? try? await api.get("customers", as: [Customer].self, cacheKey: "customers") : nil
+        async let freshLeads: [Lead]? = canLeads
+            ? try? await api.get("leads", as: [Lead].self, cacheKey: "leads") : nil
+
+        if let value = await freshQuotations { quotations = value }
+        if let value = await freshInvoices { invoices = value }
+        if let value = await freshCustomers { customers = value }
+        if let value = await freshLeads { leads = value }
     }
 }
 

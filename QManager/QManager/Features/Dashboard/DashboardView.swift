@@ -52,21 +52,20 @@ final class DashboardModel {
     }
 
     private func refreshInsights(can: (Permission) -> Bool) async {
-        var quotations: [Quotation] = []
-        var invoices: [Invoice] = []
+        // Resolve permissions first — the closure is not Sendable.
+        let canQuotations = can(.quotationsView)
+        let canInvoices = can(.invoicesView)
 
-        if can(.quotationsView) {
-            quotations = (try? await api.get(
-                "quotations", as: [Quotation].self, cacheKey: "quotations"
-            )) ?? []
-        }
-        if can(.invoicesView) {
-            invoices = (try? await api.get(
-                "invoices", as: [Invoice].self, cacheKey: "invoices"
-            )) ?? []
-        }
+        // Both feed the same insight pass, so fetch them concurrently rather
+        // than paying two round trips back to back.
+        async let quotations: [Quotation] = canQuotations
+            ? ((try? await api.get("quotations", as: [Quotation].self, cacheKey: "quotations")) ?? [])
+            : []
+        async let invoices: [Invoice] = canInvoices
+            ? ((try? await api.get("invoices", as: [Invoice].self, cacheKey: "invoices")) ?? [])
+            : []
 
-        insights = InsightEngine.build(quotations: quotations, invoices: invoices)
+        insights = await InsightEngine.build(quotations: quotations, invoices: invoices)
     }
 
     private func rebuildInsights(fromCacheOnly: Bool) async {
@@ -104,8 +103,15 @@ struct DashboardView: View {
                     content
                 }
             }
-            .navigationTitle(greeting)
+            .navigationTitle("")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // The wordmark belongs in the bar; the greeting moves inline
+                // below, where a long name no longer truncates the title.
+                ToolbarItem(placement: .principal) {
+                    LogoMark(width: 132)
+                }
+
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
                         Haptics.tap()
@@ -170,20 +176,19 @@ struct DashboardView: View {
     }
 
     private var greeting: String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        let name = session.user?.name.split(separator: " ").first.map(String.init) ?? ""
-        let part = switch hour {
+        switch Calendar.current.component(.hour, from: Date()) {
         case 5..<12: "Good morning"
         case 12..<17: "Good afternoon"
         default: "Good evening"
         }
-        return name.isEmpty ? part : "\(part), \(name)"
     }
 
     @ViewBuilder
     private var content: some View {
         ScrollView {
             VStack(spacing: 18) {
+                greetingHeader
+
                 if model.isShowingCachedData {
                     offlineBanner
                 }
@@ -221,8 +226,28 @@ struct DashboardView: View {
                 }
             }
             .padding(16)
+            // Clear the floating tab bar.
+            .padding(.bottom, 28)
         }
-        .background(Color(.systemGroupedBackground))
+        .background(Brand.surface)
+    }
+
+    private var greetingHeader: some View {
+        HStack(spacing: 12) {
+            if let user = session.user {
+                Avatar(name: user.name, size: 42)
+            }
+            VStack(alignment: .leading, spacing: 1) {
+                Text(greeting)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Text(session.user?.name ?? "")
+                    .font(.title3.weight(.bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+            Spacer()
+        }
     }
 
     private var offlineBanner: some View {
@@ -246,18 +271,18 @@ struct DashboardView: View {
                     showsNewQuotation = true
                 }
             }
-            quickAction("Search", symbol: "magnifyingglass", tint: .teal) {
+            quickAction("Search", symbol: "magnifyingglass", tint: Brand.accent) {
                 showsSearch = true
             }
             if session.can(.quotationsView) {
                 NavigationLink(value: Insight.Target.quotationList) {
-                    quickActionLabel("Quotes", symbol: "doc.text", tint: .indigo)
+                    quickActionLabel("Quotes", symbol: "doc.text", tint: Brand.primary)
                 }
                 .buttonStyle(.plain)
             }
             if session.can(.invoicesView) {
                 NavigationLink(value: Insight.Target.invoiceList) {
-                    quickActionLabel("Invoices", symbol: "doc.plaintext", tint: .blue)
+                    quickActionLabel("Invoices", symbol: "doc.plaintext", tint: Brand.tint)
                 }
                 .buttonStyle(.plain)
             }
@@ -291,8 +316,8 @@ struct DashboardView: View {
                 .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 12)
-        .background(.background.secondary, in: RoundedRectangle(cornerRadius: 12))
+        .padding(.vertical, 14)
+        .cardSurface(cornerRadius: 14)
     }
 
     // MARK: Insights
@@ -382,7 +407,7 @@ struct DashboardView: View {
         ) {
             MetricTile(
                 title: "Customers", value: "\(kpis.customers)",
-                symbol: "building.2.fill", tint: .blue
+                symbol: "building.2.fill", tint: Brand.primary
             )
             MetricTile(
                 title: "Leads", value: "\(kpis.leads)",
@@ -391,7 +416,7 @@ struct DashboardView: View {
             MetricTile(
                 title: "Quotations", value: "\(kpis.quotations.total)",
                 caption: "\(kpis.quotations.accepted) accepted",
-                symbol: "doc.text.fill", tint: .indigo
+                symbol: "doc.text.fill", tint: Brand.accent
             )
             MetricTile(
                 title: "Awaiting Approval", value: "\(kpis.quotations.pending)",
@@ -406,8 +431,8 @@ struct DashboardView: View {
         Card("Financials", symbol: "banknote") {
             VStack(spacing: 14) {
                 HStack(spacing: 12) {
-                    moneyPill("Quoted", kpis.quotations.value, tint: .indigo, symbol: "doc.text")
-                    moneyPill("Invoiced", kpis.invoices.totalValue, tint: .blue, symbol: "doc.plaintext")
+                    moneyPill("Quoted", kpis.quotations.value, tint: Brand.primary, symbol: "doc.text")
+                    moneyPill("Invoiced", kpis.invoices.totalValue, tint: Brand.accent, symbol: "doc.plaintext")
                 }
 
                 Divider()

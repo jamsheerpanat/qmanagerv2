@@ -181,9 +181,9 @@ nonisolated struct RecentItem: Codable, Identifiable, Hashable, Sendable {
 
         var tint: Color {
             switch self {
-            case .quotation: .indigo
-            case .invoice: .blue
-            case .customer: .teal
+            case .quotation: Brand.primary
+            case .invoice: Brand.tint
+            case .customer: Brand.accent
             }
         }
     }

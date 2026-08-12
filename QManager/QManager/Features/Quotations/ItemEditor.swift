@@ -11,6 +11,15 @@ struct ItemEditor: View {
     @State private var showsPicker = false
     @State private var editing: ItemDraft.ID?
 
+    private func move(_ id: ItemDraft.ID, by offset: Int) {
+        guard
+            let index = items.firstIndex(where: { $0.id == id }),
+            items.indices.contains(index + offset)
+        else { return }
+        withAnimation { items.swapAt(index, index + offset) }
+        Haptics.tap()
+    }
+
     private var runningSubtotal: Double {
         items.filter { !$0.isHeading && !$0.isOptional }
             .reduce(0) { $0 + $1.lineTotal }
@@ -44,29 +53,34 @@ struct ItemEditor: View {
                 )
                 .frame(height: 180)
             } else {
-                List {
+                // A List nested in a ScrollView has to size every row up front
+                // and loses cell reuse, so long quotations stuttered. A
+                // LazyVStack builds rows on demand and scrolls with the parent.
+                LazyVStack(spacing: 0) {
                     ForEach($items) { $item in
                         ItemRow(item: $item, currency: currency) {
                             editing = item.id
+                        } onDelete: {
+                            withAnimation { items.removeAll { $0.id == item.id } }
+                            Haptics.tap()
+                        } onMoveUp: {
+                            move(item.id, by: -1)
+                        } onMoveDown: {
+                            move(item.id, by: 1)
                         }
-                    }
-                    .onDelete { items.remove(atOffsets: $0) }
-                    .onMove { items.move(fromOffsets: $0, toOffset: $1) }
-
-                    Section {
-                        HStack {
-                            Text("Subtotal").font(.subheadline.weight(.semibold))
-                            Spacer()
-                            Text(Format.money(runningSubtotal, currency: currency))
-                                .font(.subheadline.weight(.bold))
-                                .monospacedDigit()
-                        }
+                        Divider()
                     }
                 }
-                .listStyle(.plain)
-                .frame(height: max(220, CGFloat(items.count) * 78 + 60))
-                .scrollDisabled(true)
-                .environment(\.editMode, .constant(.active))
+
+                HStack {
+                    Text("Subtotal").font(.subheadline.weight(.semibold))
+                    Spacer()
+                    Text(Format.money(runningSubtotal, currency: currency))
+                        .font(.subheadline.weight(.bold))
+                        .monospacedDigit()
+                        .contentTransition(.numericText())
+                }
+                .padding(.top, 10)
             }
         }
         .sheet(isPresented: $showsPicker) {
@@ -89,53 +103,68 @@ private struct ItemRow: View {
     @Binding var item: ItemDraft
     let currency: String
     let onEdit: () -> Void
+    let onDelete: () -> Void
+    let onMoveUp: () -> Void
+    let onMoveDown: () -> Void
 
     var body: some View {
-        if item.isHeading {
-            HStack(spacing: 8) {
+        HStack(spacing: 8) {
+            if item.isHeading {
                 Image(systemName: "text.alignleft")
                     .font(.caption)
                     .foregroundStyle(Brand.primary)
                 TextField("Section title", text: $item.sectionTitle)
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(Brand.primary)
-            }
-            .listRowBackground(Brand.primary.opacity(0.08))
-        } else {
-            Button(action: onEdit) {
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(item.sectionTitle.nilIfBlank ?? item.description.nilIfBlank ?? "Item")
-                            .font(.subheadline.weight(.medium))
-                            .lineLimit(1)
-                        HStack(spacing: 6) {
-                            Text("\(Format.quantity(item.quantity)) \(item.unit)")
-                            Text("×")
-                            Text(Format.money(item.unitPrice, currency: currency, showCode: false))
-                            if item.discountValue > 0 {
-                                Text("−\(Format.money(item.discountAmount, currency: currency, showCode: false))")
-                                    .foregroundStyle(.red)
+            } else {
+                Button(action: onEdit) {
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(item.sectionTitle.nilIfBlank ?? item.description.nilIfBlank ?? "Item")
+                                .font(.subheadline.weight(.medium))
+                                .lineLimit(1)
+                            HStack(spacing: 6) {
+                                Text("\(Format.quantity(item.quantity)) \(item.unit)")
+                                Text("×")
+                                Text(Format.money(item.unitPrice, currency: currency, showCode: false))
+                                if item.discountValue > 0 {
+                                    Text("−\(Format.money(item.discountAmount, currency: currency, showCode: false))")
+                                        .foregroundStyle(.red)
+                                }
+                                if item.isOptional { Text("· optional").foregroundStyle(.orange) }
                             }
-                            if item.isOptional {
-                                Text("· optional").foregroundStyle(.orange)
-                            }
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                         }
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    VStack(alignment: .trailing, spacing: 2) {
+                        Spacer()
                         Text(Format.money(item.lineTotal, currency: currency, showCode: false))
                             .font(.subheadline.weight(.semibold))
                             .monospacedDigit()
-                        Image(systemName: "chevron.right")
-                            .font(.caption2)
-                            .foregroundStyle(.tertiary)
                     }
                 }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
+
+            Menu {
+                Button { onMoveUp() } label: { Label("Move Up", systemImage: "arrow.up") }
+                Button { onMoveDown() } label: { Label("Move Down", systemImage: "arrow.down") }
+                if !item.isHeading {
+                    Button { onEdit() } label: { Label("Edit", systemImage: "pencil") }
+                }
+                Divider()
+                Button(role: .destructive) { onDelete() } label: {
+                    Label("Delete", systemImage: "trash")
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 28, height: 28)
+                    .contentShape(Rectangle())
+            }
         }
+        .padding(.vertical, 8)
+        .background(item.isHeading ? Brand.primary.opacity(0.07) : .clear)
     }
 }
 

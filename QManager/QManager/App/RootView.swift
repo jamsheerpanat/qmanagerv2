@@ -36,11 +36,10 @@ struct RootView: View {
 private struct LaunchView: View {
     var body: some View {
         ZStack {
-            Brand.deep.ignoresSafeArea()
-            VStack(spacing: 18) {
-                BrandMark(size: 64)
-                ProgressView()
-                    .tint(.white.opacity(0.7))
+            Brand.deepGradient.ignoresSafeArea()
+            VStack(spacing: 22) {
+                LogoMark(width: 220, mono: true)
+                ProgressView().tint(.white.opacity(0.65))
             }
         }
     }
@@ -57,8 +56,11 @@ private struct LockScreen: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 20) {
+                LogoMark(width: 170)
+                    .padding(.bottom, 4)
+
                 Image(systemName: "lock.fill")
-                    .font(.system(size: 42))
+                    .font(.system(size: 34))
                     .foregroundStyle(Brand.primary)
 
                 Text("QManager is locked")
@@ -83,24 +85,3 @@ private struct LockScreen: View {
     }
 }
 
-/// Wordmark used on the launch, login and lock screens.
-struct BrandMark: View {
-    var size: CGFloat = 56
-    var showsText = true
-
-    var body: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "doc.text.fill")
-                .font(.system(size: size * 0.5, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: size, height: size)
-                .background(Brand.primary.gradient, in: RoundedRectangle(cornerRadius: size * 0.26))
-
-            if showsText {
-                Text("QManager")
-                    .font(.title2.weight(.bold))
-                    .foregroundStyle(.white)
-            }
-        }
-    }
-}

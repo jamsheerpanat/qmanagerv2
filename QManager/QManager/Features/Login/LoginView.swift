@@ -16,41 +16,39 @@ struct LoginView: View {
 
     var body: some View {
         ZStack {
-            LinearGradient(
-                colors: [Brand.deep, Brand.primary.opacity(0.55), Brand.deep],
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
+            // The wordmark is navy on white, so the sign-in surface is light:
+            // knocking the logo out to mono here would throw away its gradient.
+            Brand.surface.ignoresSafeArea()
+
+            // A soft wash of the brand gradient, anchored top-left.
+            RadialGradient(
+                colors: [Brand.accent.opacity(0.18), .clear],
+                center: .topLeading, startRadius: 20, endRadius: 520
+            )
+            .ignoresSafeArea()
+
+            RadialGradient(
+                colors: [Brand.primary.opacity(0.14), .clear],
+                center: .bottomTrailing, startRadius: 20, endRadius: 480
             )
             .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 28) {
-                    Spacer(minLength: 40)
+                VStack(spacing: 26) {
+                    Spacer(minLength: 48)
 
-                    VStack(spacing: 8) {
-                        BrandMark()
-                        Text("Commercial Management")
-                            .font(.footnote)
-                            .foregroundStyle(.white.opacity(0.6))
-                    }
+                    LogoMark(width: 236)
+                        .padding(.bottom, 4)
 
                     VStack(spacing: 14) {
                         field(
-                            "Email",
-                            text: $email,
-                            symbol: "envelope",
-                            field: .email,
-                            keyboard: .emailAddress,
-                            content: .username
+                            "Email", text: $email, symbol: "envelope",
+                            field: .email, keyboard: .emailAddress, content: .username
                         )
 
                         field(
-                            "Password",
-                            text: $password,
-                            symbol: "lock",
-                            field: .password,
-                            isSecure: true,
-                            content: .password
+                            "Password", text: $password, symbol: "lock",
+                            field: .password, isSecure: true, content: .password
                         )
 
                         if let error = session.signInError {
@@ -59,7 +57,7 @@ struct LoginView: View {
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity, alignment: .leading)
                                 .padding(10)
-                                .background(.red.opacity(0.85), in: RoundedRectangle(cornerRadius: 10))
+                                .background(.red.gradient, in: RoundedRectangle(cornerRadius: 10))
                                 .transition(.move(edge: .top).combined(with: .opacity))
                         }
 
@@ -71,14 +69,22 @@ struct LoginView: View {
                                     Text("Sign In").fontWeight(.semibold)
                                 }
                             }
-                            .frame(maxWidth: .infinity, minHeight: 26)
+                            .frame(maxWidth: .infinity, minHeight: 28)
                         }
                         .buttonStyle(.borderedProminent)
                         .controlSize(.large)
                         .disabled(!canSubmit)
                     }
                     .padding(20)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 20))
+                    .background(
+                        Brand.surfaceRaised,
+                        in: RoundedRectangle(cornerRadius: 22)
+                    )
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 22)
+                            .strokeBorder(Brand.primary.opacity(0.08))
+                    )
+                    .shadow(color: Brand.primary.opacity(0.10), radius: 22, y: 10)
                     .padding(.horizontal, 22)
 
                     Button {
@@ -89,7 +95,7 @@ struct LoginView: View {
                             systemImage: "server.rack"
                         )
                         .font(.caption)
-                        .foregroundStyle(.white.opacity(0.7))
+                        .foregroundStyle(.secondary)
                     }
 
                     Spacer(minLength: 24)
