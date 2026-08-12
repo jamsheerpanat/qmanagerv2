@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
+import { PERMISSION_ACTIONS } from './permissions';
 
 const connectionString = `${process.env.DATABASE_URL}`;
 const pool = new Pool({ connectionString });
@@ -34,41 +35,7 @@ async function main() {
   });
 
   // 3. Create Default Permissions
-  const permissionsList = [
-    'customers.view',
-    'customers.create',
-    'customers.update',
-    'customers.delete',
-    'leads.view',
-    'leads.create',
-    'leads.update',
-    'leads.delete',
-    'products.view',
-    'products.create',
-    'products.update',
-    'products.delete',
-    'terms.view',
-    'terms.create',
-    'terms.update',
-    'terms.delete',
-    'quotations.view',
-    'quotations.create',
-    'quotations.update',
-    'quotations.approve',
-    'quotations.generate_pdf',
-    'quotations.send',
-    'quotations.revise',
-    'quotations.convert_to_invoice',
-    'invoices.view',
-    'invoices.create',
-    'invoices.update',
-    'invoices.record_payment',
-    'invoices.generate_pdf',
-    'reports.view',
-    'settings.manage',
-    'users.manage',
-    'audit.view',
-  ];
+  const permissionsList = PERMISSION_ACTIONS;
 
   const permissionsMap = new Map<string, string>();
   for (const action of permissionsList) {

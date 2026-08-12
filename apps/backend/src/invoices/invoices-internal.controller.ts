@@ -1,29 +1,19 @@
-import {
-  Controller,
-  Get,
-  Param,
-  Headers,
-  ForbiddenException,
-} from '@nestjs/common';
+import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
+import { InternalRenderGuard } from '../common/guards/internal-render.guard';
 
 /**
- * Internal-only controller used by the Playwright PDF renderer.
- * No JWT auth guard — access is restricted by checking for the
- * x-internal-pdf-render header (only set by our own render-pdf pages).
+ * Internal-only controller used by the PDF renderer and the dashboard's Live
+ * Preview iframe. Access requires either a short-lived render token minted by
+ * PdfService or a valid user JWT — see InternalRenderGuard.
  */
+@UseGuards(InternalRenderGuard)
 @Controller('internal/invoices')
 export class InvoicesInternalController {
   constructor(private readonly invoicesService: InvoicesService) {}
 
   @Get(':id')
-  async findOneForPdf(
-    @Param('id') id: string,
-    @Headers('x-internal-pdf-render') internalHeader: string,
-  ) {
-    if (internalHeader !== '1') {
-      throw new ForbiddenException('Access denied');
-    }
+  async findOneForPdf(@Param('id') id: string) {
     return this.invoicesService.findOne(id);
   }
 }

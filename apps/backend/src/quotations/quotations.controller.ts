@@ -37,10 +37,12 @@ export class QuotationsController {
   @RequirePermissions('quotations.view')
   @Get()
   findAll(@Req() req: any, @Query() query: any) {
-    const { companyId, id, permissions } = req.user;
+    const { companyId, id, permissions, isSuperAdmin } = req.user;
 
     // If the user does not have view_all permission, restrict to their own quotations
-    if (!permissions || !permissions.includes('quotations.view_all')) {
+    const canViewAll =
+      isSuperAdmin || (permissions?.includes('quotations.view_all') ?? false);
+    if (!canViewAll) {
       query.createdById = id;
     }
 

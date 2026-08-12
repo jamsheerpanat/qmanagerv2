@@ -10,6 +10,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { MinioService } from '../minio/minio.service';
 import type { Response } from 'express';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { PermissionsGuard } from '../common/guards/permissions.guard';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
 
 @Controller()
 export class DocumentsController {
@@ -18,7 +20,8 @@ export class DocumentsController {
     private minio: MinioService,
   ) {}
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions('documents.view')
   @Get('documents/:id')
   async getDocument(@Param('id') id: string) {
     const document = await this.prisma.document.findUnique({ where: { id } });
@@ -26,7 +29,8 @@ export class DocumentsController {
     return document;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, PermissionsGuard)
+  @RequirePermissions('documents.view')
   @Get('documents/:id/download')
   async downloadDocument(@Param('id') id: string, @Res() res: Response) {
     const document = await this.prisma.document.findUnique({ where: { id } });

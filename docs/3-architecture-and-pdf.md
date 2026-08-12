@@ -4,8 +4,8 @@
 
 QManager v2 uses a Turborepo/PNPM workspace setup:
 
-- `apps/backend`: NestJS application, Prisma ORM, REST API.
-- `apps/frontend`: Next.js 14 (App Router), React, TailwindCSS, Zustand.
+- `apps/backend`: NestJS 11 application, Prisma 7 ORM, REST API.
+- `apps/frontend`: Next.js 16 (App Router), React 19, TailwindCSS v4, Zustand.
 - `packages/pdf-templates`: Shared React components dedicated strictly to PDF layout structures.
 
 ## Database Design
@@ -22,14 +22,33 @@ Key tables:
 
 Unlike traditional backend PDF generators (like `pdfkit` or `wkhtmltopdf`), QManager v2 leverages its own Next.js frontend to render pixel-perfect designs.
 
-### Flow
+Rendering is driven by **Playwright** (Chromium), not Puppeteer.
+
+### Synchronous flow (the default, used by "Generate PDF")
 
 1. User clicks "Generate PDF" in the UI.
-2. The Backend queues a BullMQ job (`pdf-queue`).
-3. The BullMQ worker (`pdf.processor.ts`) launches a Headless Chrome instance via Puppeteer.
-4. Puppeteer navigates to the hidden frontend route `/render-pdf/:service-slug?quotationId=...`.
-5. The Next.js page fetches the quotation data and renders a beautiful, print-ready HTML page.
-6. Puppeteer captures this HTML as a `.pdf` file.
-7. The Backend uploads the PDF to MinIO, updates the Document record, and notifies the user via WebSockets/SSE/Notifications.
+2. `PdfService.generatePdfSync` maps the quotation's ServiceType slug to a
+   template route and launches headless Chromium.
+3. The browser context carries a short-lived `x-internal-render-token` header.
+4. Chromium navigates to `/render-pdf/:template?quotationId=...`.
+5. That page fetches `/internal/quotations/:id` — the render token rides along
+   on the request and satisfies `InternalRenderGuard`.
+6. `page.pdf()` captures A4 output, which is streamed straight back to the
+   browser as a download. Nothing is persisted.
+
+The same `/render-pdf/*` routes back the dashboard's Live Preview iframe. In
+that case there is no render token, so the page forwards the signed-in user's
+JWT instead.
+
+### Asynchronous flow (optional, `ENABLE_PDF_QUEUE=1`)
+
+1. `POST /pdf/sample-quotation` creates a `Document` row and enqueues a BullMQ
+   job on `pdf-generation`.
+2. `pdf.processor.ts` renders the same way, then hashes the output (SHA-256),
+   uploads it to MinIO, marks the Document `PUBLISHED` and creates a
+   `DocumentVerification` token for QR verification.
+
+This pipeline is off by default so the API does not require a reachable Redis
+in order to boot.
 
 This architecture ensures that PDFs always match the exact styling tokens, fonts, and layouts defined in the shared React frontend.

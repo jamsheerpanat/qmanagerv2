@@ -63,8 +63,14 @@ export class PermissionsGuard implements CanActivate {
       }
     }
 
+    // Always expose the resolved permissions downstream, including for Super
+    // Admins. Publishing the literal ['*'] here used to break every controller
+    // that does its own `permissions.includes('x')` check (e.g. the
+    // quotations.view_all scoping), because '*' matches no specific action.
+    user.permissions = Array.from(userPermissions);
+    user.isSuperAdmin = isSuperAdmin;
+
     if (isSuperAdmin) {
-      user.permissions = ['*'];
       return true;
     }
 
@@ -74,9 +80,6 @@ export class PermissionsGuard implements CanActivate {
     if (!hasPermission) {
       throw new ForbiddenException('Insufficient permissions');
     }
-
-    // Attach permissions to user object for downstream use if needed
-    user.permissions = Array.from(userPermissions);
 
     return true;
   }

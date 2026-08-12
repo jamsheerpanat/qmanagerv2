@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { fetchForRender } from "@/lib/renderFetch";
 import { useEffect, useState, Suspense } from "react";
 import {
   ITInfraCoverPage,
@@ -34,10 +35,9 @@ function ITInfraRenderPageInner() {
         return;
       }
       try {
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/internal/quotations/${quotationId}`,
-          { headers: { "x-internal-pdf-render": "1" } },
-        );
+        const res = await fetchForRender(
+          `/internal/quotations/${quotationId}`,
+          );
         setData(
           res.ok
             ? transformQuotation(await res.json(), docId)

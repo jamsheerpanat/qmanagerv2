@@ -5,15 +5,19 @@ import * as Minio from 'minio';
 export class MinioService implements OnModuleInit {
   private minioClient: Minio.Client;
   private readonly logger = new Logger(MinioService.name);
-  private readonly bucketName = 'qmanager-documents';
+  private readonly bucketName =
+    process.env.MINIO_BUCKET || 'qmanager-documents';
 
   constructor() {
+    // Previously endpoint and credentials were hardcoded to the local docker
+    // mapping, so a deployed instance silently pointed at a MinIO that was not
+    // there and every upload failed.
     this.minioClient = new Minio.Client({
-      endPoint: 'localhost', // Docker host mapping
-      port: 9002,
-      useSSL: false,
-      accessKey: 'minioadmin',
-      secretKey: 'minioadmin',
+      endPoint: process.env.MINIO_ENDPOINT || 'localhost',
+      port: parseInt(process.env.MINIO_PORT || '9002', 10),
+      useSSL: process.env.MINIO_USE_SSL === 'true',
+      accessKey: process.env.MINIO_ACCESS_KEY || 'minioadmin',
+      secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
     });
   }
 

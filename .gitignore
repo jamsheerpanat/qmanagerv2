@@ -11,6 +11,8 @@ apps/backend/dist/
 # Environment & secrets
 .env
 .env.*
+# ...but the committed template must stay tracked.
+!.env.example
 Deploy.md
 
 # Generated / build artifacts

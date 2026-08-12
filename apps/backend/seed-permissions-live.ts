@@ -3,6 +3,7 @@ import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as fs from 'fs';
 import * as path from 'path';
+import { PERMISSION_ACTIONS } from './prisma/permissions';
 
 function getDbUrl() {
   try {
@@ -24,22 +25,15 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log('--- SEEDING PERMISSIONS & ROLES IN LIVE DB ---');
 
-  const termsPermissions = [
-    { action: 'terms.view', description: 'View Terms and Conditions' },
-    { action: 'terms.create', description: 'Create Terms and Conditions' },
-    { action: 'terms.update', description: 'Update Terms and Conditions' },
-    { action: 'terms.delete', description: 'Delete Terms and Conditions' },
-  ];
-
-  // 1. Create Permissions
-  for (const perm of termsPermissions) {
+  // 1. Create every permission the API actually enforces.
+  for (const action of PERMISSION_ACTIONS) {
     await prisma.permission.upsert({
-      where: { action: perm.action },
+      where: { action },
       update: {},
-      create: perm,
+      create: { action, description: `Allow ${action}` },
     });
   }
-  console.log('Terms permissions seeded successfully.');
+  console.log(`${PERMISSION_ACTIONS.length} permissions seeded successfully.`);
 
   // 2. Create Super Admin Role
   const superAdminRole = await prisma.role.upsert({
@@ -71,7 +65,18 @@ async function main() {
   }
   console.log('All permissions attached to Super Admin role.');
 
-  // 4. Grant Super Admin to all existing users
+  // 4. Optionally grant Super Admin to every existing user.
+  //    This is a break-glass recovery path, NOT something a deploy should do —
+  //    it hands full access to every account in the database. Opt in explicitly:
+  //      GRANT_SUPER_ADMIN_TO_ALL=1 npx ts-node seed-permissions-live.ts
+  if (process.env.GRANT_SUPER_ADMIN_TO_ALL !== '1') {
+    console.log(
+      'Skipping blanket Super Admin grant (set GRANT_SUPER_ADMIN_TO_ALL=1 to force).',
+    );
+    console.log('--- DONE! ---');
+    return;
+  }
+
   const allUsers = await prisma.user.findMany();
   if (allUsers.length === 0) {
     console.log('No users found in live database to grant Super Admin to!');

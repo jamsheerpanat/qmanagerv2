@@ -3,6 +3,7 @@ import { Job } from 'bullmq';
 import { chromium } from 'playwright';
 import { PrismaService } from '../prisma/prisma.service';
 import { MinioService } from '../minio/minio.service';
+import { PdfService, frontendBaseUrl, resolveTemplateRoute } from './pdf.service';
 import * as crypto from 'crypto';
 
 @Processor('pdf-generation')
@@ -10,6 +11,7 @@ export class PdfProcessor extends WorkerHost {
   constructor(
     private prisma: PrismaService,
     private minio: MinioService,
+    private pdfService: PdfService,
   ) {
     super();
   }
@@ -26,26 +28,14 @@ export class PdfProcessor extends WorkerHost {
 
     // Build render URL — service-specific templates use dedicated routes,
     // all others fall through to the generic [templateId] route.
-    const SERVICE_TEMPLATE_ROUTES: Record<string, string> = {
-      'home-automation': 'home-automation',
-      'smart-home': 'home-automation',
-      'smart-home-automation': 'home-automation',
-      'building-automation': 'building-automation',
-      bms: 'building-automation',
-      'software-development': 'software-development',
-      software: 'software-development',
-      'web-development': 'software-development',
-      'it-infrastructure': 'it-infrastructure',
-      'it-infra': 'it-infrastructure',
-      network: 'it-infrastructure',
-    };
-    const routeSegment = SERVICE_TEMPLATE_ROUTES[templateId] || templateId;
+    const routeSegment = resolveTemplateRoute(templateId);
     const qParam = quotationId ? `&quotationId=${quotationId}` : '';
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const renderUrl = `${baseUrl}/render-pdf/${routeSegment}?docId=${documentId}${qParam}`;
+    const renderUrl = `${frontendBaseUrl()}/render-pdf/${routeSegment}?docId=${documentId}${qParam}`;
+
+    let browser: Awaited<ReturnType<(typeof chromium)['launch']>> | undefined;
 
     try {
-      const browser = await chromium.launch({
+      browser = await chromium.launch({
         headless: true,
         args: [
           '--no-sandbox',
@@ -53,7 +43,12 @@ export class PdfProcessor extends WorkerHost {
           '--disable-dev-shm-usage',
         ],
       });
-      const page = await browser.newPage();
+      const context = await browser.newContext({
+        extraHTTPHeaders: {
+          'x-internal-render-token': this.pdfService.issueRenderToken(),
+        },
+      });
+      const page = await context.newPage();
 
       await page.goto(renderUrl, { waitUntil: 'networkidle' });
 
@@ -62,8 +57,6 @@ export class PdfProcessor extends WorkerHost {
         printBackground: true,
         margin: { top: '0mm', right: '0mm', bottom: '0mm', left: '0mm' },
       });
-
-      await browser.close();
 
       const hash = crypto.createHash('sha256').update(pdfBuffer).digest('hex');
       const fileName = `document-${documentId}-${Date.now()}.pdf`;
@@ -106,6 +99,9 @@ export class PdfProcessor extends WorkerHost {
         data: { status: 'FAILED' },
       });
       throw error;
+    } finally {
+      // The browser used to leak on every failed job.
+      await browser?.close().catch(() => undefined);
     }
   }
 }

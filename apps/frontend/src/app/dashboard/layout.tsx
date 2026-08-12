@@ -121,7 +121,10 @@ const NAV_SECTIONS = [
         href: "/dashboard/settings",
         label: "Settings",
         icon: Settings,
-        perm: "settings.view",
+        // The settings API enforces settings.manage; there is no separate
+        // read-only permission, and gating on an unseeded "settings.view"
+        // hid this link from every user including Super Admin.
+        perm: "settings.manage",
       },
       {
         href: "/dashboard/settings/templates",
@@ -312,7 +315,9 @@ export default function DashboardLayout({
                   textTransform: "capitalize",
                 }}
               >
-                {user.role?.toLowerCase() || "user"}
+                {/* /auth/me returns `roles` (an array of names), never `role` —
+                    reading `user.role` always fell through to "user". */}
+                {user.roles?.[0]?.toLowerCase() || "user"}
               </div>
             </div>
           </div>

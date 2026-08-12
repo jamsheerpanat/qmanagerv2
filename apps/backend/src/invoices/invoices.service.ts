@@ -15,8 +15,30 @@ import {
   PaymentStatus,
   InvoiceType,
   DiscountType,
+  ItemType,
 } from '@prisma/client';
 import { PdfService } from '../pdf/pdf.service';
+import * as crypto from 'crypto';
+
+/**
+ * Migration baseline: production had 450 invoices before the QManager v2
+ * launch, so issued numbers start at INV-YYYY-0451.
+ */
+const INVOICE_SEQ_BASELINE = 450;
+
+/** Namespace for pg_advisory_xact_lock so invoice and quotation locks differ. */
+const INVOICE_LOCK_NAMESPACE = 1002;
+
+/** Query params that may be forwarded into the Prisma `where` clause. */
+const ALLOWED_LIST_FILTERS = [
+  'invoiceStatus',
+  'paymentStatus',
+  'invoiceType',
+  'customerId',
+  'createdById',
+  'branchId',
+  'quotationId',
+] as const;
 
 @Injectable()
 export class InvoicesService {
@@ -24,6 +46,11 @@ export class InvoicesService {
     private prisma: PrismaService,
     private pdfService: PdfService,
   ) {}
+
+  /** Stable signed int32 derived from an id, for Postgres advisory locks. */
+  private lockKeyFor(id: string): number {
+    return crypto.createHash('sha1').update(id).digest().readInt32BE(0);
+  }
 
   async create(dto: CreateInvoiceDto, userId?: string) {
     const { items, ...invoiceData } = dto;
@@ -134,8 +161,18 @@ export class InvoicesService {
   }
 
   async findAll(companyId: string, filters: any = {}) {
+    // Only forward known-safe filter keys. Spreading raw query params would let
+    // a caller pass ?companyId=<other-tenant> and override the scope below.
+    const where: any = {};
+    for (const key of ALLOWED_LIST_FILTERS) {
+      if (filters?.[key] !== undefined && filters[key] !== '') {
+        where[key] = filters[key];
+      }
+    }
+    where.companyId = companyId;
+
     return this.prisma.invoice.findMany({
-      where: { companyId, ...filters },
+      where,
       include: { customer: true },
       orderBy: { createdAt: 'desc' },
     });
@@ -193,6 +230,21 @@ export class InvoicesService {
     await this.prisma.invoiceItem.deleteMany({ where: { invoiceId: id } });
 
     const itemsData = itemsDto.map((item, index) => {
+      // Section headings are layout only — they must never carry money, or the
+      // rollup below double-counts whatever stray qty/price they were sent with.
+      if (item.itemType === ItemType.SECTION_HEADING) {
+        return {
+          ...item,
+          invoiceId: id,
+          sortOrder: item.sortOrder ?? index,
+          quantity: 0,
+          unitPrice: 0,
+          discountAmount: 0,
+          taxAmount: 0,
+          lineTotal: 0,
+        };
+      }
+
       let discountAmount = 0;
       const qty = item.quantity || 1;
       const price = item.unitPrice || 0;
@@ -230,6 +282,8 @@ export class InvoicesService {
     let subtotal = 0,
       taxAmount = 0;
     inv.items.forEach((item) => {
+      // Mirrors QuotationsService.recalculateTotals — headings are not money.
+      if (item.itemType === ItemType.SECTION_HEADING) return;
       const qty = item.quantity || 1;
       const price = item.unitPrice || 0;
       subtotal += qty * price - (item.discountAmount || 0);
@@ -268,28 +322,51 @@ export class InvoicesService {
 
     const prefix = inv.company.invoicePrefix || 'INV';
     const year = new Date().getFullYear();
-    const count = await this.prisma.invoice.count({
-      where: {
-        companyId: inv.companyId,
-        invoiceDate: {
-          gte: new Date(`${year}-01-01`),
-          lte: new Date(`${year}-12-31`),
-        },
-        invoiceStatus: { not: InvoiceStatus.DRAFT },
-      },
-    });
 
-    const seq = (count + 450 + 1).toString().padStart(4, '0');
-    const invoiceNumber = `${prefix}-${year}-${seq}`;
+    // Previously this counted non-DRAFT invoices and added a fixed offset, so
+    // cancelling or deleting any invoice made the next issue() reuse a number
+    // that already existed — a hard failure on the unique invoiceNumber column.
+    // Derive from the highest number actually issued instead, under a
+    // transaction-scoped advisory lock so concurrent issues cannot collide.
+    await this.prisma.$transaction(
+      async (tx) => {
+        // Selected via FROM so the statement yields a typed boolean column:
+        // pg_advisory_xact_lock() returns void, which Prisma cannot deserialize.
+        await tx.$queryRaw`SELECT true AS locked FROM pg_advisory_xact_lock(${INVOICE_LOCK_NAMESPACE}::int, ${this.lockKeyFor(inv.companyId)}::int)`;
 
-    await this.prisma.invoice.update({
-      where: { id },
-      data: {
-        invoiceNumber,
-        invoiceStatus: InvoiceStatus.ISSUED,
-        invoiceDate: new Date(),
+        const lastInvoice = await tx.invoice.findFirst({
+          where: {
+            companyId: inv.companyId,
+            invoiceNumber: { startsWith: `${prefix}-${year}-` },
+          },
+          orderBy: { invoiceNumber: 'desc' },
+          select: { invoiceNumber: true },
+        });
+
+        let lastSeq = 0;
+        if (lastInvoice?.invoiceNumber) {
+          const tail = lastInvoice.invoiceNumber.slice(
+            lastInvoice.invoiceNumber.lastIndexOf('-') + 1,
+          );
+          const parsedSeq = parseInt(tail, 10);
+          if (!Number.isNaN(parsedSeq)) lastSeq = parsedSeq;
+        }
+
+        if (lastSeq < INVOICE_SEQ_BASELINE) lastSeq = INVOICE_SEQ_BASELINE;
+
+        const seq = (lastSeq + 1).toString().padStart(4, '0');
+
+        await tx.invoice.update({
+          where: { id },
+          data: {
+            invoiceNumber: `${prefix}-${year}-${seq}`,
+            invoiceStatus: InvoiceStatus.ISSUED,
+            invoiceDate: new Date(),
+          },
+        });
       },
-    });
+      { timeout: 15000 },
+    );
 
     return this.findOne(id);
   }

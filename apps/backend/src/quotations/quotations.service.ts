@@ -17,6 +17,26 @@ import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { PdfService } from '../pdf/pdf.service';
 
+/**
+ * Migration baseline: production had 469 quotations before the QManager v2
+ * launch. New quotations continue from QT-YYYY-0470+ and never collide with
+ * legacy numbering. Safe to remove once the sequence naturally exceeds it.
+ */
+const QUOTATION_SEQ_BASELINE = 469;
+
+/** Namespace for pg_advisory_xact_lock so quotation and invoice locks differ. */
+const QUOTATION_LOCK_NAMESPACE = 1001;
+
+/** Query params that may be forwarded into the Prisma `where` clause. */
+const ALLOWED_LIST_FILTERS = [
+  'status',
+  'serviceTypeId',
+  'customerId',
+  'createdById',
+  'branchId',
+  'leadId',
+] as const;
+
 @Injectable()
 export class QuotationsService {
   private readonly logger = new Logger(QuotationsService.name);
@@ -25,6 +45,11 @@ export class QuotationsService {
     private prisma: PrismaService,
     private pdfService: PdfService,
   ) {}
+
+  /** Stable signed int32 derived from an id, for Postgres advisory locks. */
+  private lockKeyFor(id: string): number {
+    return crypto.createHash('sha1').update(id).digest().readInt32BE(0);
+  }
 
   private async checkLock(id: string) {
     const q = await this.prisma.quotation.findUnique({ where: { id } });
@@ -50,43 +75,6 @@ export class QuotationsService {
     const prefix = company.quotationPrefix || 'QTN';
     const year = new Date().getFullYear();
 
-    // Find the latest quotation to determine the next sequence number safely
-    const lastQuotation = await this.prisma.quotation.findFirst({
-      where: {
-        companyId: company.id,
-        issueDate: {
-          gte: new Date(`${year}-01-01`),
-          lte: new Date(`${year}-12-31`),
-        },
-        revisionNumber: 0, // Count only base quotations
-      },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
-
-    let lastSeq = 0;
-    if (lastQuotation && lastQuotation.quotationNumber) {
-      // Assuming format PREFIX-YYYY-SEQ (e.g., QTN-2026-0001)
-      const parts = lastQuotation.quotationNumber.split('-');
-      if (parts.length >= 3) {
-        const parsedSeq = parseInt(parts[2], 10);
-        if (!isNaN(parsedSeq)) {
-          lastSeq = parsedSeq;
-        }
-      }
-    }
-
-    // Migration baseline: production had 469 quotations before QManager v2 launch.
-    // This ensures new quotations continue from QT-YYYY-0470+ and never collide
-    // with legacy numbering. Safe to remove once lastSeq naturally exceeds 469.
-    if (lastSeq < 469) {
-      lastSeq = 469;
-    }
-
-    const seq = (lastSeq + 1).toString().padStart(4, '0');
-    const quotationNumber = `${prefix}-${year}-${seq}`;
-
     let validUntil = createQuotationDto.validUntil;
     if (!validUntil && company.defaultQuotationValidityDays) {
       const date = new Date();
@@ -94,32 +82,83 @@ export class QuotationsService {
       validUntil = date;
     }
 
-    const quotation = await this.prisma.quotation.create({
-      data: {
-        ...createQuotationDto,
-        quotationNumber,
-        validUntil,
-        status: QuotationStatus.DRAFT,
-        createdById: userId,
-      },
-    });
+    // Allocating the number and inserting the row must be atomic, otherwise two
+    // concurrent creates read the same "last" number and collide on the
+    // @@unique([quotationNumber, revisionNumber]) constraint. A transaction-
+    // scoped advisory lock serialises allocation per company; it is released
+    // automatically when the transaction commits or rolls back.
+    const quotation = await this.prisma.$transaction(
+      async (tx) => {
+        // Selected via FROM so the statement yields a typed boolean column:
+        // pg_advisory_xact_lock() returns void, which Prisma cannot deserialize.
+        await tx.$queryRaw`SELECT true AS locked FROM pg_advisory_xact_lock(${QUOTATION_LOCK_NAMESPACE}::int, ${this.lockKeyFor(company.id)}::int)`;
 
-    if (serviceType.termsTemplates.length > 0) {
-      const termsData = serviceType.termsTemplates.map((t) => ({
-        quotationId: quotation.id,
-        categoryId: t.categoryId,
-        content: t.content,
-        sortOrder: t.sortOrder,
-      }));
-      await this.prisma.quotationTerm.createMany({ data: termsData });
-    }
+        const lastQuotation = await tx.quotation.findFirst({
+          where: {
+            companyId: company.id,
+            quotationNumber: { startsWith: `${prefix}-${year}-` },
+          },
+          orderBy: { quotationNumber: 'desc' },
+          select: { quotationNumber: true },
+        });
+
+        let lastSeq = 0;
+        if (lastQuotation?.quotationNumber) {
+          // Format is PREFIX-YYYY-SEQ (e.g. QT-2026-0470). Read the trailing
+          // segment so prefixes containing a dash still parse correctly.
+          const tail = lastQuotation.quotationNumber.slice(
+            lastQuotation.quotationNumber.lastIndexOf('-') + 1,
+          );
+          const parsedSeq = parseInt(tail, 10);
+          if (!Number.isNaN(parsedSeq)) lastSeq = parsedSeq;
+        }
+
+        if (lastSeq < QUOTATION_SEQ_BASELINE) lastSeq = QUOTATION_SEQ_BASELINE;
+
+        const seq = (lastSeq + 1).toString().padStart(4, '0');
+
+        const created = await tx.quotation.create({
+          data: {
+            ...createQuotationDto,
+            quotationNumber: `${prefix}-${year}-${seq}`,
+            validUntil,
+            status: QuotationStatus.DRAFT,
+            createdById: userId,
+          },
+        });
+
+        if (serviceType.termsTemplates.length > 0) {
+          await tx.quotationTerm.createMany({
+            data: serviceType.termsTemplates.map((t) => ({
+              quotationId: created.id,
+              categoryId: t.categoryId,
+              content: t.content,
+              sortOrder: t.sortOrder,
+            })),
+          });
+        }
+
+        return created;
+      },
+      { timeout: 15000 },
+    );
 
     return this.findOne(quotation.id);
   }
 
   async findAll(companyId: string, filters: any = {}) {
+    // Only forward known-safe filter keys. Spreading raw query params would let
+    // a caller pass ?companyId=<other-tenant> and override the scope below.
+    const where: any = {};
+    for (const key of ALLOWED_LIST_FILTERS) {
+      if (filters?.[key] !== undefined && filters[key] !== '') {
+        where[key] = filters[key];
+      }
+    }
+    where.companyId = companyId;
+
     return this.prisma.quotation.findMany({
-      where: { companyId, ...filters },
+      where,
       include: {
         customer: true,
         serviceType: true,

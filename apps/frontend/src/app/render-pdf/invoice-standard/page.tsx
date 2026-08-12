@@ -1,6 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { fetchForRender } from "@/lib/renderFetch";
 import { useEffect, useState, Suspense } from "react";
 import { ModernInvoicePage } from "@qmanager/pdf-templates";
 import { format } from "date-fns";
@@ -34,12 +35,8 @@ function InvoiceStandardRenderPageInner() {
       }
       try {
         const endpoint = searchParams.get("invoiceId") ? "invoices" : "quotations";
-        const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"}/internal/${endpoint}/${invoiceId}`,
-          { 
-            headers: { "x-internal-pdf-render": "1" },
-            cache: "no-store"
-          },
+        const res = await fetchForRender(
+          `/internal/${endpoint}/${invoiceId}`,
         );
         if (res.ok) {
           const invData = await res.json();
