@@ -6,6 +6,7 @@ final class InvoiceListModel {
     var phase: LoadPhase<[Invoice]> = .idle
     var search = ""
     var scope: Scope = .all
+    var isStale = false
 
     enum Scope: String, CaseIterable, Identifiable {
         case all = "All"
@@ -40,10 +41,20 @@ final class InvoiceListModel {
         (phase.value ?? []).reduce(0) { $0 + $1.balanceAmount }
     }
 
+    func loadCached() async {
+        if phase.value == nil, let cached = await api.cached("invoices", as: [Invoice].self) {
+            phase = .loaded(cached)
+            isStale = true
+        }
+    }
+
     func load(showSpinner: Bool = true) async {
         if showSpinner, phase.value == nil { phase = .loading }
         do {
-            phase = .loaded(try await api.get("invoices", as: [Invoice].self))
+            phase = .loaded(
+                try await api.get("invoices", as: [Invoice].self, cacheKey: "invoices")
+            )
+            isStale = false
         } catch {
             if phase.value == nil { phase = .failed(error) }
         }
@@ -70,7 +81,10 @@ struct InvoiceListView: View {
             .navigationTitle("Invoices")
             .searchable(text: $model.search, prompt: "Invoice number or customer")
             .refreshable { await model.load(showSpinner: false) }
-            .task { if model.phase.value == nil { await model.load() } }
+            .task {
+                await model.loadCached()
+                await model.load(showSpinner: model.phase.value == nil)
+            }
             .toolbar {
                 if session.can(.invoicesCreate) {
                     ToolbarItem(placement: .topBarTrailing) {

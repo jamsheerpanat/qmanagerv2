@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 @MainActor
 @Observable
@@ -6,6 +7,7 @@ final class QuotationListModel {
     var phase: LoadPhase<[Quotation]> = .idle
     var search = ""
     var statusFilter: QuotationStatus?
+    var isStale = false
 
     private let api: APIClient
     init(api: APIClient = .shared) { self.api = api }
@@ -30,11 +32,23 @@ final class QuotationListModel {
         return QuotationStatus.allCases.filter { present.contains($0) }
     }
 
+    /// Paint from cache first so the list is instant and works offline.
+    func loadCached() async {
+        if phase.value == nil, let cached = await api.cached("quotations", as: [Quotation].self) {
+            phase = .loaded(cached)
+            isStale = true
+        }
+    }
+
     func load(showSpinner: Bool = true) async {
         if showSpinner, phase.value == nil { phase = .loading }
         do {
-            phase = .loaded(try await api.get("quotations", as: [Quotation].self))
+            phase = .loaded(
+                try await api.get("quotations", as: [Quotation].self, cacheKey: "quotations")
+            )
+            isStale = false
         } catch {
+            // Cached rows are better than an error screen.
             if phase.value == nil { phase = .failed(error) }
         }
     }
@@ -60,7 +74,10 @@ struct QuotationListView: View {
             .navigationTitle("Quotations")
             .searchable(text: $model.search, prompt: "Number, project or customer")
             .refreshable { await model.load(showSpinner: false) }
-            .task { if model.phase.value == nil { await model.load() } }
+            .task {
+                await model.loadCached()
+                await model.load(showSpinner: model.phase.value == nil)
+            }
             .toolbar {
                 if session.can(.quotationsCreate) {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -119,6 +136,30 @@ struct QuotationListView: View {
                 ForEach(model.filtered) { quotation in
                     NavigationLink(value: quotation) {
                         QuotationRow(quotation: quotation)
+                    }
+                    .contextMenu {
+                        Button {
+                            UIPasteboard.general.string = quotation.quotationNumber
+                            Haptics.tap()
+                        } label: {
+                            Label("Copy Number", systemImage: "doc.on.doc")
+                        }
+
+                        if let phone = quotation.customer?.phone?.nilIfBlank,
+                           let url = URL(string: "tel://\(phone.filter { !$0.isWhitespace })") {
+                            Link(destination: url) {
+                                Label("Call Customer", systemImage: "phone")
+                            }
+                        }
+
+                        if let email = quotation.customer?.email?.nilIfBlank,
+                           let url = URL(string: "mailto:\(email)") {
+                            Link(destination: url) {
+                                Label("Email Customer", systemImage: "envelope")
+                            }
+                        }
+                    } preview: {
+                        QuotationPreview(quotation: quotation)
                     }
                 }
             }
@@ -205,5 +246,52 @@ struct QuotationRow: View {
             }
         }
         .padding(.vertical, 4)
+    }
+}
+
+/// Rich preview shown when long-pressing a quotation row.
+struct QuotationPreview: View {
+    let quotation: Quotation
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text(quotation.quotationNumber).font(.headline)
+                Spacer()
+                StatusChip(
+                    text: quotation.status.label,
+                    tint: quotation.status.tint,
+                    symbol: quotation.status.symbol
+                )
+            }
+
+            if let title = quotation.projectTitle?.nilIfBlank {
+                Text(title).font(.subheadline).foregroundStyle(.secondary)
+            }
+
+            if let customer = quotation.customer?.displayName {
+                Label(customer, systemImage: "building.2")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Divider()
+
+            HStack {
+                Text("Grand Total").font(.caption).foregroundStyle(.secondary)
+                Spacer()
+                Text(Format.money(quotation.grandTotal, currency: quotation.currency))
+                    .font(.headline)
+                    .foregroundStyle(Brand.primary)
+            }
+
+            if let deadline = Format.deadline(quotation.validUntil) {
+                Label(deadline, systemImage: "calendar")
+                    .font(.caption2)
+                    .foregroundStyle(quotation.isExpired ? .red : .secondary)
+            }
+        }
+        .padding(16)
+        .frame(width: 280)
     }
 }

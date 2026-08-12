@@ -1,7 +1,7 @@
 import SwiftUI
 
 /// Decodes an API enum without exploding when the backend gains a new case.
-nonisolated protocol LenientEnum: RawRepresentable, Decodable, Sendable, Hashable
+nonisolated protocol LenientEnum: RawRepresentable, Codable, Sendable, Hashable
 where RawValue == String {
     static var fallback: Self { get }
 }

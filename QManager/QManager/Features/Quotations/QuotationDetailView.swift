@@ -114,6 +114,7 @@ struct QuotationDetailView: View {
     let preview: Quotation?
 
     @Environment(SessionStore.self) private var session
+    @Environment(RecentsStore.self) private var recents
     @State private var model: QuotationDetailModel
     @State private var pdf = PDFDownloader()
     @State private var commentPrompt: CommentPrompt?
@@ -148,8 +149,21 @@ struct QuotationDetailView: View {
         }
         .navigationTitle(quotation?.quotationNumber ?? "Quotation")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await model.load() }
+        .task {
+            await model.load()
+            if let quotation = model.quotation {
+                recents.record(
+                    .quotation,
+                    id: quotation.id,
+                    title: quotation.quotationNumber,
+                    subtitle: quotation.customer?.displayName ?? quotation.status.label
+                )
+            }
+        }
         .refreshable { await model.load() }
+        .onChange(of: model.actionError) { _, message in
+            if message != nil { Haptics.error() }
+        }
         .toolbar { toolbarContent }
         .sheet(item: $pdf.fileURL.map()) { wrapper in
             PDFPreview(url: wrapper.url, title: quotation?.quotationNumber ?? "Quotation")

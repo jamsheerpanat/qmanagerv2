@@ -20,6 +20,79 @@ final class NewQuotationModel {
     private let api: APIClient
     init(api: APIClient = .shared) { self.api = api }
 
+    // MARK: Draft persistence
+
+    private static let draftKey = "qmanager.quotationDraft"
+
+    private struct Snapshot: Codable {
+        var customerID: String
+        var serviceTypeID: String
+        var projectTitle: String
+        var projectLocation: String
+        var currency: String
+        var scopeSummary: String
+        var discountType: DiscountType
+        var discountValue: Double
+        var items: [ItemDraft]
+        var terms: [TermDraft]
+        var savedAt: Date
+    }
+
+    /// True when a previous session left unfinished work behind.
+    static func hasSavedDraft() -> Bool {
+        UserDefaults.standard.data(forKey: draftKey) != nil
+    }
+
+    static func savedDraftDate() -> Date? {
+        guard
+            let data = UserDefaults.standard.data(forKey: draftKey),
+            let snapshot = try? JSONDecoder().decode(Snapshot.self, from: data)
+        else { return nil }
+        return snapshot.savedAt
+    }
+
+    /// Called as the user moves through the wizard. Cheap enough to run on
+    /// every step change, and it means a crash or a phone call costs nothing.
+    func saveDraft() {
+        guard !isEmpty else { return }
+        let snapshot = Snapshot(
+            customerID: customerID, serviceTypeID: serviceTypeID,
+            projectTitle: projectTitle, projectLocation: projectLocation,
+            currency: currency, scopeSummary: scopeSummary,
+            discountType: discountType, discountValue: discountValue,
+            items: items, terms: terms, savedAt: Date()
+        )
+        if let data = try? JSONEncoder().encode(snapshot) {
+            UserDefaults.standard.set(data, forKey: Self.draftKey)
+        }
+    }
+
+    func restoreDraft() {
+        guard
+            let data = UserDefaults.standard.data(forKey: Self.draftKey),
+            let snapshot = try? JSONDecoder().decode(Snapshot.self, from: data)
+        else { return }
+
+        customerID = snapshot.customerID
+        serviceTypeID = snapshot.serviceTypeID
+        projectTitle = snapshot.projectTitle
+        projectLocation = snapshot.projectLocation
+        currency = snapshot.currency
+        scopeSummary = snapshot.scopeSummary
+        discountType = snapshot.discountType
+        discountValue = snapshot.discountValue
+        items = snapshot.items
+        terms = snapshot.terms
+    }
+
+    func discardDraft() {
+        UserDefaults.standard.removeObject(forKey: Self.draftKey)
+    }
+
+    private var isEmpty: Bool {
+        customerID.isEmpty && projectTitle.isEmpty && items.isEmpty && terms.isEmpty
+    }
+
     var subtotal: Double {
         items.filter { !$0.isHeading && !$0.isOptional }.reduce(0) { $0 + $1.lineTotal }
     }
@@ -79,6 +152,7 @@ final class NewQuotationModel {
                 try await api.send("quotations/\(quotation.id)/terms", method: .post, body: payload)
             }
 
+            discardDraft()
             return quotation.id
         } catch {
             errorMessage = (error as? APIError)?.errorDescription ?? error.localizedDescription
@@ -96,6 +170,7 @@ struct NewQuotationView: View {
 
     @State private var model = NewQuotationModel()
     @State private var step = 0
+    @State private var showsResumePrompt = false
 
     private let steps = ["Customer", "Project", "Items", "Terms", "Review"]
 
@@ -125,7 +200,27 @@ struct NewQuotationView: View {
                     Button("Cancel") { dismiss() }
                 }
             }
-            .task { await catalog.loadIfNeeded() }
+            .task {
+                await catalog.loadIfNeeded()
+                showsResumePrompt = NewQuotationModel.hasSavedDraft()
+            }
+            // Autosave as the user advances, so an interruption costs nothing.
+            .onChange(of: step) { _, _ in model.saveDraft() }
+            .confirmationDialog(
+                "Resume unfinished quotation?",
+                isPresented: $showsResumePrompt,
+                titleVisibility: .visible
+            ) {
+                Button("Resume") {
+                    model.restoreDraft()
+                    Haptics.tap()
+                }
+                Button("Start Fresh", role: .destructive) { model.discardDraft() }
+            } message: {
+                if let date = NewQuotationModel.savedDraftDate() {
+                    Text("You have a draft from \(Format.relative(date)).")
+                }
+            }
             .overlay {
                 if model.isSaving { LoadingState(message: "Creating quotation…") }
             }
@@ -303,8 +398,11 @@ struct NewQuotationView: View {
                     Task {
                         guard let companyID = session.user?.companyId else { return }
                         if let id = await model.save(companyID: companyID) {
+                            Haptics.success()
                             onCreated(id)
                             dismiss()
+                        } else {
+                            Haptics.error()
                         }
                     }
                 } label: {

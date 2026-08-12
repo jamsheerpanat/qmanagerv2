@@ -76,6 +76,31 @@ actor APIClient {
         return try decode(data)
     }
 
+    /// GET that also writes the raw response to the offline cache.
+    func get<T: Decodable & Sendable>(
+        _ path: String,
+        query: [String: String] = [:],
+        as type: T.Type = T.self,
+        cacheKey: String
+    ) async throws -> T {
+        let data = try await perform(path: path, method: .get, query: query, body: nil)
+        let value: T = try decode(data)
+        // Only cache what decoded cleanly, so a schema change cannot poison the
+        // cache with data the app will choke on at next launch.
+        await ResponseCache.shared.store(data, for: cacheKey)
+        return value
+    }
+
+    /// Last-known-good value for a cache key, or nil.
+    func cached<T: Decodable & Sendable>(_ cacheKey: String, as type: T.Type) async -> T? {
+        guard let data = await ResponseCache.shared.data(for: cacheKey) else { return nil }
+        return try? Self.decoder.decode(T.self, from: data)
+    }
+
+    func cacheDate(_ cacheKey: String) async -> Date? {
+        await ResponseCache.shared.age(for: cacheKey)
+    }
+
     @discardableResult
     func post<T: Decodable & Sendable>(
         _ path: String,
@@ -342,6 +367,8 @@ actor APIClient {
         // Best effort: revoke server-side, then drop local state regardless.
         try? await send("auth/logout", method: .post)
         await tokens.clear()
+        // Cached commercial data must not survive the session.
+        await ResponseCache.shared.clear()
     }
 
     private func endSession() async {

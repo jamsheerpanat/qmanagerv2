@@ -62,6 +62,7 @@ struct InvoiceDetailView: View {
     let preview: Invoice?
 
     @Environment(SessionStore.self) private var session
+    @Environment(RecentsStore.self) private var recents
     @State private var model: InvoiceDetailModel
     @State private var pdf = PDFDownloader()
     @State private var showsPaymentSheet = false
@@ -86,7 +87,17 @@ struct InvoiceDetailView: View {
         }
         .navigationTitle(invoice?.displayNumber ?? "Invoice")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await model.load() }
+        .task {
+            await model.load()
+            if let invoice = model.invoice {
+                recents.record(
+                    .invoice,
+                    id: invoice.id,
+                    title: invoice.displayNumber,
+                    subtitle: invoice.customer?.displayName ?? invoice.invoiceStatus.label
+                )
+            }
+        }
         .refreshable { await model.load() }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -114,7 +125,9 @@ struct InvoiceDetailView: View {
         .sheet(isPresented: $showsPaymentSheet) {
             if let invoice {
                 RecordPaymentView(invoice: invoice) { draft in
-                    await model.recordPayment(draft)
+                    let ok = await model.recordPayment(draft)
+                    if ok { Haptics.success() } else { Haptics.error() }
+                    return ok
                 }
             }
         }

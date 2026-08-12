@@ -1,10 +1,12 @@
 import SwiftUI
+import UIKit
 
 @MainActor
 @Observable
 final class CustomerListModel {
     var phase: LoadPhase<[Customer]> = .idle
     var search = ""
+    var isStale = false
 
     private let api: APIClient
     init(api: APIClient = .shared) { self.api = api }
@@ -22,10 +24,20 @@ final class CustomerListModel {
         }
     }
 
+    func loadCached() async {
+        if phase.value == nil, let cached = await api.cached("customers", as: [Customer].self) {
+            phase = .loaded(cached)
+            isStale = true
+        }
+    }
+
     func load(showSpinner: Bool = true) async {
         if showSpinner, phase.value == nil { phase = .loading }
         do {
-            phase = .loaded(try await api.get("customers", as: [Customer].self))
+            phase = .loaded(
+                try await api.get("customers", as: [Customer].self, cacheKey: "customers")
+            )
+            isStale = false
         } catch {
             if phase.value == nil { phase = .failed(error) }
         }
@@ -55,6 +67,32 @@ struct CustomerListView: View {
                             NavigationLink(value: customer) {
                                 CustomerRow(customer: customer)
                             }
+                            .contextMenu {
+                                if let phone = customer.phone?.nilIfBlank,
+                                   let url = URL(string: "tel://\(phone.filter { !$0.isWhitespace })") {
+                                    Link(destination: url) {
+                                        Label("Call", systemImage: "phone")
+                                    }
+                                }
+                                if let whatsapp = customer.whatsapp?.nilIfBlank,
+                                   let url = URL(string: "https://wa.me/\(whatsapp.filter(\.isNumber))") {
+                                    Link(destination: url) {
+                                        Label("WhatsApp", systemImage: "message")
+                                    }
+                                }
+                                if let email = customer.email?.nilIfBlank,
+                                   let url = URL(string: "mailto:\(email)") {
+                                    Link(destination: url) {
+                                        Label("Email", systemImage: "envelope")
+                                    }
+                                }
+                                Button {
+                                    UIPasteboard.general.string = customer.customerCode
+                                    Haptics.tap()
+                                } label: {
+                                    Label("Copy Code", systemImage: "doc.on.doc")
+                                }
+                            }
                         }
                     }
                 }
@@ -66,7 +104,10 @@ struct CustomerListView: View {
             .navigationTitle("Customers")
             .searchable(text: $model.search, prompt: "Name, code, email or phone")
             .refreshable { await model.load(showSpinner: false) }
-            .task { if model.phase.value == nil { await model.load() } }
+            .task {
+                await model.loadCached()
+                await model.load(showSpinner: model.phase.value == nil)
+            }
             .toolbar {
                 if session.can(.customersCreate) {
                     ToolbarItem(placement: .topBarTrailing) {
@@ -143,6 +184,7 @@ struct CustomerDetailView: View {
     let preview: Customer?
 
     @Environment(SessionStore.self) private var session
+    @Environment(RecentsStore.self) private var recents
     @State private var model: CustomerDetailModel
     @State private var showsEdit = false
     @State private var showsNewContact = false
@@ -187,7 +229,17 @@ struct CustomerDetailView: View {
         }
         .navigationTitle(customer?.displayName ?? "Customer")
         .navigationBarTitleDisplayMode(.inline)
-        .task { await model.load() }
+        .task {
+            await model.load()
+            if let customer = model.customer {
+                recents.record(
+                    .customer,
+                    id: customer.id,
+                    title: customer.displayName,
+                    subtitle: customer.customerCode
+                )
+            }
+        }
         .refreshable { await model.load() }
         .toolbar {
             if session.can(.customersUpdate), customer != nil {

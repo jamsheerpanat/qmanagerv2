@@ -5,8 +5,8 @@ import Foundation
 /// The backend replaces the whole item collection on save (`POST
 /// /quotations/:id/items` does deleteMany + createMany), so the UI keeps a plain
 /// array and posts it wholesale rather than diffing.
-nonisolated struct ItemDraft: Identifiable, Hashable {
-    let id = UUID()
+nonisolated struct ItemDraft: Identifiable, Hashable, Codable {
+    var id = UUID()
     var itemType: ItemType = .product
     var sectionTitle: String = ""
     var description: String = ""
@@ -146,8 +146,8 @@ nonisolated struct TermPayload: Encodable, Sendable {
     let sortOrder: Int
 }
 
-nonisolated struct TermDraft: Identifiable, Hashable {
-    let id = UUID()
+nonisolated struct TermDraft: Identifiable, Hashable, Codable {
+    var id = UUID()
     var content: String
     var categoryId: String?
 
