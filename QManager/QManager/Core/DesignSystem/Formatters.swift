@@ -16,13 +16,13 @@ nonisolated enum Format {
     // one (11.7µs vs 0.4µs). A single list row formats several amounts and
     // re-renders on every scroll frame, so this was the hottest path in the UI.
     //
-    // `nonisolated(unsafe)` is deliberate: NumberFormatter and
-    // RelativeDateTimeFormatter are documented as thread-safe for *formatting*
-    // on modern Foundation, and these instances are configured once at creation
-    // and never mutated afterwards.
+    // RelativeDateTimeFormatter is not marked Sendable, but formatting with a
+    // fixed configuration is thread-safe and these are never mutated after
+    // creation — hence the escape hatch on that one only.
 
-    private nonisolated(unsafe) static let twoDecimalFormatter = makeNumberFormatter(digits: 2)
-    private nonisolated(unsafe) static let threeDecimalFormatter = makeNumberFormatter(digits: 3)
+    // NumberFormatter is Sendable, so these need no escape hatch.
+    private static let twoDecimalFormatter = makeNumberFormatter(digits: 2)
+    private static let threeDecimalFormatter = makeNumberFormatter(digits: 3)
     private nonisolated(unsafe) static let relativeFormatter: RelativeDateTimeFormatter = {
         let formatter = RelativeDateTimeFormatter()
         formatter.unitsStyle = .short

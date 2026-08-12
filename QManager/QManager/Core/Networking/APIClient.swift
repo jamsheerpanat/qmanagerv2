@@ -13,6 +13,21 @@ extension Notification.Name {
     static let sessionExpired = Notification.Name("qmanager.sessionExpired")
 }
 
+// Configured once and never mutated afterwards. `ISO8601DateFormatter` is not
+// marked `Sendable`, but parsing with a fixed configuration is thread-safe, and
+// decoding runs off the main actor — hence `nonisolated(unsafe)`.
+private nonisolated(unsafe) let iso8601WithFractionalSeconds: ISO8601DateFormatter = {
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    return formatter
+}()
+
+private nonisolated(unsafe) let iso8601Plain: ISO8601DateFormatter = {
+    let formatter = ISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime]
+    return formatter
+}()
+
 /// Talks to the QManager NestJS API.
 ///
 /// Access tokens live 15 minutes, so a 401 mid-session is normal rather than
@@ -41,17 +56,17 @@ actor APIClient {
 
     /// Prisma serialises `DateTime` as ISO-8601 with milliseconds, but a few
     /// fields come back without the fractional part. Accept both.
+    ///
+    /// The formatters are file-scope constants rather than locals captured by
+    /// the decoding closure: `ISO8601DateFormatter` is not `Sendable`, and
+    /// capturing one inside a `@Sendable` closure is diagnosed. Hoisting them
+    /// also means they are built once instead of per decoder.
     private static let decoder: JSONDecoder = {
         let decoder = JSONDecoder()
-        let withFraction = ISO8601DateFormatter()
-        withFraction.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
-        let plain = ISO8601DateFormatter()
-        plain.formatOptions = [.withInternetDateTime]
-
         decoder.dateDecodingStrategy = .custom { decoder in
             let raw = try decoder.singleValueContainer().decode(String.self)
-            if let date = withFraction.date(from: raw) { return date }
-            if let date = plain.date(from: raw) { return date }
+            if let date = iso8601WithFractionalSeconds.date(from: raw) { return date }
+            if let date = iso8601Plain.date(from: raw) { return date }
             throw DecodingError.dataCorrupted(
                 .init(codingPath: decoder.codingPath, debugDescription: "Unrecognised date: \(raw)")
             )
