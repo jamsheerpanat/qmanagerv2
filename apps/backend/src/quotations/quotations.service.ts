@@ -37,6 +37,53 @@ const ALLOWED_LIST_FILTERS = [
   'leadId',
 ] as const;
 
+/**
+ * Columns a client may supply on the array-body replace endpoints. Nest's
+ * ValidationPipe skips top-level array bodies, so these payloads reach us
+ * unfiltered and any stray field (e.g. a display-only `brand`) would make
+ * Prisma reject the whole write. Pick instead of spread.
+ */
+const ALLOWED_ITEM_FIELDS = [
+  'itemType',
+  'productId',
+  'serviceItemId',
+  'sectionTitle',
+  'description',
+  'image',
+  'quantity',
+  'unit',
+  'unitPrice',
+  'discountType',
+  'discountValue',
+  'taxRate',
+  'warranty',
+  'deliveryTime',
+  'remarks',
+  'isOptional',
+  'sortOrder',
+] as const;
+
+const ALLOWED_SCOPE_FIELDS = [
+  'sectionTitle',
+  'content',
+  'isHidden',
+  'sortOrder',
+] as const;
+
+const ALLOWED_TERM_FIELDS = ['categoryId', 'content', 'sortOrder'] as const;
+
+/** Copies only the allowed keys that are actually present on `source`. */
+function pick<T extends object, K extends keyof T>(
+  source: T,
+  fields: readonly K[],
+): Pick<T, K> {
+  const out = {} as Pick<T, K>;
+  for (const field of fields) {
+    if (source[field] !== undefined) out[field] = source[field];
+  }
+  return out;
+}
+
 @Injectable()
 export class QuotationsService {
   private readonly logger = new Logger(QuotationsService.name);
@@ -235,7 +282,6 @@ export class QuotationsService {
 
   async replaceItems(quotationId: string, itemsDto: QuotationItemDto[]) {
     await this.checkLock(quotationId);
-    await this.prisma.quotationItem.deleteMany({ where: { quotationId } });
 
     const itemsData = await Promise.all(
       itemsDto.map(async (item, index) => {
@@ -266,7 +312,7 @@ export class QuotationsService {
         const margin = beforeTax - qty * unitCost;
 
         return {
-          ...item,
+          ...pick(item, ALLOWED_ITEM_FIELDS),
           quotationId,
           sortOrder: item.sortOrder ?? index,
           discountAmount,
@@ -278,32 +324,41 @@ export class QuotationsService {
       }),
     );
 
-    await this.prisma.quotationItem.createMany({ data: itemsData });
+    // One transaction so a rejected insert cannot leave the quotation empty.
+    await this.prisma.$transaction(async (tx) => {
+      await tx.quotationItem.deleteMany({ where: { quotationId } });
+      await tx.quotationItem.createMany({ data: itemsData });
+    });
+
     await this.recalculateTotals(quotationId);
     return this.findOne(quotationId);
   }
 
   async replaceScopes(quotationId: string, scopesDto: QuotationScopeDto[]) {
     await this.checkLock(quotationId);
-    await this.prisma.quotationScope.deleteMany({ where: { quotationId } });
     const scopesData = scopesDto.map((s, idx) => ({
-      ...s,
+      ...pick(s, ALLOWED_SCOPE_FIELDS),
       quotationId,
       sortOrder: s.sortOrder ?? idx,
     }));
-    await this.prisma.quotationScope.createMany({ data: scopesData });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.quotationScope.deleteMany({ where: { quotationId } });
+      await tx.quotationScope.createMany({ data: scopesData });
+    });
     return this.findOne(quotationId);
   }
 
   async replaceTerms(quotationId: string, termsDto: QuotationTermDto[]) {
     await this.checkLock(quotationId);
-    await this.prisma.quotationTerm.deleteMany({ where: { quotationId } });
     const termsData = termsDto.map((t, idx) => ({
-      ...t,
+      ...pick(t, ALLOWED_TERM_FIELDS),
       quotationId,
       sortOrder: t.sortOrder ?? idx,
     }));
-    await this.prisma.quotationTerm.createMany({ data: termsData });
+    await this.prisma.$transaction(async (tx) => {
+      await tx.quotationTerm.deleteMany({ where: { quotationId } });
+      await tx.quotationTerm.createMany({ data: termsData });
+    });
     return this.findOne(quotationId);
   }
 
