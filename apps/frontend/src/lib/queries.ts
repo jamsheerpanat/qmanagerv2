@@ -21,6 +21,7 @@ export const queryKeys = {
   serviceItems: ["catalog/service-items"] as const,
   categories: ["catalog/categories"] as const,
   termsTemplates: ["terms/templates"] as const,
+  termsGroups: ["terms/groups"] as const,
   dashboardKpis: ["reports/dashboard"] as const,
   dashboardCharts: ["reports/charts"] as const,
 };
@@ -71,6 +72,50 @@ export function useCategories() {
     queryFn: () => get<any[]>("/catalog/categories"),
     staleTime: 10 * 60_000,
   });
+}
+
+export function useServiceItems() {
+  return useQuery({
+    queryKey: queryKeys.serviceItems,
+    queryFn: () => get<any[]>("/catalog/service-items"),
+    staleTime: 10 * 60_000,
+  });
+}
+
+export function useTermsTemplates() {
+  return useQuery({
+    queryKey: queryKeys.termsTemplates,
+    queryFn: () => get<any[]>("/terms/templates"),
+    staleTime: 10 * 60_000,
+  });
+}
+
+export function useTermsGroups() {
+  return useQuery({
+    queryKey: queryKeys.termsGroups,
+    queryFn: () => get<any[]>("/terms/groups"),
+    staleTime: 10 * 60_000,
+  });
+}
+
+/**
+ * Puts a just-created product at the front of the cached catalogue.
+ *
+ * The wizards create products inline and previously prepended to their own
+ * local state. Writing straight into the cache keeps that instant feedback,
+ * and the follow-up invalidation re-syncs with the server.
+ */
+export function useAddProductToCache() {
+  const queryClient = useQueryClient();
+  return (product: any) => {
+    for (const lite of [true, false]) {
+      queryClient.setQueryData(
+        queryKeys.products(lite),
+        (old: any[] | undefined) => (old ? [product, ...old] : old),
+      );
+    }
+    void queryClient.invalidateQueries({ queryKey: queryKeys.productsAll });
+  };
 }
 
 /** Invalidates a collection after a mutation so the next read refetches. */

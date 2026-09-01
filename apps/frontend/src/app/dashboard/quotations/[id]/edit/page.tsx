@@ -2,7 +2,17 @@
 
 import { useState, useEffect, use } from "react";
 import { api } from "@/lib/axios";
-import { useInvalidate, queryKeys } from "@/lib/queries";
+import {
+  useInvalidate,
+  queryKeys,
+  useCustomers,
+  useServiceTypes,
+  useServiceItems,
+  useTermsTemplates,
+  useProducts,
+  useCategories,
+  useAddProductToCache,
+} from "@/lib/queries";
 import { compressImage } from "@/lib/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -68,15 +78,18 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
   const invalidate = useInvalidate();
   const { } = useAuthStore();
 
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [serviceTypes, setServiceTypes] = useState<any[]>([]);
-  const [serviceItems, setServiceItems] = useState<any[]>([]);
-  const [termsTemplates, setTermsTemplates] = useState<any[]>([]);
+  // Reference data from the shared cache; only the quotation itself still
+  // needs a fetch here, because it seeds the form state below.
+  const customers = useCustomers().data ?? [];
+  const serviceTypes = useServiceTypes().data ?? [];
+  const serviceItems = useServiceItems().data ?? [];
+  const termsTemplates = useTermsTemplates().data ?? [];
   const [isSaving, setIsSaving] = useState(false);
   const [insertIndex, setInsertIndex] = useState<number | null>(null);
 
-  const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const products = useProducts(true).data ?? [];
+  const categories = useCategories().data ?? [];
+  const addProductToCache = useAddProductToCache();
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [newProductForm, setNewProductForm] = useState<any>({
@@ -135,7 +148,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
         minimumSellingPrice: 0,
       });
       const newProduct = res.data;
-      setProducts([newProduct, ...products]);
+      addProductToCache(newProduct);
       setIsCreatingProduct(false);
       setNewProductForm({ productName: "", productCode: "", categoryId: "", sellingPrice: 0, taxRate: 0 });
       handleSelectItem(newProduct, "PRODUCT");
@@ -223,23 +236,8 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
 
   async function fetchData() {
     try {
-      const [custRes, servRes, servItemRes, termsRes, quoteRes, prodRes, catRes] =
-        await Promise.all([
-          api.get("/customers"),
-          api.get("/catalog/service-types"),
-          api.get("/catalog/service-items"),
-          api.get("/terms/templates"),
-          api.get(`/quotations/${id}`),
-          api.get("/catalog/products?lite=1"),
-          api.get("/catalog/categories"),
-        ]);
-      setCustomers(custRes.data);
-      setServiceTypes(servRes.data);
-      setServiceItems(servItemRes.data);
-      setTermsTemplates(termsRes.data);
-      setProducts(prodRes.data);
-      setCategories(catRes.data);
-      
+      const quoteRes = await api.get(`/quotations/${id}`);
+
       const q = quoteRes.data;
       setFormData({
         customerId: q.customerId || "",

@@ -1,8 +1,19 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { api } from "@/lib/axios";
-import { useInvalidate, queryKeys } from "@/lib/queries";
+import {
+  useInvalidate,
+  queryKeys,
+  useCustomers,
+  useServiceTypes,
+  useServiceItems,
+  useTermsTemplates,
+  useTermsGroups,
+  useProducts,
+  useCategories,
+  useAddProductToCache,
+} from "@/lib/queries";
 import { compressImage } from "@/lib/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -67,17 +78,20 @@ export default function CreateQuotationWizard() {
   const invalidate = useInvalidate();
   const { user } = useAuthStore();
 
-  const [customers, setCustomers] = useState<any[]>([]);
-  const [serviceTypes, setServiceTypes] = useState<any[]>([]);
-  const [serviceItems, setServiceItems] = useState<any[]>([]);
-  const [termsTemplates, setTermsTemplates] = useState<any[]>([]);
-  const [termsGroups, setTermsGroups] = useState<any[]>([]);
+  // Reference data comes from the shared cache: seven requests used to fire on
+  // every mount of this wizard, even when the same lists had just been loaded.
+  const customers = useCustomers().data ?? [];
+  const serviceTypes = useServiceTypes().data ?? [];
+  const serviceItems = useServiceItems().data ?? [];
+  const termsTemplates = useTermsTemplates().data ?? [];
+  const termsGroups = useTermsGroups().data ?? [];
   const [isSaving, setIsSaving] = useState(false);
   const [insertIndex, setInsertIndex] = useState<number | null>(null);
   const [selectedTemplateIds, setSelectedTemplateIds] = useState<string[]>([]);
 
-  const [products, setProducts] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
+  const products = useProducts(true).data ?? [];
+  const categories = useCategories().data ?? [];
+  const addProductToCache = useAddProductToCache();
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
   const [isCreatingProduct, setIsCreatingProduct] = useState(false);
   const [newProductForm, setNewProductForm] = useState<any>({
@@ -134,7 +148,7 @@ export default function CreateQuotationWizard() {
         minimumSellingPrice: 0,
       });
       const newProduct = res.data;
-      setProducts([newProduct, ...products]);
+      addProductToCache(newProduct);
       setIsCreatingProduct(false);
       setNewProductForm({ productName: "", productCode: "", categoryId: "", sellingPrice: 0, taxRate: 0 });
       handleSelectItem(newProduct, "PRODUCT");
@@ -217,34 +231,6 @@ export default function CreateQuotationWizard() {
     discountType: "PERCENTAGE",
     discountValue: 0,
   });
-
-  async function fetchData() {
-    try {
-      const [custRes, servRes, servItemRes, termsRes, groupsRes, prodRes, catRes] =
-        await Promise.all([
-          api.get("/customers"),
-          api.get("/catalog/service-types"),
-          api.get("/catalog/service-items"),
-          api.get("/terms/templates"),
-          api.get("/terms/groups"),
-          api.get("/catalog/products?lite=1"),
-          api.get("/catalog/categories"),
-        ]);
-      setCustomers(custRes.data);
-      setServiceTypes(servRes.data);
-      setServiceItems(servItemRes.data);
-      setTermsTemplates(termsRes.data);
-      setTermsGroups(groupsRes.data);
-      setProducts(prodRes.data);
-      setCategories(catRes.data);
-    } catch (e) {
-      console.error("Failed to load initial data", e);
-    }
-  };
-
-  useEffect(() => {
-    fetchData();
-  }, []);
 
 
   const updateForm = (field: string, value: any) => {
