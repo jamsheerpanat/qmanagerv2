@@ -1,5 +1,10 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
-import { chromium } from 'playwright';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+  OnModuleDestroy,
+} from '@nestjs/common';
+import { chromium, type Browser } from 'playwright';
 import * as crypto from 'crypto';
 
 /**
@@ -31,8 +36,20 @@ export function frontendBaseUrl(): string {
 /** Render tokens are short-lived; a PDF render takes seconds, not minutes. */
 const RENDER_TOKEN_TTL_MS = 2 * 60 * 1000;
 
+/** How long to wait for a render page to signal it is ready to print. */
+const PDF_READY_TIMEOUT_MS = 30000;
+
 @Injectable()
-export class PdfService {
+export class PdfService implements OnModuleDestroy {
+  private readonly logger = new Logger(PdfService.name);
+
+  /**
+   * Chromium is launched once and shared. A cold launch costs hundreds of
+   * milliseconds and every PDF used to pay it; renders are isolated from one
+   * another by using a fresh browser context per render instead.
+   */
+  private browserPromise?: Promise<Browser>;
+
   /**
    * Secret backing the internal render token. Falls back to JWT_SECRET so an
    * existing deployment keeps working without new configuration.
@@ -91,31 +108,56 @@ export class PdfService {
     const routeSegment = resolveTemplateRoute(templateId);
     const renderUrl = `${frontendBaseUrl()}/render-pdf/${routeSegment}?${idParamName}=${queryId}`;
 
-    let browser:
-      | Awaited<ReturnType<(typeof chromium)['launch']>>
-      | undefined;
+    const browser = await this.getBrowser();
+
+    // The header is attached at the context level so it rides along on the
+    // page's cross-origin XHR back to /internal/*, which is what actually
+    // needs to authenticate.
+    const context = await browser.newContext({
+      extraHTTPHeaders: {
+        'x-internal-render-token': this.issueRenderToken(),
+      },
+    });
 
     try {
-      browser = await chromium.launch({
-        headless: true,
-        args: [
-          '--no-sandbox',
-          '--disable-setuid-sandbox',
-          '--disable-dev-shm-usage',
-        ],
-      });
-
-      // The header is attached at the context level so it rides along on the
-      // page's cross-origin XHR back to /internal/*, which is what actually
-      // needs to authenticate.
-      const context = await browser.newContext({
-        extraHTTPHeaders: {
-          'x-internal-render-token': this.issueRenderToken(),
-        },
-      });
       const page = await context.newPage();
 
-      await page.goto(renderUrl, { waitUntil: 'networkidle', timeout: 30000 });
+      await page.goto(renderUrl, {
+        waitUntil: 'domcontentloaded',
+        timeout: 30000,
+      });
+
+      // The render pages mark their root with data-pdf-ready once they have
+      // left their loading state, which is a far cheaper signal than waiting
+      // for the network to fall idle. A template without the marker falls back
+      // to the original behaviour rather than failing.
+      // Race the two readiness signals rather than trying one and then the
+      // other: a marked template settles as soon as its root appears, and a
+      // template without the marker still finishes on network idle instead of
+      // first burning the whole marker timeout. Whichever lands first wins.
+      const marker = page.waitForSelector('[data-pdf-ready]', {
+        timeout: PDF_READY_TIMEOUT_MS,
+      });
+      const idle = page.waitForLoadState('networkidle', {
+        timeout: PDF_READY_TIMEOUT_MS,
+      });
+      // Attach handlers up front so the losing promise's rejection is never
+      // an unhandled rejection.
+      marker.catch(() => undefined);
+      idle.catch(() => undefined);
+
+      try {
+        await Promise.any([marker, idle]);
+      } catch {
+        throw new Error(
+          `Render page never became ready within ${PDF_READY_TIMEOUT_MS}ms: ${renderUrl}`,
+        );
+      }
+
+      // Printing before webfonts settle produces a PDF in fallback faces.
+      await page
+        .evaluate(() => document.fonts.ready.then(() => undefined))
+        .catch(() => undefined);
 
       const pdfBuffer = await page.pdf({
         format: 'A4',
@@ -125,12 +167,42 @@ export class PdfService {
 
       return Buffer.from(pdfBuffer);
     } catch (error) {
-      console.error(`Error generating PDF synchronously:`, error);
+      this.logger.error(`Error generating PDF synchronously: ${String(error)}`);
       throw new InternalServerErrorException('Failed to generate PDF');
     } finally {
-      // Previously the browser was only closed on the success path, so every
-      // failed render leaked a Chromium process.
-      await browser?.close().catch(() => undefined);
+      // Only the context is disposed — the browser is shared and stays up.
+      await context.close().catch(() => undefined);
     }
+  }
+
+  /**
+   * Returns the shared browser, launching it on first use. If a previous
+   * instance died (crash, OOM kill) the next call transparently relaunches.
+   */
+  private async getBrowser(): Promise<Browser> {
+    const existing = await this.browserPromise?.catch(() => undefined);
+    if (existing?.isConnected()) return existing;
+
+    this.browserPromise = chromium.launch({
+      headless: true,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+      ],
+    });
+
+    try {
+      return await this.browserPromise;
+    } catch (error) {
+      // Do not cache a rejected promise, or every later render fails too.
+      this.browserPromise = undefined;
+      throw error;
+    }
+  }
+
+  async onModuleDestroy() {
+    const browser = await this.browserPromise?.catch(() => undefined);
+    await browser?.close().catch(() => undefined);
   }
 }

@@ -84,7 +84,7 @@ function InvoiceStandardRenderPageInner() {
   return (
     <>
       <FontLoader />
-      <div className="pdf-container print:bg-white bg-gray-200 flex flex-col">
+      <div className="pdf-container print:bg-white bg-gray-200 flex flex-col" data-pdf-ready="1">
         <ModernInvoicePage
           projectName={data.quotation?.projectTitle || data.projectName || ""}
           sectionName={data.serviceType?.name || ""}

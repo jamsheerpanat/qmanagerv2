@@ -2,11 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 
+import { PermissionsCacheService } from '../common/permissions-cache.service';
 @Injectable()
 export class RolesService {
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
+    private permissionsCache: PermissionsCacheService,
   ) {}
 
   async findAll() {
@@ -79,6 +81,10 @@ export class RolesService {
         },
       });
     });
+
+    // Every holder of this role now has a different permission set, so the
+    // cached sets must go rather than linger for the rest of their TTL.
+    this.permissionsCache.invalidateAll();
 
     await this.audit.logEvent({
       actorId,

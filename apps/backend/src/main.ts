@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { json, urlencoded } from 'express';
+import compression from 'compression';
 import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 
 import * as fs from 'fs';
@@ -14,6 +15,11 @@ async function bootstrap() {
 
     app.use(json({ limit: '50mb' }));
     app.use(urlencoded({ extended: true, limit: '50mb' }));
+
+    // Nothing compressed API responses before this: not Express, and not the
+    // nginx vhost. List endpoints return large JSON (catalogues, quotation
+    // lists, base64 images) that gzips to a fraction of its size.
+    app.use(compression());
 
     // Security Hardening
     const httpAdapter = app.getHttpAdapter().getInstance();

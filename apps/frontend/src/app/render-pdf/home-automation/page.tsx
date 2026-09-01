@@ -83,7 +83,7 @@ function HomeAutomationRenderPageInner() {
   return (
     <>
       <FontLoader />
-      <div className="pdf-container print:bg-white bg-gray-200 flex flex-col items-center py-10 print:py-0 print:block">
+      <div className="pdf-container print:bg-white bg-gray-200 flex flex-col items-center py-10 print:py-0 print:block" data-pdf-ready="1">
         <HomeAutomationCoverPage
           projectName={data.projectName}
           customerName={data.customerName}

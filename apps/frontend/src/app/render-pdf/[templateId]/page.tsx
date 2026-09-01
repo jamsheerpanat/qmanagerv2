@@ -118,7 +118,7 @@ export default function RenderPdfPage({
   const verifyUrl = `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/portal/quotation/${(data as any)?.token || (data as any)?.id}`;
 
   return (
-    <div className="pdf-container print:bg-white bg-gray-100 flex flex-col items-center py-10 print:py-0 print:block">
+    <div className="pdf-container print:bg-white bg-gray-100 flex flex-col items-center py-10 print:py-0 print:block" data-pdf-ready="1">
       <CoverPage
         title={data.title}
         subtitle={data.subtitle}

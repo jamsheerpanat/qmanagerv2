@@ -3,11 +3,13 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import * as bcrypt from 'bcrypt';
 
+import { PermissionsCacheService } from '../common/permissions-cache.service';
 @Injectable()
 export class UsersService {
   constructor(
     private prisma: PrismaService,
     private audit: AuditService,
+    private permissionsCache: PermissionsCacheService,
   ) {}
 
   async findAll() {
@@ -87,6 +89,10 @@ export class UsersService {
         },
       });
     });
+
+    // Role assignments may have changed; drop this user's cached permissions
+    // so the next request re-resolves them.
+    this.permissionsCache.invalidateUser(id);
 
     await this.audit.logEvent({
       actorId,
