@@ -17,6 +17,10 @@ import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { PdfService } from '../pdf/pdf.service';
 import { parseLimit } from '../common/parse-limit';
+import {
+  PUBLIC_COMPANY_SELECT,
+  USER_SUMMARY_SELECT,
+} from '../common/select-presets';
 
 /**
  * Migration baseline: production had 469 quotations before the QManager v2
@@ -277,7 +281,7 @@ export class QuotationsService {
         contact: true,
         lead: true,
         serviceType: true,
-        company: true,
+        company: { select: PUBLIC_COMPANY_SELECT },
         branch: true,
         items: {
           orderBy: { sortOrder: 'asc' },
@@ -287,7 +291,10 @@ export class QuotationsService {
         terms: { orderBy: { sortOrder: 'asc' }, include: { category: true } },
         approvals: {
           orderBy: { requestedAt: 'desc' },
-          include: { requestedBy: true, approver: true },
+          include: {
+            requestedBy: { select: USER_SUMMARY_SELECT },
+            approver: { select: USER_SUMMARY_SELECT },
+          },
         },
         shares: { orderBy: { sentAt: 'desc' } },
         childQuotations: {

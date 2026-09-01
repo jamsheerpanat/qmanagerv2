@@ -1,31 +1,77 @@
-import { useState, useEffect } from "react";
-import { Bell, Check, Trash } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Bell, Check } from "lucide-react";
 import { api } from "@/lib/axios";
 import { formatDistanceToNow } from "date-fns";
+
+const POLL_INTERVAL_MS = 30_000;
 
 export function NotificationsDropdown() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
 
-  async function fetchNotifications() {
+  /**
+   * Only the badge count is polled. The list — fifty rows, joined and ordered —
+   * was being fetched every thirty seconds per open tab to render a number, and
+   * is only ever seen once the dropdown is open.
+   */
+  const fetchUnreadCount = useCallback(async () => {
     try {
-      const [listRes, countRes] = await Promise.all([
-        api.get("/notifications"),
-        api.get("/notifications/unread-count"),
-      ]);
-      setNotifications(listRes.data);
-      setUnreadCount(countRes.data);
-    } catch (e) {
-      console.error("Failed to fetch notifications");
+      const { data } = await api.get("/notifications/unread-count");
+      setUnreadCount(data);
+    } catch {
+      // A failed poll is not worth surfacing; the next tick retries.
     }
-  };
+  }, []);
+
+  const fetchNotifications = useCallback(async () => {
+    try {
+      const { data } = await api.get("/notifications");
+      setNotifications(data);
+    } catch {
+      // Leave whatever is already on screen.
+    }
+  }, []);
 
   useEffect(() => {
-    fetchNotifications();
-    const interval = setInterval(fetchNotifications, 30000); // Poll every 30s
-    return () => clearInterval(interval);
-  }, []);
+    fetchUnreadCount();
+
+    let timer: ReturnType<typeof setInterval> | undefined;
+
+    // Polling a background tab costs a request and a permissions resolution
+    // for a badge nobody is looking at. Stop while hidden, and refresh once on
+    // the way back so the count is current when the tab is focused again.
+    const start = () => {
+      if (timer) return;
+      timer = setInterval(fetchUnreadCount, POLL_INTERVAL_MS);
+    };
+    const stop = () => {
+      if (timer) clearInterval(timer);
+      timer = undefined;
+    };
+
+    const onVisibilityChange = () => {
+      if (document.hidden) {
+        stop();
+      } else {
+        fetchUnreadCount();
+        start();
+      }
+    };
+
+    if (!document.hidden) start();
+    document.addEventListener("visibilitychange", onVisibilityChange);
+
+    return () => {
+      stop();
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [fetchUnreadCount]);
+
+  // The list is loaded when the panel is opened, not on a timer.
+  useEffect(() => {
+    if (open) fetchNotifications();
+  }, [open, fetchNotifications]);
 
 
   async function markAsRead(id: string) {

@@ -7,6 +7,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '@prisma/client';
+import { PUBLIC_COMPANY_SELECT } from '../common/select-presets';
 
 @Injectable()
 export class PortalService {
@@ -26,7 +27,7 @@ export class PortalService {
         quotation: {
           include: {
             items: true,
-            company: true,
+            company: { select: PUBLIC_COMPANY_SELECT },
             customer: true,
             terms: true,
             serviceType: true,
@@ -40,7 +41,7 @@ export class PortalService {
         where: { id: token },
         include: {
           items: true,
-          company: true,
+          company: { select: PUBLIC_COMPANY_SELECT },
           customer: true,
           terms: true,
           serviceType: true,
@@ -198,7 +199,7 @@ export class PortalService {
         invoice: {
           include: {
             items: true,
-            company: true,
+            company: { select: PUBLIC_COMPANY_SELECT },
             customer: true,
             payments: { orderBy: { paymentDate: 'desc' } },
           },
@@ -211,7 +212,7 @@ export class PortalService {
         where: { id: token },
         include: {
           items: true,
-          company: true,
+          company: { select: PUBLIC_COMPANY_SELECT },
           customer: true,
           payments: { orderBy: { paymentDate: 'desc' } },
         },
