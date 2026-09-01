@@ -204,6 +204,14 @@ export class QuotationsService {
     }
     where.companyId = companyId;
 
+    // The dashboard only renders the few most recent quotations; without a cap
+    // it was pulling the entire table (and its joins) on every page load.
+    const parsedLimit = Number.parseInt(filters?.limit, 10);
+    const take =
+      Number.isInteger(parsedLimit) && parsedLimit > 0
+        ? Math.min(parsedLimit, 500)
+        : undefined;
+
     return this.prisma.quotation.findMany({
       where,
       include: {
@@ -212,6 +220,7 @@ export class QuotationsService {
         createdBy: { select: { id: true, name: true } },
       },
       orderBy: { createdAt: 'desc' },
+      ...(take ? { take } : {}),
     });
   }
 
@@ -283,46 +292,56 @@ export class QuotationsService {
   async replaceItems(quotationId: string, itemsDto: QuotationItemDto[]) {
     await this.checkLock(quotationId);
 
-    const itemsData = await Promise.all(
-      itemsDto.map(async (item, index) => {
-        let unitCost = 0;
-        if (item.productId) {
-          const product = await this.prisma.product.findUnique({
-            where: { id: item.productId },
-          });
-          if (product) unitCost = product.costPrice || 0;
+    // Cost lookup for every linked product in one query rather than one round
+    // trip per line — a 40-line quotation was issuing 40 sequential selects.
+    const productIds = [
+      ...new Set(itemsDto.map((i) => i.productId).filter(Boolean) as string[]),
+    ];
+    const costPriceByProductId = new Map<string, number>();
+    if (productIds.length > 0) {
+      const products = await this.prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, costPrice: true },
+      });
+      for (const product of products) {
+        costPriceByProductId.set(product.id, product.costPrice || 0);
+      }
+    }
+
+    const itemsData = itemsDto.map((item, index) => {
+      const unitCost = item.productId
+        ? (costPriceByProductId.get(item.productId) ?? 0)
+        : 0;
+
+      let discountAmount = 0;
+      const qty = item.quantity || 1;
+      const price = item.unitPrice || 0;
+      const taxRate = item.taxRate || 0;
+
+      if (item.discountValue) {
+        if (item.discountType === DiscountType.PERCENTAGE) {
+          discountAmount = qty * price * (item.discountValue / 100);
+        } else {
+          discountAmount = item.discountValue;
         }
+      }
 
-        let discountAmount = 0;
-        const qty = item.quantity || 1;
-        const price = item.unitPrice || 0;
-        const taxRate = item.taxRate || 0;
+      const beforeTax = qty * price - discountAmount;
+      const taxAmount = beforeTax * (taxRate / 100);
+      const lineTotal = beforeTax + taxAmount;
+      const margin = beforeTax - qty * unitCost;
 
-        if (item.discountValue) {
-          if (item.discountType === DiscountType.PERCENTAGE) {
-            discountAmount = qty * price * (item.discountValue / 100);
-          } else {
-            discountAmount = item.discountValue;
-          }
-        }
-
-        const beforeTax = qty * price - discountAmount;
-        const taxAmount = beforeTax * (taxRate / 100);
-        const lineTotal = beforeTax + taxAmount;
-        const margin = beforeTax - qty * unitCost;
-
-        return {
-          ...pick(item, ALLOWED_ITEM_FIELDS),
-          quotationId,
-          sortOrder: item.sortOrder ?? index,
-          discountAmount,
-          taxAmount,
-          lineTotal,
-          unitCost,
-          margin,
-        };
-      }),
-    );
+      return {
+        ...pick(item, ALLOWED_ITEM_FIELDS),
+        quotationId,
+        sortOrder: item.sortOrder ?? index,
+        discountAmount,
+        taxAmount,
+        lineTotal,
+        unitCost,
+        margin,
+      };
+    });
 
     // One transaction so a rejected insert cannot leave the quotation empty.
     await this.prisma.$transaction(async (tx) => {

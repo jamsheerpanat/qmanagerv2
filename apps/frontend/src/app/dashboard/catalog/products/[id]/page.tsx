@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { api } from "@/lib/axios";
+import { fileToCompressedDataUrl } from "@/lib/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -426,17 +427,15 @@ export default function EditProductPage({
                   <Input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
+                    onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      const reader = new FileReader();
-                      reader.onloadend = () => {
-                        setFormData({
-                          ...formData,
-                          productImage: reader.result as string,
-                        });
-                      };
-                      reader.readAsDataURL(file);
+                      // Downscale before storing: the raw data URL goes into
+                      // the product row and is returned with every list load.
+                      setFormData({
+                        ...formData,
+                        productImage: await fileToCompressedDataUrl(file),
+                      });
                     }}
                   />
                   {formData.productImage && (

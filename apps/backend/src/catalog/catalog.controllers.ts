@@ -6,6 +6,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import {
@@ -79,8 +80,8 @@ export class ProductsController {
 
   @RequirePermissions('products.view')
   @Get()
-  findAll() {
-    return this.service.findAll();
+  findAll(@Query('lite') lite?: string) {
+    return this.service.findAll(lite === '1' || lite === 'true');
   }
 
   @RequirePermissions('products.view')

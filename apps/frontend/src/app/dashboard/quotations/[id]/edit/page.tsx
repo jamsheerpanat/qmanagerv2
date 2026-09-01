@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { api } from "@/lib/axios";
+import { compressImage } from "@/lib/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent} from "@/components/ui/card";
@@ -59,25 +60,6 @@ const STEPS = [
   "Review",
 ];
 
-async function compressImage(base64Str: string, maxWidth = 150): Promise<string> {
-  return new Promise((resolve) => {
-    if (!base64Str || !base64Str.startsWith('data:image')) return resolve(base64Str);
-    const img = new Image();
-    img.src = base64Str;
-    img.onload = () => {
-      const canvas = document.createElement('canvas');
-      const ratio = maxWidth / img.width;
-      if (ratio >= 1) return resolve(base64Str);
-      canvas.width = maxWidth;
-      canvas.height = img.height * ratio;
-      const ctx = canvas.getContext('2d');
-      if (ctx) ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      resolve(canvas.toDataURL('image/jpeg', 0.6));
-    };
-    img.onerror = () => resolve(base64Str);
-  });
-}
-
 export default function EditQuotationWizard({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const [step, setStep] = useState(0);
@@ -115,7 +97,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
       taxRate: item.taxRate || 0,
       productId: type === "PRODUCT" && item.id ? item.id : undefined,
       serviceItemId: type === "SERVICE" && item.id ? item.id : undefined,
-      image: item.image || undefined,
+      image: item.productImage || item.image || undefined,
     };
 
     const idx = insertIndex !== null ? insertIndex : formData.items.length - 1;
@@ -246,7 +228,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
           api.get("/catalog/service-items"),
           api.get("/terms/templates"),
           api.get(`/quotations/${id}`),
-          api.get("/catalog/products"),
+          api.get("/catalog/products?lite=1"),
           api.get("/catalog/categories"),
         ]);
       setCustomers(custRes.data);
@@ -342,9 +324,16 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
       }
 
       router.push(`/dashboard/quotations/${id}`);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("Failed to save quotation");
+      // Show what the server actually said — a bare "Failed to save quotation"
+      // gave no way to tell a validation problem from an outage.
+      const detail = e?.response?.data?.message;
+      alert(
+        detail
+          ? `Failed to save quotation: ${Array.isArray(detail) ? detail.join(", ") : detail}`
+          : "Failed to save quotation. Please check your connection and try again.",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -542,8 +531,8 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                       .map((p: any) => (
                         <div key={p.id} className="flex justify-between items-center p-3 border rounded-lg hover:bg-gray-50">
                           <div className="flex items-center gap-3">
-                            {p.image ? (
-                              <img src={p.image} alt={p.productName} className="w-12 h-12 rounded object-cover border" />
+                            {p.productImage ? (
+                              <img src={p.productImage} alt={p.productName} className="w-12 h-12 rounded object-cover border" />
                             ) : (
                               <div className="w-12 h-12 rounded bg-gray-100 border flex items-center justify-center text-gray-400 text-xs text-center break-words p-1">No img</div>
                             )}

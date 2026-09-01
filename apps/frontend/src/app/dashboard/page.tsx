@@ -275,11 +275,11 @@ export default function DashboardPage() {
         const [kpiRes, chartsRes, qtnsRes] = await Promise.all([
           api.get("/reports/dashboard"),
           api.get("/reports/charts"),
-          api.get("/quotations"),
+          api.get("/quotations?limit=6"),
         ]);
         setKpis(kpiRes.data);
         setCharts(chartsRes.data);
-        setQuotations((qtnsRes.data || []).slice(0, 6));
+        setQuotations(qtnsRes.data || []);
       } catch (e) {
         console.error(e);
       } finally {

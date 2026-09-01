@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { json, urlencoded } from 'express';
+import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 
 import * as fs from 'fs';
 
@@ -57,6 +58,10 @@ async function bootstrap() {
         transform: true,
       }),
     );
+
+    // Turn Prisma failures into meaningful 4xx responses instead of the bare
+    // 500 "Internal server error" the UI used to show for every one of them.
+    app.useGlobalFilters(new PrismaExceptionFilter());
 
     const port = process.env.PORT || 3001;
     await app.listen(port);
