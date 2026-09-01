@@ -13,6 +13,11 @@ git pull origin main
 export DATABASE_URL="postgresql://qmanager_user:password@localhost:5432/qmanager_v2"
 export LIVE_DATABASE_URL="postgresql://qmanager_user:password@localhost:5432/qmanager_v2"
 
+# corepack resolves pnpm from the root package.json's "packageManager" field
+# and downloads it if absent; without this it can stop to prompt on a
+# non-interactive shell.
+export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
+
 # Install first, for the whole workspace. This used to run only inside
 # apps/frontend and only after the backend had already been built and
 # restarted, so any new backend dependency was missing at build time.
