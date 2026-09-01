@@ -68,9 +68,9 @@ export default function CatalogProductsPage() {
                   }
                 >
                   <td className="px-6 py-4">
-                    {p.productImage ? (
+                    {p.productThumbnail ? (
                       <img
-                        src={p.productImage}
+                        src={p.productThumbnail}
                         alt={p.productName}
                         className="w-10 h-10 object-cover rounded-md border bg-white"
                       />

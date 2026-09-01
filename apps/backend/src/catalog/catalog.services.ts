@@ -63,25 +63,20 @@ export class ProductsService {
   constructor(private prisma: PrismaService) {}
 
   /**
-   * `lite` drops the bulky columns — chiefly the base64 `productImage`, plus
-   * the long description fields. The quotation wizard loads the whole catalog
-   * on mount just to populate its item picker, and those columns made that
-   * response many megabytes.
+   * Never returns the bulky columns. Callers that render a picture use
+   * `productThumbnail`; the full `productImage` and the long text fields are
+   * only available from findOne, which serves one product at a time.
    */
-  async findAll(lite = false) {
+  async findAll() {
     return this.prisma.product.findMany({
-      ...(lite
-        ? {
-            omit: {
-              productImage: true,
-              detailedDescription: true,
-              technicalSpecification: true,
-              installationNotes: true,
-              internalNotes: true,
-              datasheetAttachment: true,
-            },
-          }
-        : {}),
+      omit: {
+        productImage: true,
+        detailedDescription: true,
+        technicalSpecification: true,
+        installationNotes: true,
+        internalNotes: true,
+        datasheetAttachment: true,
+      },
       include: { category: true, serviceType: true },
       orderBy: { createdAt: 'desc' },
     });

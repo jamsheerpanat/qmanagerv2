@@ -87,7 +87,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
   const [isSaving, setIsSaving] = useState(false);
   const [insertIndex, setInsertIndex] = useState<number | null>(null);
 
-  const products = useProducts(true).data ?? [];
+  const products = useProducts().data ?? [];
   const categories = useCategories().data ?? [];
   const addProductToCache = useAddProductToCache();
   const [isItemModalOpen, setIsItemModalOpen] = useState(false);
@@ -534,8 +534,8 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                       .map((p: any) => (
                         <div key={p.id} className="flex justify-between items-center p-3 border rounded-lg hover:bg-gray-50">
                           <div className="flex items-center gap-3">
-                            {p.productImage ? (
-                              <img src={p.productImage} alt={p.productName} className="w-12 h-12 rounded object-cover border" />
+                            {p.productThumbnail ? (
+                              <img src={p.productThumbnail} alt={p.productName} className="w-12 h-12 rounded object-cover border" />
                             ) : (
                               <div className="w-12 h-12 rounded bg-gray-100 border flex items-center justify-center text-gray-400 text-xs text-center break-words p-1">No img</div>
                             )}

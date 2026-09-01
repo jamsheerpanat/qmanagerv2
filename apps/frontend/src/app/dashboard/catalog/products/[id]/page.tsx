@@ -3,7 +3,7 @@
 import { useState, useEffect, use } from "react";
 import { api } from "@/lib/axios";
 import { useInvalidate, queryKeys } from "@/lib/queries";
-import { fileToCompressedDataUrl } from "@/lib/image";
+import { fileToProductImages } from "@/lib/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +45,7 @@ export default function EditProductPage({
 
     warrantyPeriod: "",
     productImage: "",
+    productThumbnail: "",
     datasheetAttachment: "",
     installationNotes: "",
     internalNotes: "",
@@ -83,6 +84,7 @@ export default function EditProductPage({
 
           warrantyPeriod: p.warrantyPeriod || "",
           productImage: p.productImage || "",
+          productThumbnail: p.productThumbnail || "",
           datasheetAttachment: p.datasheetAttachment || "",
           installationNotes: p.installationNotes || "",
           internalNotes: p.internalNotes || "",
@@ -108,7 +110,7 @@ export default function EditProductPage({
         taxRate: parseFloat((formData.taxRate as any) || "0"),
       };
       await api.patch(`/catalog/products/${id}`, payload);
-      await invalidate(queryKeys.productsAll);
+      await invalidate(queryKeys.products);
       alert("Product updated successfully!");
       router.push("/dashboard/catalog/products");
     } catch (error: any) {
@@ -433,11 +435,11 @@ export default function EditProductPage({
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      // Downscale before storing: the raw data URL goes into
-                      // the product row and is returned with every list load.
+                      // Two sizes: the full image for this page and the
+                      // PDF, and the thumbnail that list responses carry.
                       setFormData({
                         ...formData,
-                        productImage: await fileToCompressedDataUrl(file),
+                        ...(await fileToProductImages(file)),
                       });
                     }}
                   />
@@ -447,7 +449,11 @@ export default function EditProductPage({
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        setFormData({ ...formData, productImage: "" })
+                        setFormData({
+                          ...formData,
+                          productImage: "",
+                          productThumbnail: "",
+                        })
                       }
                     >
                       Clear

@@ -13,10 +13,7 @@ export const queryKeys = {
   quotationsAll: ["quotations"] as const,
   quotations: (limit?: number) => ["quotations", limit ?? "all"] as const,
   invoices: ["invoices"] as const,
-  /** Prefix shared by both catalogue variants; invalidating it clears both. */
-  productsAll: ["catalog/products"] as const,
-  products: (lite: boolean) =>
-    ["catalog/products", lite ? "lite" : "full"] as const,
+  products: ["catalog/products"] as const,
   serviceTypes: ["catalog/service-types"] as const,
   serviceItems: ["catalog/service-items"] as const,
   categories: ["catalog/categories"] as const,
@@ -47,13 +44,14 @@ export function useQuotations(limit?: number) {
 }
 
 /**
- * `lite` omits the base64 image and long-text columns. Pickers that only need
- * names and prices should pass true; the catalogue page needs the full row.
+ * The list endpoint never returns the full `productImage` or the long text
+ * columns; rows carry `productThumbnail` for display. Fetch a single product
+ * when the full image is needed.
  */
-export function useProducts(lite = false) {
+export function useProducts() {
   return useQuery({
-    queryKey: queryKeys.products(lite),
-    queryFn: () => get<any[]>(`/catalog/products${lite ? "?lite=1" : ""}`),
+    queryKey: queryKeys.products,
+    queryFn: () => get<any[]>("/catalog/products"),
   });
 }
 
@@ -108,13 +106,10 @@ export function useTermsGroups() {
 export function useAddProductToCache() {
   const queryClient = useQueryClient();
   return (product: any) => {
-    for (const lite of [true, false]) {
-      queryClient.setQueryData(
-        queryKeys.products(lite),
-        (old: any[] | undefined) => (old ? [product, ...old] : old),
-      );
-    }
-    void queryClient.invalidateQueries({ queryKey: queryKeys.productsAll });
+    queryClient.setQueryData(queryKeys.products, (old: any[] | undefined) =>
+      old ? [product, ...old] : old,
+    );
+    void queryClient.invalidateQueries({ queryKey: queryKeys.products });
   };
 }
 

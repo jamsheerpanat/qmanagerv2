@@ -521,8 +521,19 @@ model Product {
   taxable Boolean @default(true)
   taxRate Float   @default(0)
 
-  warrantyPeriod      String?
-  productImage        String?
+  warrantyPeriod String?
+
+  /**
+   * Full-size artwork, and a small thumbnail of it.
+   * Both are base64 data URLs. `productImage` is only ever read for a single
+   * product — the detail page and the PDF renderer — while list responses carry
+   * `productThumbnail`, which is roughly a tenth of the size. Postgres stores
+   * oversized values out of line, so a query that does not select
+   * `productImage` never reads those bytes at all.
+   */
+  productImage     String?
+  productThumbnail String?
+
   datasheetAttachment String?
 
   installationNotes String?

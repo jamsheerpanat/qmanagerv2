@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { api } from "@/lib/axios";
 import { useInvalidate, queryKeys } from "@/lib/queries";
-import { fileToCompressedDataUrl } from "@/lib/image";
+import { fileToProductImages } from "@/lib/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -38,6 +38,7 @@ export default function NewProductPage() {
 
     warrantyPeriod: "1 Year",
     productImage: "",
+    productThumbnail: "",
     datasheetAttachment: "",
     installationNotes: "",
     internalNotes: "",
@@ -60,7 +61,7 @@ export default function NewProductPage() {
         taxRate: parseFloat((formData.taxRate as any) || "0"),
       };
       await api.post("/catalog/products", payload);
-      await invalidate(queryKeys.productsAll);
+      await invalidate(queryKeys.products);
       router.push("/dashboard/catalog/products");
     } catch (error: any) {
       alert(error.response?.data?.message || "Error creating product");
@@ -357,11 +358,11 @@ export default function NewProductPage() {
                     onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (!file) return;
-                      // Downscale before storing: the raw data URL goes into
-                      // the product row and is returned with every list load.
+                      // Two sizes: the full image for this page and the
+                      // PDF, and the thumbnail that list responses carry.
                       setFormData({
                         ...formData,
-                        productImage: await fileToCompressedDataUrl(file),
+                        ...(await fileToProductImages(file)),
                       });
                     }}
                   />
@@ -371,7 +372,11 @@ export default function NewProductPage() {
                       variant="ghost"
                       size="sm"
                       onClick={() =>
-                        setFormData({ ...formData, productImage: "" })
+                        setFormData({
+                          ...formData,
+                          productImage: "",
+                          productThumbnail: "",
+                        })
                       }
                     >
                       Clear

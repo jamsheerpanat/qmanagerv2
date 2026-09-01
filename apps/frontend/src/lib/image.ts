@@ -31,6 +31,15 @@ export async function compressImage(
   });
 }
 
+function readAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(file);
+  });
+}
+
 /**
  * Reads a picked file and returns a downscaled data URL. Product artwork is
  * shown as a small thumbnail in lists and inside generated PDFs, so 800px wide
@@ -41,11 +50,26 @@ export async function fileToCompressedDataUrl(
   maxWidth = 800,
   quality = 0.7,
 ): Promise<string> {
-  const dataUrl = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result as string);
-    reader.onerror = () => reject(reader.error);
-    reader.readAsDataURL(file);
-  });
-  return compressImage(dataUrl, maxWidth, quality);
+  return compressImage(await readAsDataUrl(file), maxWidth, quality);
+}
+
+/** Width of the list thumbnail. Wide enough for a retina 48px avatar. */
+export const THUMBNAIL_WIDTH = 160;
+
+/**
+ * Produces both sizes a product needs from a single pick: the full image for
+ * the detail page and PDFs, and a thumbnail for list responses.
+ *
+ * Lists never receive the full image, so the thumbnail is what keeps the
+ * catalogue page's payload small — around a tenth of the full size.
+ */
+export async function fileToProductImages(
+  file: File,
+): Promise<{ productImage: string; productThumbnail: string }> {
+  const original = await readAsDataUrl(file);
+  const [productImage, productThumbnail] = await Promise.all([
+    compressImage(original, 800, 0.7),
+    compressImage(original, THUMBNAIL_WIDTH, 0.6),
+  ]);
+  return { productImage, productThumbnail };
 }
