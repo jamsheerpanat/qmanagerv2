@@ -93,11 +93,37 @@ export class PrismaExceptionFilter implements ExceptionFilter {
     };
   }
 
-  /** Human-readable name of the column(s) that tripped a unique constraint. */
+  /**
+   * Human-readable name of the column(s) that tripped a unique constraint.
+   *
+   * Prisma exposes these differently depending on the engine: `meta.target`
+   * with the classic engine, but nested under the driver adapter's error (and
+   * quoted) when running through @prisma/adapter-pg, which is what this app
+   * uses. Check both, so the message names the actual field.
+   */
   private fieldsOf(exception: Prisma.PrismaClientKnownRequestError): string {
-    const target = (exception.meta as { target?: unknown } | undefined)?.target;
-    if (Array.isArray(target) && target.length) return target.join(', ');
-    if (typeof target === 'string' && target) return target;
+    const meta = exception.meta as
+      | {
+          target?: unknown;
+          driverAdapterError?: {
+            cause?: { constraint?: { fields?: unknown } };
+          };
+        }
+      | undefined;
+
+    const unquote = (value: string) => value.replace(/^"|"$/g, '');
+
+    const adapterFields = meta?.driverAdapterError?.cause?.constraint?.fields;
+    if (Array.isArray(adapterFields) && adapterFields.length) {
+      return adapterFields.map((f) => unquote(String(f))).join(', ');
+    }
+
+    const target = meta?.target;
+    if (Array.isArray(target) && target.length) {
+      return target.map((f) => unquote(String(f))).join(', ');
+    }
+    if (typeof target === 'string' && target) return unquote(target);
+
     return 'value';
   }
 }
