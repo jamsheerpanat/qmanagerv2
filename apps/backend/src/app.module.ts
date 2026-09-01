@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
+import { VersionController } from './version.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { CommonModule } from './common/common.module';
@@ -60,7 +61,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     ReportsModule,
     AutomationModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, VersionController],
   providers: [AppService],
 })
 export class AppModule {}

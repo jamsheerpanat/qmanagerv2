@@ -7,6 +7,7 @@ import * as z from "zod";
 import { useAuthStore } from "@/lib/store";
 import { api } from "@/lib/axios";
 import { useRouter } from "next/navigation";
+import { BuildLabel } from "@/components/BuildLabel";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,7 +55,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-gray-50">
+    <div className="flex h-screen w-full flex-col items-center justify-center bg-gray-50">
       <Card className="w-full max-w-md">
         <CardHeader className="flex flex-col items-center gap-2">
           <img
@@ -101,6 +102,7 @@ export default function LoginPage() {
           </form>
         </CardContent>
       </Card>
+      <BuildLabel />
     </div>
   );
 }
