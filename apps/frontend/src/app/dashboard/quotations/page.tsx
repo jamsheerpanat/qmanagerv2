@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { api } from "@/lib/axios";
+import { useState } from "react";
+import { useQuotations } from "@/lib/queries";
 import { Input } from "@/components/ui/input";
 import {
   Plus,
@@ -49,26 +49,15 @@ function StatusPill({ status }: { status: string }) {
 }
 
 export default function QuotationsPage() {
-  const [quotations, setQuotations] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  async function fetchQuotations() {
-    try {
-      const { data } = await api.get("/quotations");
-      setQuotations(data || []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchQuotations();
-  }, []);
+  // Served from the shared cache when returning to this page, so navigating
+  // back no longer refetches the whole list.
+  const { data, isPending } = useQuotations();
+  const quotations = data ?? [];
+  const loading = isPending;
 
 
   const filtered = quotations.filter((q: any) => {

@@ -5,6 +5,7 @@ import {
   Patch,
   Body,
   Param,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { LeadsService } from './leads.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
+import { parseLimit } from '../common/parse-limit';
 
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('leads')
@@ -20,14 +22,14 @@ export class LeadsController {
 
   @RequirePermissions('leads.view')
   @Get()
-  findAll() {
-    return this.leadsService.findAll();
+  findAll(@Req() req: any, @Query('limit') limit?: string) {
+    return this.leadsService.findAll(req.user.companyId, parseLimit(limit));
   }
 
   @RequirePermissions('leads.view')
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.leadsService.findOne(id);
+  findOne(@Param('id') id: string, @Req() req: any) {
+    return this.leadsService.findOne(id, req.user.companyId);
   }
 
   @RequirePermissions('leads.create')

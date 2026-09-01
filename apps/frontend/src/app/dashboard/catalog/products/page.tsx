@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { api } from "@/lib/axios";
+import { useState } from "react";
+import { useProducts } from "@/lib/queries";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,22 +10,11 @@ import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 
 export default function CatalogProductsPage() {
-  const [products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const router = useRouter();
 
-  async function fetchProducts() {
-    try {
-      const { data } = await api.get("/catalog/products");
-      setProducts(data);
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  useEffect(() => {
-    fetchProducts();
-  }, []);
+  // Full rows here: this page renders the product thumbnails.
+  const products = useProducts().data ?? [];
 
 
   const filtered = products.filter(

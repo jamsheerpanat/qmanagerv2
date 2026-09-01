@@ -16,6 +16,7 @@ import { ItemType, DiscountType, QuotationStatus } from '@prisma/client';
 import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { PdfService } from '../pdf/pdf.service';
+import { parseLimit } from '../common/parse-limit';
 
 /**
  * Migration baseline: production had 469 quotations before the QManager v2
@@ -88,6 +89,12 @@ function pick<T extends object, K extends keyof T>(
 export class QuotationsService {
   private readonly logger = new Logger(QuotationsService.name);
 
+  /** Pooled SMTP transports, one per company, tagged with the settings used. */
+  private readonly mailTransporters = new Map<
+    string,
+    { settingsKey: string; transporter: nodemailer.Transporter }
+  >();
+
   constructor(
     private prisma: PrismaService,
     private pdfService: PdfService,
@@ -96,6 +103,48 @@ export class QuotationsService {
   /** Stable signed int32 derived from an id, for Postgres advisory locks. */
   private lockKeyFor(id: string): number {
     return crypto.createHash('sha1').update(id).digest().readInt32BE(0);
+  }
+
+  /**
+   * Returns a pooled SMTP transporter for a company, creating it on first use.
+   *
+   * A fresh transport per send meant a new TCP connection, TLS handshake and
+   * SMTP auth round trip on every email, inside the request. Pooling reuses the
+   * connection; the cache is keyed on the settings themselves so changing them
+   * in Settings takes effect without a restart.
+   */
+  private mailTransporterFor(company: {
+    id: string;
+    smtpHost: string | null;
+    smtpPort: number | null;
+    smtpUser: string | null;
+    smtpPass: string | null;
+  }): nodemailer.Transporter {
+    const port = company.smtpPort || 587;
+    const settingsKey = [
+      company.smtpHost,
+      port,
+      company.smtpUser,
+      company.smtpPass,
+    ].join('\u0000');
+
+    const cached = this.mailTransporters.get(company.id);
+    if (cached) {
+      if (cached.settingsKey === settingsKey) return cached.transporter;
+      // Settings changed in the UI: release this company's pooled sockets and
+      // rebuild. Other companies' transports are left alone.
+      cached.transporter.close();
+    }
+
+    const transporter = nodemailer.createTransport({
+      pool: true,
+      host: company.smtpHost!,
+      port,
+      secure: port === 465,
+      auth: { user: company.smtpUser!, pass: company.smtpPass! },
+    });
+    this.mailTransporters.set(company.id, { settingsKey, transporter });
+    return transporter;
   }
 
   private async checkLock(id: string) {
@@ -206,11 +255,7 @@ export class QuotationsService {
 
     // The dashboard only renders the few most recent quotations; without a cap
     // it was pulling the entire table (and its joins) on every page load.
-    const parsedLimit = Number.parseInt(filters?.limit, 10);
-    const take =
-      Number.isInteger(parsedLimit) && parsedLimit > 0
-        ? Math.min(parsedLimit, 500)
-        : undefined;
+    const take = parseLimit(filters?.limit);
 
     return this.prisma.quotation.findMany({
       where,
@@ -692,15 +737,7 @@ export class QuotationsService {
 
     if (company && company.smtpHost && company.smtpUser && company.smtpPass) {
       try {
-        const transporter = nodemailer.createTransport({
-          host: company.smtpHost,
-          port: company.smtpPort || 587,
-          secure: company.smtpPort === 465,
-          auth: {
-            user: company.smtpUser,
-            pass: company.smtpPass,
-          },
-        });
+        const transporter = this.mailTransporterFor(company);
 
         await transporter.sendMail({
           from: `"${company.name}" <${company.smtpUser}>`,

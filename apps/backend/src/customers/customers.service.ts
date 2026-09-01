@@ -11,18 +11,24 @@ export class CustomersService {
     private timeline: TimelineService,
   ) {}
 
-  async findAll() {
+  /**
+   * Scoped to the caller's company. This previously took no companyId at all,
+   * so every tenant's customers were returned to every caller.
+   */
+  async findAll(companyId: string, limit?: number) {
     return this.prisma.customer.findMany({
+      where: { companyId },
       include: {
         contacts: { where: { isPrimary: true } },
       },
       orderBy: { createdAt: 'desc' },
+      ...(limit ? { take: limit } : {}),
     });
   }
 
-  async findOne(id: string) {
-    const customer = await this.prisma.customer.findUnique({
-      where: { id },
+  async findOne(id: string, companyId: string) {
+    const customer = await this.prisma.customer.findFirst({
+      where: { id, companyId },
       include: { contacts: true, leads: true },
     });
     if (!customer) throw new NotFoundException();

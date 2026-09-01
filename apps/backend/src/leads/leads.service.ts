@@ -11,20 +11,23 @@ export class LeadsService {
     private timeline: TimelineService,
   ) {}
 
-  async findAll() {
+  /** Scoped to the caller's company; this used to return every tenant's leads. */
+  async findAll(companyId: string, limit?: number) {
     return this.prisma.lead.findMany({
+      where: { companyId },
       include: {
         customer: true,
         contact: true,
         assignedTo: { select: { id: true, name: true } },
       },
       orderBy: { createdAt: 'desc' },
+      ...(limit ? { take: limit } : {}),
     });
   }
 
-  async findOne(id: string) {
-    const lead = await this.prisma.lead.findUnique({
-      where: { id },
+  async findOne(id: string, companyId: string) {
+    const lead = await this.prisma.lead.findFirst({
+      where: { id, companyId },
       include: {
         customer: true,
         contact: true,

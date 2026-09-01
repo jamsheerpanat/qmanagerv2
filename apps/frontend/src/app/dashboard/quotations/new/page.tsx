@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { api } from "@/lib/axios";
+import { useInvalidate, queryKeys } from "@/lib/queries";
 import { compressImage } from "@/lib/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -63,6 +64,7 @@ const STEPS = [
 export default function CreateQuotationWizard() {
   const [step, setStep] = useState(0);
   const router = useRouter();
+  const invalidate = useInvalidate();
   const { user } = useAuthStore();
 
   const [customers, setCustomers] = useState<any[]>([]);
@@ -294,6 +296,9 @@ export default function CreateQuotationWizard() {
         await api.post(`/quotations/${quotation.id}/terms`, payload);
       }
 
+      // The list is cached; without this the saved quotation would
+      // not appear until the entry went stale.
+      await invalidate(queryKeys.quotationsAll);
       router.push(`/dashboard/quotations/${quotation.id}`);
     } catch (e: any) {
       console.error(e);

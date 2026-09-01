@@ -5,6 +5,7 @@ import {
   Patch,
   Body,
   Param,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -12,6 +13,7 @@ import { CustomersService } from './customers.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PermissionsGuard } from '../common/guards/permissions.guard';
 import { RequirePermissions } from '../common/decorators/permissions.decorator';
+import { parseLimit } from '../common/parse-limit';
 
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @Controller('customers')
@@ -20,14 +22,14 @@ export class CustomersController {
 
   @RequirePermissions('customers.view')
   @Get()
-  findAll() {
-    return this.customersService.findAll();
+  findAll(@Req() req: any, @Query('limit') limit?: string) {
+    return this.customersService.findAll(req.user.companyId, parseLimit(limit));
   }
 
   @RequirePermissions('customers.view')
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.customersService.findOne(id);
+  findOne(@Param('id') id: string, @Req() req: any) {
+    return this.customersService.findOne(id, req.user.companyId);
   }
 
   @RequirePermissions('customers.create')

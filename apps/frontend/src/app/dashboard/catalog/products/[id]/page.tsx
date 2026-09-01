@@ -2,6 +2,7 @@
 
 import { useState, useEffect, use } from "react";
 import { api } from "@/lib/axios";
+import { useInvalidate, queryKeys } from "@/lib/queries";
 import { fileToCompressedDataUrl } from "@/lib/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ export default function EditProductPage({
   params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
+  const invalidate = useInvalidate();
   const { id } = use(params);
   const [categories, setCategories] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
@@ -106,6 +108,7 @@ export default function EditProductPage({
         taxRate: parseFloat((formData.taxRate as any) || "0"),
       };
       await api.patch(`/catalog/products/${id}`, payload);
+      await invalidate(queryKeys.productsAll);
       alert("Product updated successfully!");
       router.push("/dashboard/catalog/products");
     } catch (error: any) {

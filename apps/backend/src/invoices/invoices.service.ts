@@ -40,6 +40,7 @@ const ALLOWED_LIST_FILTERS = [
   'quotationId',
 ] as const;
 
+import { parseLimit } from '../common/parse-limit';
 @Injectable()
 export class InvoicesService {
   constructor(
@@ -171,10 +172,13 @@ export class InvoicesService {
     }
     where.companyId = companyId;
 
+    const take = parseLimit(filters?.limit);
+
     return this.prisma.invoice.findMany({
       where,
       include: { customer: true },
       orderBy: { createdAt: 'desc' },
+      ...(take ? { take } : {}),
     });
   }
 

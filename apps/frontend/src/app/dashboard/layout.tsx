@@ -5,6 +5,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { NotificationsDropdown } from "@/components/NotificationsDropdown";
+import { QueryProvider } from "@/lib/query-provider";
 import {
   LayoutDashboard,
   Users,
@@ -211,282 +212,284 @@ export default function DashboardLayout({
   const bg = avatarColor(user.name || "User");
 
   return (
-    <div className="flex h-screen w-full" style={{ background: "#f1f5f9" }}>
-      {/* ── Sidebar ──────────────────────────────────────────────────────── */}
-      <aside className="qm-sidebar w-60 flex flex-col shrink-0 overflow-y-auto">
-        {/* Logo */}
-        <div
-          style={{
-            padding: "16px",
-            borderBottom: "1px solid rgba(255,255,255,0.06)",
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-            <img
-              src="/qmanager-logo.jpeg"
-              alt="Q-Manager Logo"
-              style={{
-                width: "auto",
-                height: "54px",
-                borderRadius: "4px",
-                objectFit: "contain",
-              }}
-            />
-          </div>
-        </div>
-
-        {/* Nav */}
-        <nav style={{ flex: 1, padding: "8px 10px 16px" }}>
-          {NAV_SECTIONS.map((section) => {
-            // filter by permissions
-            const visible = section.items.filter(
-              (item) => !item.perm || user.permissions?.includes(item.perm),
-            );
-            if (visible.length === 0) return null;
-            return (
-              <div key={section.label}>
-                <div className="qm-sidebar-section">{section.label}</div>
-                {visible.map((item) => (
-                  <SidebarLink
-                    key={item.href}
-                    href={item.href}
-                    label={item.label}
-                    icon={item.icon}
-                    active={isActive(item.href, item.exact)}
-                  />
-                ))}
-              </div>
-            );
-          })}
-        </nav>
-
-        {/* User footer */}
-        <div
-          style={{
-            padding: "12px 10px",
-            borderTop: "1px solid rgba(255,255,255,0.06)",
-          }}
-        >
+    <QueryProvider>
+      <div className="flex h-screen w-full" style={{ background: "#f1f5f9" }}>
+        {/* ── Sidebar ──────────────────────────────────────────────────────── */}
+        <aside className="qm-sidebar w-60 flex flex-col shrink-0 overflow-y-auto">
+          {/* Logo */}
           <div
             style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "10px",
-              padding: "8px 10px",
-              borderRadius: "10px",
-              background: "rgba(255,255,255,0.04)",
-              marginBottom: "6px",
+              padding: "16px",
+              borderBottom: "1px solid rgba(255,255,255,0.06)",
             }}
           >
-            <div
-              style={{
-                width: "32px",
-                height: "32px",
-                borderRadius: "8px",
-                background: bg,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontWeight: "700",
-                fontSize: "12px",
-                flexShrink: 0,
-              }}
-            >
-              {getInitials(user.name)}
-            </div>
-            <div style={{ overflow: "hidden" }}>
-              <div
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              <img
+                src="/qmanager-logo.jpeg"
+                alt="Q-Manager Logo"
                 style={{
-                  color: "#f8fafc",
-                  fontSize: "12.5px",
-                  fontWeight: "600",
-                  whiteSpace: "nowrap",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}
-              >
-                {user.name}
-              </div>
-              <div
-                style={{
-                  color: "#475569",
-                  fontSize: "10px",
-                  textTransform: "capitalize",
-                }}
-              >
-                {/* /auth/me returns `roles` (an array of names), never `role` —
-                    reading `user.role` always fell through to "user". */}
-                {user.roles?.[0]?.toLowerCase() || "user"}
-              </div>
-            </div>
-          </div>
-          <button
-            onClick={() => {
-              logout();
-              router.push("/login");
-            }}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              width: "100%",
-              padding: "7px 10px",
-              borderRadius: "8px",
-              background: "transparent",
-              border: "none",
-              cursor: "pointer",
-              color: "#ef4444",
-              fontSize: "12.5px",
-              fontWeight: "500",
-              transition: "background 0.15s",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.background = "rgba(239,68,68,0.1)")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.background = "transparent")
-            }
-          >
-            <LogOut size={14} />
-            Sign Out
-          </button>
-        </div>
-      </aside>
-
-      {/* ── Main area ────────────────────────────────────────────────────── */}
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden",
-        }}
-      >
-        {/* Topbar */}
-        <header
-          className="qm-topbar"
-          style={{
-            height: "58px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "0 24px",
-            flexShrink: 0,
-            zIndex: 10,
-          }}
-        >
-          {/* Breadcrumb / page title area */}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <div
-              style={{
-                fontSize: "11px",
-                color: "#94a3b8",
-                letterSpacing: "0.5px",
-              }}
-            >
-              {NAV_SECTIONS.flatMap((s) => s.items).find((i) =>
-                i.exact
-                  ? pathname === i.href
-                  : pathname.startsWith(i.href) && i.href !== "/dashboard",
-              )?.label || "Dashboard"}
-            </div>
-          </div>
-
-          {/* Right side */}
-          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-            {/* Search trigger */}
-            <button
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "8px",
-                padding: "7px 14px",
-                borderRadius: "8px",
-                background: "#f8fafc",
-                border: "1px solid #e2e8f0",
-                color: "#94a3b8",
-                fontSize: "12.5px",
-                cursor: "pointer",
-                transition: "all 0.15s",
-                minWidth: "180px",
-              }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.borderColor = "#3b82f6")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.borderColor = "#e2e8f0")
-              }
-            >
-              <Search size={13} />
-              <span>Quick search…</span>
-              <kbd
-                style={{
-                  marginLeft: "auto",
-                  fontSize: "10px",
-                  color: "#cbd5e1",
-                  background: "#f1f5f9",
-                  padding: "1px 5px",
+                  width: "auto",
+                  height: "54px",
                   borderRadius: "4px",
-                  border: "1px solid #e2e8f0",
+                  objectFit: "contain",
                 }}
-              >
-                ⌘K
-              </kbd>
-            </button>
+              />
+            </div>
+          </div>
 
-            <NotificationsDropdown />
+          {/* Nav */}
+          <nav style={{ flex: 1, padding: "8px 10px 16px" }}>
+            {NAV_SECTIONS.map((section) => {
+              // filter by permissions
+              const visible = section.items.filter(
+                (item) => !item.perm || user.permissions?.includes(item.perm),
+              );
+              if (visible.length === 0) return null;
+              return (
+                <div key={section.label}>
+                  <div className="qm-sidebar-section">{section.label}</div>
+                  {visible.map((item) => (
+                    <SidebarLink
+                      key={item.href}
+                      href={item.href}
+                      label={item.label}
+                      icon={item.icon}
+                      active={isActive(item.href, item.exact)}
+                    />
+                  ))}
+                </div>
+              );
+            })}
+          </nav>
 
-            {/* User chip */}
+          {/* User footer */}
+          <div
+            style={{
+              padding: "12px 10px",
+              borderTop: "1px solid rgba(255,255,255,0.06)",
+            }}
+          >
             <div
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: "8px",
-                padding: "5px 10px 5px 5px",
-                borderRadius: "24px",
-                background: "#f8fafc",
-                border: "1px solid #e2e8f0",
-                cursor: "pointer",
+                gap: "10px",
+                padding: "8px 10px",
+                borderRadius: "10px",
+                background: "rgba(255,255,255,0.04)",
+                marginBottom: "6px",
               }}
             >
               <div
                 style={{
-                  width: "28px",
-                  height: "28px",
-                  borderRadius: "50%",
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "8px",
                   background: bg,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   color: "white",
                   fontWeight: "700",
-                  fontSize: "11px",
+                  fontSize: "12px",
+                  flexShrink: 0,
                 }}
               >
                 {getInitials(user.name)}
               </div>
-              <span
+              <div style={{ overflow: "hidden" }}>
+                <div
+                  style={{
+                    color: "#f8fafc",
+                    fontSize: "12.5px",
+                    fontWeight: "600",
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}
+                >
+                  {user.name}
+                </div>
+                <div
+                  style={{
+                    color: "#475569",
+                    fontSize: "10px",
+                    textTransform: "capitalize",
+                  }}
+                >
+                  {/* /auth/me returns `roles` (an array of names), never `role` —
+                    reading `user.role` always fell through to "user". */}
+                  {user.roles?.[0]?.toLowerCase() || "user"}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                logout();
+                router.push("/login");
+              }}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                width: "100%",
+                padding: "7px 10px",
+                borderRadius: "8px",
+                background: "transparent",
+                border: "none",
+                cursor: "pointer",
+                color: "#ef4444",
+                fontSize: "12.5px",
+                fontWeight: "500",
+                transition: "background 0.15s",
+              }}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.background = "rgba(239,68,68,0.1)")
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.background = "transparent")
+              }
+            >
+              <LogOut size={14} />
+              Sign Out
+            </button>
+          </div>
+        </aside>
+
+        {/* ── Main area ────────────────────────────────────────────────────── */}
+        <div
+          style={{
+            flex: 1,
+            display: "flex",
+            flexDirection: "column",
+            overflow: "hidden",
+          }}
+        >
+          {/* Topbar */}
+          <header
+            className="qm-topbar"
+            style={{
+              height: "58px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "0 24px",
+              flexShrink: 0,
+              zIndex: 10,
+            }}
+          >
+            {/* Breadcrumb / page title area */}
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <div
                 style={{
-                  fontSize: "12.5px",
-                  color: "#334155",
-                  fontWeight: "600",
+                  fontSize: "11px",
+                  color: "#94a3b8",
+                  letterSpacing: "0.5px",
                 }}
               >
-                {user.name?.split(" ")[0]}
-              </span>
+                {NAV_SECTIONS.flatMap((s) => s.items).find((i) =>
+                  i.exact
+                    ? pathname === i.href
+                    : pathname.startsWith(i.href) && i.href !== "/dashboard",
+                )?.label || "Dashboard"}
+              </div>
             </div>
-          </div>
-        </header>
 
-        {/* Page content */}
-        <main
-          style={{ flex: 1, overflowY: "auto", padding: "28px 28px" }}
-          className="animate-fade-in"
-        >
-          {children}
-        </main>
+            {/* Right side */}
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              {/* Search trigger */}
+              <button
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "7px 14px",
+                  borderRadius: "8px",
+                  background: "#f8fafc",
+                  border: "1px solid #e2e8f0",
+                  color: "#94a3b8",
+                  fontSize: "12.5px",
+                  cursor: "pointer",
+                  transition: "all 0.15s",
+                  minWidth: "180px",
+                }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.borderColor = "#3b82f6")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.borderColor = "#e2e8f0")
+                }
+              >
+                <Search size={13} />
+                <span>Quick search…</span>
+                <kbd
+                  style={{
+                    marginLeft: "auto",
+                    fontSize: "10px",
+                    color: "#cbd5e1",
+                    background: "#f1f5f9",
+                    padding: "1px 5px",
+                    borderRadius: "4px",
+                    border: "1px solid #e2e8f0",
+                  }}
+                >
+                  ⌘K
+                </kbd>
+              </button>
+
+              <NotificationsDropdown />
+
+              {/* User chip */}
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  padding: "5px 10px 5px 5px",
+                  borderRadius: "24px",
+                  background: "#f8fafc",
+                  border: "1px solid #e2e8f0",
+                  cursor: "pointer",
+                }}
+              >
+                <div
+                  style={{
+                    width: "28px",
+                    height: "28px",
+                    borderRadius: "50%",
+                    background: bg,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    color: "white",
+                    fontWeight: "700",
+                    fontSize: "11px",
+                  }}
+                >
+                  {getInitials(user.name)}
+                </div>
+                <span
+                  style={{
+                    fontSize: "12.5px",
+                    color: "#334155",
+                    fontWeight: "600",
+                  }}
+                >
+                  {user.name?.split(" ")[0]}
+                </span>
+              </div>
+            </div>
+          </header>
+
+          {/* Page content */}
+          <main
+            style={{ flex: 1, overflowY: "auto", padding: "28px 28px" }}
+            className="animate-fade-in"
+          >
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </QueryProvider>
   );
 }

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { api } from "@/lib/axios";
+import { useInvalidate, queryKeys } from "@/lib/queries";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,7 @@ import { Label } from "@/components/ui/label";
 
 export default function NewCustomerPage() {
   const router = useRouter();
+  const invalidate = useInvalidate();
   const [formData, setFormData] = useState({
     displayName: "",
     customerType: "COMPANY",
@@ -22,6 +24,7 @@ export default function NewCustomerPage() {
     e.preventDefault();
     try {
       const { data } = await api.post("/customers", formData);
+      await invalidate(queryKeys.customers);
       router.push(`/dashboard/customers/${data.id}`);
     } catch (error) {
       alert("Error creating customer");

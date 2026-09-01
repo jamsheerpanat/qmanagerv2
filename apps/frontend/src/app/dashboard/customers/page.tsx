@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { api } from "@/lib/axios";
+import { useState } from "react";
+import { useCustomers } from "@/lib/queries";
 import { Plus, Search, Mail, Phone, Building2, Users } from "lucide-react";
 import { useRouter } from "next/navigation";
 
@@ -32,26 +32,13 @@ function avatarColor(name: string) {
 }
 
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [typeFilter, setTypeFilter] = useState("ALL");
-  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  async function fetchCustomers() {
-    try {
-      const { data } = await api.get("/customers");
-      setCustomers(data || []);
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchCustomers();
-  }, []);
+  const { data, isPending } = useCustomers();
+  const customers = data ?? [];
+  const loading = isPending;
 
   const types = [
     "ALL",

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { api } from "@/lib/axios";
+import { useInvalidate, queryKeys } from "@/lib/queries";
 import { fileToCompressedDataUrl } from "@/lib/image";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function NewProductPage() {
   const router = useRouter();
+  const invalidate = useInvalidate();
   const [categories, setCategories] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
   const [formData, setFormData] = useState({
@@ -58,6 +60,7 @@ export default function NewProductPage() {
         taxRate: parseFloat((formData.taxRate as any) || "0"),
       };
       await api.post("/catalog/products", payload);
+      await invalidate(queryKeys.productsAll);
       router.push("/dashboard/catalog/products");
     } catch (error: any) {
       alert(error.response?.data?.message || "Error creating product");

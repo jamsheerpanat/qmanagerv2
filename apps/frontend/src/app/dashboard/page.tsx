@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/axios";
+import { useQuotations } from "@/lib/queries";
 import {
   AreaChart,
   Area,
@@ -266,20 +267,17 @@ const BRAND_COLORS = [
 export default function DashboardPage() {
   const [kpis, setKpis] = useState<any>(null);
   const [charts, setCharts] = useState<any>(null);
-  const [quotations, setQuotations] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const load = async () => {
       try {
-        const [kpiRes, chartsRes, qtnsRes] = await Promise.all([
+        const [kpiRes, chartsRes] = await Promise.all([
           api.get("/reports/dashboard"),
           api.get("/reports/charts"),
-          api.get("/quotations?limit=6"),
         ]);
         setKpis(kpiRes.data);
         setCharts(chartsRes.data);
-        setQuotations(qtnsRes.data || []);
       } catch (e) {
         console.error(e);
       } finally {
@@ -288,6 +286,10 @@ export default function DashboardPage() {
     };
     load();
   }, []);
+
+  // Its own cache entry (the limit is part of the key), refreshed when a
+  // quotation is saved.
+  const quotations = useQuotations(6).data ?? [];
 
   if (loading) {
     return (
