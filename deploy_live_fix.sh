@@ -47,4 +47,7 @@ echo "     Until this runs, older products show a placeholder in the catalogue"
 echo "     and the quotation item picker. Their full images are untouched."
 echo
 echo "  2. nginx gzip: deploy/nginx/qmanager2.octolabs.cloud.conf has changed."
-echo "     Copy it to /etc/nginx/sites-available/ and 'nginx -t && systemctl reload nginx'."
+echo "     Compare it against the live vhost BEFORE copying — this host runs"
+echo "     several apps and the upstream ports must match qmanager2-web/-api"
+echo "     (4200/4201 as of this writing). Then:"
+echo "       nginx -t && systemctl reload nginx"

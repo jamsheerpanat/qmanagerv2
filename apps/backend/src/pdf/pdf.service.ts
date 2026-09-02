@@ -29,8 +29,28 @@ export function resolveTemplateRoute(templateId: string): string {
   return SERVICE_TEMPLATE_ROUTES[templateId] || templateId;
 }
 
+/**
+ * Where the headless renderer should load the /render-pdf pages from.
+ *
+ * The old fallback was a bare `http://localhost:3000`, which is only correct if
+ * this app happens to own that port. On a shared host it does not: QManager's
+ * web app listens elsewhere and 3000 belongs to a different application
+ * entirely, so the renderer navigated to someone else's site and produced a PDF
+ * of it — or failed outright when no /render-pdf route existed there.
+ *
+ * NEXT_PUBLIC_APP_URL is the app's own public origin and is already configured,
+ * so it is a far safer second choice than guessing a port.
+ */
 export function frontendBaseUrl(): string {
-  return process.env.FRONTEND_URL || 'http://localhost:3000';
+  const configured =
+    process.env.FRONTEND_URL || process.env.NEXT_PUBLIC_APP_URL;
+  if (configured) return configured.replace(/\/+$/, '');
+
+  new Logger('PdfService').warn(
+    'Neither FRONTEND_URL nor NEXT_PUBLIC_APP_URL is set; falling back to ' +
+      'http://localhost:3000, which on a shared host may be a different app.',
+  );
+  return 'http://localhost:3000';
 }
 
 /** Render tokens are short-lived; a PDF render takes seconds, not minutes. */
