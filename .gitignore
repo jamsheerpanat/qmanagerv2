@@ -35,3 +35,11 @@ apps/backend/fix_live_data.ts
 *.jpg
 *.gif
 # Keep .png for logo assets if needed
+
+# Credential scratch files. The repository is public — nothing token-shaped
+# should ever be committable by accident.
+gittocken.txt
+*token*.txt
+*.pem
+*.key
+.netrc
