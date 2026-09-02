@@ -1,12 +1,33 @@
 #!/usr/bin/expect -f
-set timeout 60
+#
+# Runs a single command on the production host.
+#
+# The password used to be hardcoded in this file. The repository is public, so
+# that credential must be considered compromised and should be rotated; it is
+# now read from the environment instead of being committed.
+#
+# Prefer an SSH key over a password entirely:
+#   ssh-copy-id root@<host>          # then this script is unnecessary
+#
+# Usage:
+#   DEPLOY_HOST=root@<host> DEPLOY_PASSWORD='...' ./run_ssh.exp "<command>"
+set timeout 300
 set cmd [lindex $argv 0]
 
-spawn ssh -o StrictHostKeyChecking=no root@76.13.76.173 "$cmd"
+if {![info exists env(DEPLOY_HOST)]} {
+    puts stderr "DEPLOY_HOST is not set (expected e.g. root@203.0.113.10)"
+    exit 2
+}
+if {![info exists env(DEPLOY_PASSWORD)]} {
+    puts stderr "DEPLOY_PASSWORD is not set. Use an SSH key if you can."
+    exit 2
+}
+
+spawn ssh -o StrictHostKeyChecking=no $env(DEPLOY_HOST) "$cmd"
 
 expect {
     "password:" {
-        send "9zV1K;54OqFH)yIt6r9(\r"
+        send "$env(DEPLOY_PASSWORD)\r"
         exp_continue
     }
     eof
