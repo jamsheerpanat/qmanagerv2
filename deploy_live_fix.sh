@@ -27,6 +27,13 @@ cd apps/backend
 npx prisma db push --accept-data-loss
 npx prisma generate
 npm run build
+# Keep the database's permission catalogue in step with prisma/permissions.ts
+# and attached to the Super Admin role. Only this was ever run on deploy, so a
+# permission added in code never reached the database and the pages it gated
+# stayed hidden. Steps 1-3 of that script are upserts; its blanket
+# grant-everyone-Super-Admin step is opt-in via GRANT_SUPER_ADMIN_TO_ALL=1 and
+# stays off here.
+npx ts-node seed-permissions-live.ts
 npx ts-node seed-terms-live.ts
 
 cd ../frontend

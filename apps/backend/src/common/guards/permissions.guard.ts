@@ -7,6 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from '../decorators/permissions.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
+import { SUPER_ADMIN_ROLE } from '../roles';
 import {
   PermissionsCacheService,
   ResolvedPermissions,
@@ -97,7 +98,7 @@ export class PermissionsGuard implements CanActivate {
     const permissions = new Set<string>();
     let isSuperAdmin = false;
     for (const ur of userWithRoles.roles) {
-      if (ur.role.name === 'Super Admin') {
+      if (ur.role.name === SUPER_ADMIN_ROLE) {
         isSuperAdmin = true;
       }
       for (const rp of ur.role.permissions) {

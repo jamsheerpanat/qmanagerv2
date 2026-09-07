@@ -10,6 +10,7 @@ import {
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { PrismaService } from '../prisma/prisma.service';
+import { SUPER_ADMIN_ROLE } from '../common/roles';
 
 @Controller('auth')
 export class AuthController {
@@ -79,6 +80,15 @@ export class AuthController {
       );
     });
 
+    // PermissionsGuard short-circuits on Super Admin and never consults the
+    // permission rows, so a Super Admin is authorised for everything server
+    // side regardless of what is attached to the role. This endpoint drives the
+    // UI, so it has to report the same thing — otherwise the API accepts a
+    // request that the interface gives no way to make.
+    const isSuperAdmin = user.roles.some(
+      (ur) => ur.role.name === SUPER_ADMIN_ROLE,
+    );
+
     // Formatting it cleanly for the frontend
     const mappedUser = {
       id: user.id,
@@ -90,6 +100,7 @@ export class AuthController {
       branchId: user.branchId,
       roles: user.roles.map((r) => r.role.name),
       permissions: Array.from(permissions),
+      isSuperAdmin,
     };
 
     return mappedUser;

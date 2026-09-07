@@ -241,8 +241,17 @@ export default function DashboardLayout({
           <nav style={{ flex: 1, padding: "8px 10px 16px" }}>
             {NAV_SECTIONS.map((section) => {
               // filter by permissions
+              // A Super Admin passes every check in PermissionsGuard without
+              // its permission rows being consulted, so gating the navigation
+              // on those rows hid pages that the API would have served — User
+              // Management among them, whenever `users.manage` was missing
+              // from the database because the permission seed had not been
+              // re-run since it was added.
               const visible = section.items.filter(
-                (item) => !item.perm || user.permissions?.includes(item.perm),
+                (item) =>
+                  !item.perm ||
+                  user.isSuperAdmin ||
+                  user.permissions?.includes(item.perm),
               );
               if (visible.length === 0) return null;
               return (

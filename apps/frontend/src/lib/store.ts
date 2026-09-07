@@ -26,7 +26,11 @@ export const useAuthStore = create<AuthState>()(
       logout: () => set({ user: null, accessToken: null, refreshToken: null }),
       hasPermission: (permission) => {
         const user = get().user;
-        if (!user || !user.permissions) return false;
+        if (!user) return false;
+        // Mirrors PermissionsGuard, which allows a Super Admin everything
+        // without consulting the permission rows at all.
+        if (user.isSuperAdmin) return true;
+        if (!user.permissions) return false;
         return user.permissions.includes(permission);
       },
     }),
