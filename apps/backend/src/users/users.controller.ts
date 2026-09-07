@@ -20,14 +20,14 @@ export class UsersController {
 
   @RequirePermissions('users.manage')
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Req() req: any) {
+    return this.usersService.findAll(req.user.companyId, req.user.isSuperAdmin);
   }
 
   @RequirePermissions('users.manage')
   @Post()
   create(@Body() body: any, @Req() req: any) {
-    return this.usersService.create(body, req.user.id);
+    return this.usersService.create(body, req.user.id, req.user.companyId);
   }
 
   @RequirePermissions('users.manage')

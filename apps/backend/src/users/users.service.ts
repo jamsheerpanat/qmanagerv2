@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import * as bcrypt from 'bcrypt';
@@ -12,8 +16,14 @@ export class UsersService {
     private permissionsCache: PermissionsCacheService,
   ) {}
 
-  async findAll() {
+  /**
+   * Scoped to the caller's company. A Super Admin sees every account, which is
+   * the existing behaviour for that role; anyone else holding users.manage
+   * previously saw other tenants' users too.
+   */
+  async findAll(companyId?: string, isSuperAdmin = false) {
     return this.prisma.user.findMany({
+      ...(isSuperAdmin || !companyId ? {} : { where: { companyId } }),
       select: {
         id: true,
         name: true,
@@ -27,8 +37,15 @@ export class UsersService {
     });
   }
 
-  async create(data: any, actorId: string) {
-    const { roleIds, companyId, ...userData } = data;
+  async create(data: any, actorId: string, actorCompanyId: string) {
+    // companyId is taken from the authenticated caller and the body's copy is
+    // discarded: trusting it would let anyone with users.manage create an
+    // account inside another company.
+    const { roleIds, ...rest } = data;
+    // Drop any companyId the caller supplied; the company is the actor's.
+    delete rest.companyId;
+    const userData = rest;
+    const companyId = actorCompanyId;
 
     // Hash password if provided, otherwise generic default
     const passwordHash = await bcrypt.hash(data.password || 'Welcome@123', 10);
@@ -61,6 +78,14 @@ export class UsersService {
 
   async update(id: string, data: any, actorId: string) {
     const { roleIds, password, ...userData } = data;
+
+    // The users screen can edit the account you are signed in as, and an
+    // administrator suspending themselves cannot undo it from the interface.
+    if (id === actorId && userData.status && userData.status !== 'ACTIVE') {
+      throw new BadRequestException(
+        'You cannot deactivate the account you are signed in as. Ask another administrator to do it.',
+      );
+    }
 
     if (password) {
       userData.passwordHash = await bcrypt.hash(password, 10);
