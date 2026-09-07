@@ -27,6 +27,13 @@ import * as path from 'path';
 const THUMBNAIL_WIDTH = 160;
 
 function getDbUrl() {
+  // An explicitly exported DATABASE_URL wins, which is how the Prisma CLI
+  // behaves: prisma.config.ts loads dotenv, and dotenv does not override a
+  // variable that is already set. Reading .env first meant that exporting a
+  // database on the command line was silently ignored here while prisma
+  // honoured it, so a migration and a script could target different databases.
+  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+
   try {
     const envPath = path.join(__dirname, '.env');
     if (fs.existsSync(envPath)) {
@@ -43,7 +50,8 @@ function getDbUrl() {
   );
 }
 
-const pool = new Pool({ connectionString: getDbUrl() });
+const dbUrl = getDbUrl();
+const pool = new Pool({ connectionString: dbUrl });
 const prisma = new PrismaClient({ adapter: new PrismaPg(pool) });
 
 /** Decodes a data URL, downscales it, and re-encodes it as a JPEG data URL. */
@@ -62,8 +70,20 @@ async function makeThumbnail(dataUrl: string): Promise<string | null> {
 
 const kb = (s: string) => (s.length / 1024).toFixed(1) + 'KB';
 
+/** Host and database only — never the credentials. */
+function describeDbUrl(url: string): string {
+  try {
+    const u = new URL(url);
+    return `${u.hostname}:${u.port || '5432'}${u.pathname}`;
+  } catch {
+    return '(unparseable DATABASE_URL)';
+  }
+}
+
 async function main() {
   const write = process.argv.includes('--write');
+
+  console.log(`Database: ${describeDbUrl(dbUrl)}\n`);
 
   const products = await prisma.product.findMany({
     where: { productImage: { not: null }, productThumbnail: null },

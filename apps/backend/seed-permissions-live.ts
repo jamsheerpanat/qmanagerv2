@@ -6,6 +6,13 @@ import * as path from 'path';
 import { PERMISSION_ACTIONS } from './prisma/permissions';
 
 function getDbUrl() {
+  // An explicitly exported DATABASE_URL wins, which is how the Prisma CLI
+  // behaves: prisma.config.ts loads dotenv, and dotenv does not override a
+  // variable that is already set. Reading .env first meant that exporting a
+  // database on the command line was silently ignored here while prisma
+  // honoured it, so a migration and a script could target different databases.
+  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+
   try {
     const envPath = path.join(__dirname, '.env');
     if (fs.existsSync(envPath)) {

@@ -10,8 +10,31 @@ set -euo pipefail
 cd /var/www/qmanager-v2
 git pull origin main
 
-export DATABASE_URL="postgresql://qmanager_user:password@localhost:5432/qmanager_v2"
-export LIVE_DATABASE_URL="postgresql://qmanager_user:password@localhost:5432/qmanager_v2"
+# apps/backend/.env is the single source of truth for the database.
+#
+# This used to export a hardcoded DATABASE_URL. That value won for
+# `prisma db push`, because prisma.config.ts loads dotenv and dotenv never
+# overrides an already-set variable — while the ts-node scripts here read .env
+# directly and ignored the export. The migration and the seeds were therefore
+# free to target different databases, which is how a column could be pushed and
+# then be missing from the database a script talked to.
+#
+# Both variables are now derived from the one value in .env, so prisma, the
+# seeds and the backfills cannot disagree. seed-terms-live.ts requires
+# LIVE_DATABASE_URL and exits if it is unset, so it must still be exported.
+# The credential is also no longer committed — this repository is public.
+ENV_FILE="apps/backend/.env"
+DB_URL="$(grep -E '^DATABASE_URL=' "$ENV_FILE" 2>/dev/null | head -1 | cut -d= -f2- \
+  | sed -e 's/^"//' -e 's/"$//' -e "s/^'//" -e "s/'$//")"
+
+if [ -z "$DB_URL" ]; then
+  echo "ERROR: no DATABASE_URL in $ENV_FILE. Set it there before deploying." >&2
+  exit 1
+fi
+
+export DATABASE_URL="$DB_URL"
+export LIVE_DATABASE_URL="$DB_URL"
+echo "Database: $(echo "$DB_URL" | sed -E 's#//[^:]+:[^@]+@#//***:***@#')"
 
 # corepack resolves pnpm from the root package.json's "packageManager" field
 # and downloads it if absent; without this it can stop to prompt on a
