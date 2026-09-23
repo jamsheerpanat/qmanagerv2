@@ -474,7 +474,7 @@ export default function EditQuotationWizard({ params }: { params: Promise<{ id: 
                   </Button>
                   <div
                     className="flex items-center gap-2 ml-2"
-                    title="Markup on cost price. Changing it re-prices every catalog product that has a cost price."
+                    title="Added on top of each product's selling price. Changing it re-prices every catalog product in the quotation."
                   >
                     <label htmlFor="profit-percent" className="text-sm font-medium text-gray-700 whitespace-nowrap">
                       Profit %
