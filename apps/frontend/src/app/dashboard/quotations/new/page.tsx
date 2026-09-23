@@ -15,6 +15,7 @@ import {
   useAddProductToCache,
 } from "@/lib/queries";
 import { compressImage } from "@/lib/image";
+import { DEFAULT_PROFIT_PERCENT, applyProfitToItems, productPriceWithProfit } from "@/lib/pricing";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent} from "@/components/ui/card";
@@ -110,7 +111,9 @@ export default function CreateQuotationWizard() {
       sectionTitle: type === "PRODUCT" ? item.productName || "New Custom Product" : item.serviceName || "New Custom Service",
       description: type === "PRODUCT" ? item.shortDescription || "" : item.description || "",
       quantity: 1,
-      unitPrice: type === "PRODUCT" ? item.sellingPrice || 0 : item.defaultPrice || 0,
+      unitPrice: type === "PRODUCT"
+        ? productPriceWithProfit(item, Number(formData.profitPercent) || 0)
+        : item.defaultPrice || 0,
       taxRate: item.taxRate || 0,
       productId: type === "PRODUCT" && item.id ? item.id : undefined,
       serviceItemId: type === "SERVICE" && item.id ? item.id : undefined,
@@ -230,6 +233,7 @@ export default function CreateQuotationWizard() {
     scopeSummary: "",
     discountType: "PERCENTAGE",
     discountValue: 0,
+    profitPercent: DEFAULT_PROFIT_PERCENT,
   });
 
 
@@ -253,6 +257,7 @@ export default function CreateQuotationWizard() {
         currency: formData.currency,
         discountType: formData.discountType,
         discountValue: Number(formData.discountValue),
+        profitPercent: Number(formData.profitPercent) || 0,
       });
 
       if (formData.items.length > 0) {
@@ -425,6 +430,29 @@ export default function CreateQuotationWizard() {
                   >
                     <Plus className="w-4 h-4 mr-2" /> Add Section
                   </Button>
+                  <div
+                    className="flex items-center gap-2 ml-2"
+                    title="Markup on cost price. Changing it re-prices every catalog product that has a cost price."
+                  >
+                    <label htmlFor="profit-percent" className="text-sm font-medium text-gray-700 whitespace-nowrap">
+                      Profit %
+                    </label>
+                    <Input
+                      id="profit-percent"
+                      type="number"
+                      min="0"
+                      className="h-9 w-20 bg-white"
+                      value={formData.profitPercent}
+                      onChange={(e) => {
+                        const raw = e.target.value;
+                        setFormData((prev: any) => ({
+                          ...prev,
+                          profitPercent: raw,
+                          items: raw === "" ? prev.items : applyProfitToItems(prev.items, products, Number(raw)),
+                        }));
+                      }}
+                    />
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <Button

@@ -609,6 +609,7 @@ export class QuotationsService {
         discountType: q.discountType,
         discountValue: q.discountValue,
         discountAmount: q.discountAmount,
+        profitPercent: q.profitPercent,
         taxAmount: q.taxAmount,
         grandTotal: q.grandTotal,
         amountInWords: q.amountInWords,

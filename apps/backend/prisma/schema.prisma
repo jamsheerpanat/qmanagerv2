@@ -732,6 +732,8 @@ model Quotation {
   discountType   DiscountType?
   discountValue  Float?        @default(0)
   discountAmount Float         @default(0)
+  // Markup on catalog cost price used to price product lines.
+  profitPercent  Float         @default(30)
   taxAmount      Float         @default(0)
   grandTotal     Float         @default(0)
   totalCost      Float         @default(0)

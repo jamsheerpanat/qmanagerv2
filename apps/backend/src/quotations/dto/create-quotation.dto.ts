@@ -7,6 +7,7 @@ import {
   IsBoolean,
   IsArray,
   ValidateNested,
+  Min,
 } from 'class-validator';
 import { ItemType, DiscountType } from '@prisma/client';
 
@@ -70,6 +71,11 @@ export class CreateQuotationDto {
   @IsNumber()
   @IsOptional()
   discountValue?: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  profitPercent?: number;
 
   @IsString()
   @IsOptional()
