@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { PERMISSION_ACTIONS } from './permissions';
 
 const connectionString = `${process.env.DATABASE_URL}`;
@@ -88,8 +89,18 @@ async function main() {
   }
 
   // 6. Create Super Admin User
-  const passwordHash = await bcrypt.hash('Admin@123', 10);
+  // The password comes from SEED_ADMIN_PASSWORD or is generated and printed
+  // once. It used to be a hardcoded 'Admin@123', which is public in this repo.
+  // Only applies when the user is first created; the upsert leaves an existing
+  // password alone.
+  const adminPassword =
+    process.env.SEED_ADMIN_PASSWORD || randomBytes(15).toString('base64url');
+  const passwordHash = await bcrypt.hash(adminPassword, 10);
   const adminEmail = 'superadmin@qmanager.local';
+  const adminExisted = await prisma.user.findUnique({
+    where: { email: adminEmail },
+    select: { id: true },
+  });
 
   const adminUser = await prisma.user.upsert({
     where: { email: adminEmail },
@@ -103,6 +114,9 @@ async function main() {
       status: 'ACTIVE',
     },
   });
+  if (!adminExisted && !process.env.SEED_ADMIN_PASSWORD) {
+    console.log(`Created ${adminEmail} with password: ${adminPassword}`);
+  }
 
   // Assign role to Super Admin
   await prisma.userRole.upsert({
