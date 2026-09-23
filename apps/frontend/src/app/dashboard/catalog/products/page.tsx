@@ -2,16 +2,38 @@
 
 import { useState } from "react";
 import { useProducts } from "@/lib/queries";
+import { api } from "@/lib/axios";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Plus, Search } from "lucide-react";
+import { Download, Plus, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 
 export default function CatalogProductsPage() {
   const [search, setSearch] = useState("");
+  const [isExporting, setIsExporting] = useState(false);
   const router = useRouter();
+
+  async function handleExport() {
+    setIsExporting(true);
+    try {
+      const res = await api.get("/catalog/products/export", { responseType: "blob" });
+      const url = window.URL.createObjectURL(res.data);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `products-${new Date().toISOString().split("T")[0]}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      console.error(e);
+      alert("Failed to export products. Please try again.");
+    } finally {
+      setIsExporting(false);
+    }
+  }
 
   // Full rows here: this page renders the product thumbnails.
   const products = useProducts().data ?? [];
@@ -27,9 +49,15 @@ export default function CatalogProductsPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Product Catalog</h1>
-        <Button onClick={() => router.push("/dashboard/catalog/products/new")}>
-          <Plus className="w-4 h-4 mr-2" /> Add Product
-        </Button>
+        <div className="flex gap-2">
+          <Button variant="outline" onClick={handleExport} disabled={isExporting}>
+            <Download className="w-4 h-4 mr-2" />
+            {isExporting ? "Exporting..." : "Export to Excel"}
+          </Button>
+          <Button onClick={() => router.push("/dashboard/catalog/products/new")}>
+            <Plus className="w-4 h-4 mr-2" /> Add Product
+          </Button>
+        </div>
       </div>
 
       <Card>

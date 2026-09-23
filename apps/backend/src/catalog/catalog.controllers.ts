@@ -7,7 +7,9 @@ import {
   Body,
   Param,
   UseGuards,
+  Res,
 } from '@nestjs/common';
+import type { Response } from 'express';
 import {
   ServiceTypesService,
   CategoriesService,
@@ -81,6 +83,20 @@ export class ProductsController {
   @Get()
   findAll() {
     return this.service.findAll();
+  }
+
+  // Declared before ':id', which would otherwise capture "export".
+  @RequirePermissions('products.view')
+  @Get('export')
+  async export(@Res() res: Response) {
+    const file = await this.service.exportToExcel();
+    const date = new Date().toISOString().split('T')[0];
+    res.set({
+      'Content-Type':
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'Content-Disposition': `attachment; filename="products-${date}.xlsx"`,
+    });
+    res.send(file);
   }
 
   @RequirePermissions('products.view')
