@@ -1,5 +1,6 @@
 import React from "react";
 import { ITHeader, ITFooter } from "./ITInfraAboutPage";
+import { PageFlow } from "../shared/PageFlow";
 
 export const ITInfraQuotationPage = ({
   items, subtotal, discount, tax, grandTotal, currency = "KWD", scopeSummary
@@ -25,8 +26,7 @@ export const ITInfraQuotationPage = ({
 
   return (
     <div className="pdf-page-flow" style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "white" }}>
-      <div style={{ padding: "10mm 13mm 8mm" }}>
-        <ITHeader pageTitle="Commercial Quotation" />
+      <PageFlow header={<ITHeader pageTitle="Commercial Quotation" />} footer={<ITFooter />}>
         
         {scopeSummary && (
           <div style={{ marginBottom: "15px", background: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
@@ -112,9 +112,7 @@ export const ITInfraQuotationPage = ({
             </div>
           </div>
         </div>
-
-        <ITFooter pageNum={4} />
-      </div>
+      </PageFlow>
     </div>
   );
 };

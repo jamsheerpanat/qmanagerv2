@@ -1,6 +1,7 @@
 import React from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { SDHeader, SDFooter } from "./SoftwareDevAboutPage";
+import { PageFlow } from "../shared/PageFlow";
 
 const ScopeCard = ({
   number,
@@ -148,8 +149,7 @@ export const SoftwareDevCommercialFlow = ({
 
   return (
     <div className="pdf-page-flow" style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "white" }}>
-      <div style={{ padding: "10mm 13mm 8mm" }}>
-        <SDHeader pageTitle="Scope, Commercials & Terms" />
+      <PageFlow header={<SDHeader pageTitle="Scope, Commercials & Terms" />} footer={<SDFooter />}>
 
         {/* --- SCOPE SECTION --- */}
         <div style={{ marginBottom: "16px" }}>
@@ -369,9 +369,7 @@ export const SoftwareDevCommercialFlow = ({
             </div>
           </div>
         </div>
-
-        <SDFooter />
-      </div>
+      </PageFlow>
     </div>
   );
 };

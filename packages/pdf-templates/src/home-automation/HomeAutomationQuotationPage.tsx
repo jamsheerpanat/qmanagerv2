@@ -1,4 +1,5 @@
 import React from "react";
+import { PageFlow } from "../shared/PageFlow";
 
 /* ─────────────────────────── Shared Header / Footer ─────────────────────── */
 
@@ -114,8 +115,7 @@ export const HomeAutomationQuotationPage = ({
       className="pdf-page-flow"
       style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "white" }}
     >
-      <div style={{ padding: "10mm 13mm 8mm" }}>
-        <QHeader />
+      <PageFlow header={<QHeader />} footer={<QFooter />}>
         
         {scopeSummary && (
           <div style={{ marginBottom: "15px", background: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
@@ -522,9 +522,7 @@ export const HomeAutomationQuotationPage = ({
             </div>
           </div>
         </div>
-
-        <QFooter />
-      </div>
+      </PageFlow>
     </div>
   );
 };

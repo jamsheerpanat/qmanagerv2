@@ -1,5 +1,6 @@
 import React from "react";
 import { SDHeader, SDFooter } from "./SoftwareDevAboutPage";
+import { PageFlow } from "../shared/PageFlow";
 
 export const SoftwareDevQuotationPage = ({
   items, subtotal, discount, tax, grandTotal, currency = "KWD", scopeSummary
@@ -25,8 +26,7 @@ export const SoftwareDevQuotationPage = ({
 
   return (
     <div className="pdf-page-flow" style={{ fontFamily: "'Inter','Segoe UI',sans-serif", background: "white" }}>
-      <div style={{ padding: "10mm 13mm 8mm" }}>
-        <SDHeader pageTitle="Commercial Quotation" />
+      <PageFlow header={<SDHeader pageTitle="Commercial Quotation" />} footer={<SDFooter />}>
         
         {scopeSummary && (
           <div style={{ marginBottom: "15px", background: "#f8fafc", padding: "10px", borderRadius: "8px", border: "1px solid #e2e8f0" }}>
@@ -112,9 +112,7 @@ export const SoftwareDevQuotationPage = ({
             </div>
           </div>
         </div>
-
-        <SDFooter pageNum={4} />
-      </div>
+      </PageFlow>
     </div>
   );
 };
