@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXFileReference section */
-		CBEB2A1F302C87B00067DB77 /* QManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = QManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CBEB2A1F302C87B00067DB77 /* OctoQManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = OctoQManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -40,7 +40,7 @@
 		CBEB2A20302C87B00067DB77 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				CBEB2A1F302C87B00067DB77 /* QManager.app */,
+				CBEB2A1F302C87B00067DB77 /* OctoQManager.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -67,7 +67,7 @@
 			packageProductDependencies = (
 			);
 			productName = QManager;
-			productReference = CBEB2A1F302C87B00067DB77 /* QManager.app */;
+			productReference = CBEB2A1F302C87B00067DB77 /* OctoQManager.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -274,7 +274,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.octonics.QManager;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = OctoQManager;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -322,7 +322,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 15.0;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.octonics.QManager;
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				PRODUCT_NAME = OctoQManager;
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;

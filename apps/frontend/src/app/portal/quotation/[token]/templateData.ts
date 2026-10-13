@@ -112,6 +112,28 @@ const SOFTWARE_DEV: TemplateData = {
     "Services include requirements analysis, UI/UX design, full-stack development, API integration, cloud deployment, testing, and ongoing maintenance.",
   ],
   vendors: ["React", "Next.js", "Node.js", "PostgreSQL", "AWS", "Docker", "TypeScript", "Flutter"],
+  // Mirrors packages/pdf-templates/src/software-dev so the portal matches the PDF.
+  valueCards: [
+    { icon: "🎯", title: "BUILT FOR YOUR PROCESS", text: "Software shaped around how your team actually works, not a generic template." },
+    { icon: "🔐", title: "SECURE BY DESIGN", text: "Role-based access, audit logs, and secure authentication from day one." },
+    { icon: "📱", title: "WEB & MOBILE", text: "Responsive web apps and native-quality mobile apps for Android and iOS." },
+    { icon: "📊", title: "CLEAR INSIGHTS", text: "Dashboards and reports that give management real-time visibility." },
+    { icon: "🔗", title: "CONNECTED", text: "Integrations with email, WhatsApp, payments, accounting, and third-party APIs." },
+    { icon: "🚀", title: "SCALABLE & SUPPORTED", text: "Cloud-ready architecture with training, documentation, and ongoing support." },
+  ],
+  scopeTitle: "PROPOSED SOFTWARE",
+  scopeHighlight: "DEVELOPMENT SCOPE",
+  scopeIntro: "The proposed software solution can include the following modules and services based on the selected project scope and approved quotation items.",
+  scopes: [
+    { number: "01", icon: "🌐", title: "WEB APPLICATION DEVELOPMENT", intro: "A secure and responsive web application for office users, management teams, admins, and operational departments.", features: ["Secure login", "User management", "Role-based access", "Dashboard", "Data entry forms", "Workflow management", "Reports & analytics", "PDF generation", "Email notifications", "Activity logs"] },
+    { number: "02", icon: "📱", title: "MOBILE APPLICATION DEVELOPMENT", intro: "Mobile apps for customers, employees, field staff, technicians, sales teams, or management users.", features: ["Android & iOS", "Mobile login", "User dashboard", "Push notifications", "QR code scanning", "Mobile forms", "Task updates", "Real-time status"] },
+    { number: "03", icon: "🏢", title: "BUSINESS MANAGEMENT SYSTEM / ERP", intro: "Custom business modules to manage core operations in a structured digital platform.", features: ["Customer management", "Lead management", "Quotation management", "Invoice management", "Inventory management", "Purchase management", "HR records", "Branch management", "Approval workflows"] },
+    { number: "04", icon: "🎯", title: "CRM & SALES AUTOMATION", intro: "CRM tools to manage leads, customers, follow-ups, quotations, and sales pipelines more effectively.", features: ["Lead registration", "Customer database", "Enquiry tracking", "Follow-up reminders", "Sales pipeline", "Quotation tracking", "Communication history", "Conversion reports"] },
+    { number: "05", icon: "📄", title: "DOCUMENT & PDF AUTOMATION", intro: "Generate professional documents automatically using predefined templates and approved data.", features: ["Quotations & proposals", "Invoices & receipts", "Delivery notes", "Work orders", "Agreements", "Auto numbering", "Company branding", "QR verification", "Signature section"] },
+    { number: "06", icon: "📊", title: "DASHBOARDS & REPORTS", intro: "Dashboards and reports provide management with clear visibility of business performance.", features: ["Management dashboard", "Sales dashboard", "Customer reports", "Quotation reports", "Invoice reports", "Payment status", "User activity", "Export PDF / Excel", "Date filtering"] },
+    { number: "07", icon: "🔗", title: "INTEGRATION SERVICES", intro: "The software can be integrated with selected external systems and services depending on project requirements.", features: ["Email service", "SMS / WhatsApp", "Payment gateway", "Accounting software", "Barcode & QR", "API integrations", "Cloud storage", "Third-party tools"] },
+  ],
+  deliverables: ["Requirement analysis", "System architecture planning", "UI/UX design", "Database design", "Web application development", "Mobile app development (if included)", "Admin panel development", "PDF & document template setup", "Reports & dashboard setup", "Testing and bug fixing", "Deployment support", "User training", "Basic technical documentation", "Post-deployment support as agreed"],
   coverLayers: [{ icon: "🎨", label: "UI/UX" }, { icon: "⚙️", label: "Backend" }, { icon: "📱", label: "Mobile" }, { icon: "☁️", label: "Cloud" }, { icon: "🔗", label: "API" }, { icon: "🧪", label: "Testing" }],
 };
 
@@ -203,7 +225,39 @@ const HOME_AUTO_AR: TemplateData = {
 };
 
 const BUILDING_AUTO_AR: TemplateData = { ...IT_INFRA_AR, tagline: "أنظمة إدارة مباني ذكية لبيئات تجارية فعالة ومستدامة ومريحة.", aboutTitle: "أتمتة مباني ذكية", aboutHighlight: "لمساحات تجارية فعالة", coverLayers: [{ icon: "🏢", label: "إدارة مباني" }, { icon: "❄️", label: "تكييف" }, { icon: "💡", label: "إضاءة" }, { icon: "🔐", label: "تحكم وصول" }, { icon: "🔥", label: "إنذار حريق" }, { icon: "⚡", label: "طاقة" }] };
-const SOFTWARE_DEV_AR: TemplateData = { ...IT_INFRA_AR, tagline: "حلول برمجية مخصصة لرقمنة وأتمتة وتوسيع عملياتك التجارية.", aboutTitle: "تطوير برمجيات مخصصة", aboutHighlight: "للتحول الرقمي", coverLayers: [{ icon: "🎨", label: "تصميم" }, { icon: "⚙️", label: "باك إند" }, { icon: "📱", label: "موبايل" }, { icon: "☁️", label: "سحابي" }, { icon: "🔗", label: "API" }, { icon: "🧪", label: "اختبار" }] };
+const SOFTWARE_DEV_AR: TemplateData = {
+  ...IT_INFRA_AR,
+  tagline: "حلول برمجية مخصصة لرقمنة وأتمتة وتوسيع عملياتك التجارية.",
+  aboutTitle: "تطوير برمجيات مخصصة",
+  aboutHighlight: "للتحول الرقمي",
+  introParagraphs: [
+    "تطوّر أوكتونيكس للابتكارات تطبيقات ويب وتطبيقات جوال ومنصات برمجية مخصصة تناسب إجراءات عملك وأهداف نموك.",
+    "نجمع بين البنى البرمجية الحديثة ومنهجية العمل المرنة والتصميم المتمحور حول المستخدم لتقديم حلول موثوقة وقابلة للتوسع وسهلة الصيانة.",
+    "تشمل خدماتنا تحليل المتطلبات، وتصميم واجهات وتجربة المستخدم، والتطوير المتكامل، وربط الأنظمة، والنشر السحابي، والاختبار، والصيانة المستمرة.",
+  ],
+  vendors: SOFTWARE_DEV.vendors,
+  valueCards: [
+    { icon: "🎯", title: "مصمم لإجراءاتك", text: "برنامج مبني حول طريقة عمل فريقك الفعلية وليس قالباً عاماً." },
+    { icon: "🔐", title: "أمان من الأساس", text: "صلاحيات حسب الأدوار وسجلات نشاط ومصادقة آمنة من اليوم الأول." },
+    { icon: "📱", title: "ويب وجوال", text: "تطبيقات ويب متجاوبة وتطبيقات جوال لأندرويد و iOS." },
+    { icon: "📊", title: "رؤية واضحة", text: "لوحات تحكم وتقارير تمنح الإدارة رؤية فورية للأداء." },
+    { icon: "🔗", title: "ربط متكامل", text: "ربط مع البريد وواتساب وبوابات الدفع والمحاسبة والأنظمة الخارجية." },
+    { icon: "🚀", title: "قابل للتوسع ومدعوم", text: "بنية سحابية جاهزة مع تدريب وتوثيق ودعم مستمر." },
+  ],
+  scopeTitle: "نطاق تطوير",
+  scopeHighlight: "البرمجيات المقترح",
+  scopeIntro: "يشمل الحل البرمجي المقترح الوحدات والخدمات التالية بناءً على نطاق المشروع المحدد وبنود العرض المعتمدة.",
+  scopes: [
+    { number: "01", icon: "🌐", title: "تطوير تطبيقات الويب", intro: "تطبيق ويب آمن ومتجاوب لموظفي المكتب والإدارة والمسؤولين والأقسام التشغيلية.", features: ["تسجيل دخول آمن", "إدارة المستخدمين", "صلاحيات حسب الأدوار", "لوحة تحكم", "نماذج إدخال البيانات", "إدارة سير العمل", "تقارير وتحليلات", "إنشاء ملفات PDF", "إشعارات البريد", "سجل النشاط"] },
+    { number: "02", icon: "📱", title: "تطوير تطبيقات الجوال", intro: "تطبيقات جوال للعملاء والموظفين والفنيين وفرق المبيعات والإدارة.", features: ["أندرويد و iOS", "تسجيل الدخول", "لوحة المستخدم", "إشعارات فورية", "مسح رمز QR", "نماذج الجوال", "تحديث المهام", "حالة لحظية"] },
+    { number: "03", icon: "🏢", title: "نظام إدارة الأعمال / ERP", intro: "وحدات مخصصة لإدارة العمليات الأساسية في منصة رقمية منظمة.", features: ["إدارة العملاء", "إدارة العملاء المحتملين", "إدارة العروض", "إدارة الفواتير", "إدارة المخزون", "إدارة المشتريات", "سجلات الموارد البشرية", "إدارة الفروع", "سير الموافقات"] },
+    { number: "04", icon: "🎯", title: "إدارة العملاء وأتمتة المبيعات", intro: "أدوات لإدارة العملاء المحتملين والمتابعات والعروض ومسار المبيعات بفعالية أكبر.", features: ["تسجيل العملاء المحتملين", "قاعدة بيانات العملاء", "تتبع الاستفسارات", "تذكير المتابعة", "مسار المبيعات", "تتبع العروض", "سجل التواصل", "تقارير التحويل"] },
+    { number: "05", icon: "📄", title: "أتمتة المستندات و PDF", intro: "إنشاء مستندات احترافية تلقائياً باستخدام قوالب معتمدة.", features: ["العروض والمقترحات", "الفواتير والإيصالات", "إشعارات التسليم", "أوامر العمل", "الاتفاقيات", "ترقيم تلقائي", "هوية الشركة", "تحقق QR", "خانة التوقيع"] },
+    { number: "06", icon: "📊", title: "لوحات التحكم والتقارير", intro: "لوحات وتقارير تمنح الإدارة رؤية واضحة لأداء العمل.", features: ["لوحة الإدارة", "لوحة المبيعات", "تقارير العملاء", "تقارير العروض", "تقارير الفواتير", "حالة الدفع", "نشاط المستخدمين", "تصدير PDF / Excel", "تصفية بالتاريخ"] },
+    { number: "07", icon: "🔗", title: "خدمات الربط", intro: "يمكن ربط النظام بأنظمة وخدمات خارجية حسب متطلبات المشروع.", features: ["خدمة البريد", "رسائل SMS / واتساب", "بوابة الدفع", "برامج المحاسبة", "باركود و QR", "ربط API", "تخزين سحابي", "أدوات خارجية"] },
+  ],
+  deliverables: ["تحليل المتطلبات", "تخطيط بنية النظام", "تصميم واجهات وتجربة المستخدم", "تصميم قاعدة البيانات", "تطوير تطبيق الويب", "تطوير تطبيق الجوال (إن وجد)", "تطوير لوحة الإدارة", "إعداد قوالب المستندات و PDF", "إعداد التقارير ولوحات التحكم", "الاختبار وإصلاح الأخطاء", "دعم النشر", "تدريب المستخدمين", "توثيق تقني أساسي", "دعم ما بعد التشغيل حسب الاتفاق"],
+  coverLayers: [{ icon: "🎨", label: "تصميم" }, { icon: "⚙️", label: "باك إند" }, { icon: "📱", label: "موبايل" }, { icon: "☁️", label: "سحابي" }, { icon: "🔗", label: "API" }, { icon: "🧪", label: "اختبار" }] };
 
 const SLUG_MAP_AR: Record<string, TemplateData> = {
   "it-infrastructure": IT_INFRA_AR,

@@ -153,7 +153,7 @@ export const SoftwareDevCommercialFlow = ({
 
         {/* --- SCOPE SECTION --- */}
         <div style={{ marginBottom: "16px" }}>
-          <h2 style={{ fontSize: "17px", fontWeight: "800", color: "#0f172a", lineHeight: "1.2", fontFamily: "'Montserrat', sans-serif", marginBottom: "4px" }}>
+          <h2 style={{ fontSize: "17px", fontWeight: "800", color: "#0f172a", lineHeight: "1.2", fontFamily: "'Montserrat', sans-serif", marginBottom: "4px", breakAfter: "avoid" }}>
             PROPOSED SOFTWARE <span style={{ color: "#4f46e5" }}>DEVELOPMENT SCOPE</span>
           </h2>
           <div style={{ width: "50px", height: "3px", background: "linear-gradient(90deg,#4f46e5,#818cf8)", borderRadius: "2px", marginBottom: "8px" }} />
@@ -269,14 +269,14 @@ export const SoftwareDevCommercialFlow = ({
 
         {/* --- TERMS AND SIGNATURE SECTION --- */}
         <div style={{ marginTop: "30px", borderTop: "2px dashed #e2e8f0", paddingTop: "20px" }}>
-          <h2 style={{ fontSize: "17px", fontWeight: "800", color: "#0f172a", lineHeight: "1.2", fontFamily: "'Montserrat', sans-serif", marginBottom: "4px" }}>
+          <h2 style={{ fontSize: "17px", fontWeight: "800", color: "#0f172a", lineHeight: "1.2", fontFamily: "'Montserrat', sans-serif", marginBottom: "4px", breakAfter: "avoid" }}>
             TERMS & <span style={{ color: "#4f46e5" }}>ACCEPTANCE</span>
           </h2>
           <div style={{ width: "50px", height: "3px", background: "linear-gradient(90deg,#4f46e5,#818cf8)", borderRadius: "2px", marginBottom: "16px" }} />
           
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", breakInside: "avoid" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
             <div style={{ display: "flex", flexDirection: "column", gap: "9px" }}>
-              <div style={{ background: "#fffbeb", border: "1px solid #fbbf24", borderRadius: "8px", padding: "9px" }}>
+              <div style={{ background: "#fffbeb", border: "1px solid #fbbf24", borderRadius: "8px", padding: "9px", breakInside: "avoid" }}>
                 <div style={{ fontSize: "8px", fontWeight: "700", color: "#92400e", marginBottom: "5px" }}>📋 GENERAL NOTES</div>
                 <div style={{ display: "flex", flexDirection: "column", gap: "3px" }}>
                   {GENERAL_NOTES.map((n, i) => (

@@ -414,7 +414,8 @@ export default function QuotationDetailPage({
               setIsGeneratingLink(true);
               try {
                 const { data } = await api.post(`/quotations/${id}/generate-share-link`);
-                setShareLinkUrl(data.portalLink);
+                // The API's NEXT_PUBLIC_APP_URL can point at an internal host; the portal lives on this origin.
+                setShareLinkUrl(`${window.location.origin}/portal/quotation/${data.token}`);
                 setLinkCopied(false);
                 setShowShareLinkModal(true);
               } catch (e) {
