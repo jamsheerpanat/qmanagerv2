@@ -102,6 +102,7 @@ export const HomeAutomationQuotationPage = ({
 
   /* ── Running serial counter (skips section headings + optionals) ── */
   let serial = 0;
+  const hasDiscount = (items || []).some((i: any) => i.discountAmount > 0);
 
   /* ── Reusable cell style helper ── */
   const cell = (extra: React.CSSProperties = {}): React.CSSProperties => ({
@@ -187,7 +188,7 @@ export const HomeAutomationQuotationPage = ({
                 { label: "Unit Price", w: "11%", align: "right" as const },
                 { label: "Discount", w: "9%", align: "right" as const },
                 { label: "Total", w: "14.5%", align: "right" as const },
-              ].map((h) => (
+              ].filter((h) => hasDiscount || h.label !== "Discount").map((h) => (
                 <th
                   key={h.label}
                   style={{
@@ -220,7 +221,7 @@ export const HomeAutomationQuotationPage = ({
                     }}
                   >
                     <td
-                      colSpan={8}
+                      colSpan={hasDiscount ? 8 : 7}
                       style={{
                         padding: "5px 8px",
                         fontWeight: "700",
@@ -337,7 +338,8 @@ export const HomeAutomationQuotationPage = ({
                   </td>
 
                   {/* Discount */}
-                  <td
+                  {hasDiscount && (
+<td
                     style={cell({
                       textAlign: "right",
                       color: "#ef4444",
@@ -350,7 +352,7 @@ export const HomeAutomationQuotationPage = ({
                         -{fmt(item.discountAmount)} <span style={{ fontSize: "5px", color: "#f87171" }}>{currency}</span>
                       </>
                     ) : "—"}
-                  </td>
+                  </td>)}
 
                   {/* Total */}
                   <td
@@ -371,7 +373,7 @@ export const HomeAutomationQuotationPage = ({
             {/* Empty state */}
             {(!items || items.length === 0) && (
               <tr>
-                <td colSpan={8} style={{ padding: "20px", textAlign: "center", color: "#94a3b8", fontSize: "8px" }}>
+                <td colSpan={hasDiscount ? 8 : 7} style={{ padding: "20px", textAlign: "center", color: "#94a3b8", fontSize: "8px" }}>
                   No items defined for this quotation.
                 </td>
               </tr>
@@ -464,7 +466,7 @@ export const HomeAutomationQuotationPage = ({
                 { label: "Subtotal", value: fmt(subtotal), color: "#0f172a", bg: "#fff" },
                 { label: "Discount", value: `− ${fmt(discount)}`, color: "#dc2626", bg: "#fef2f2" },
                 { label: "Tax (VAT)", value: `+ ${fmt(tax)}`, color: "#64748b", bg: "#f8fafc" },
-              ].map(({ label, value, color, bg }) => (
+              ].filter((r) => r.label !== "Discount" || discount > 0).map(({ label, value, color, bg }) => (
                 <div
                   key={label}
                   style={{
