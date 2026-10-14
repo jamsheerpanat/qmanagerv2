@@ -47,6 +47,11 @@ export COREPACK_ENABLE_DOWNLOAD_PROMPT=0
 pnpm install --frozen-lockfile
 
 cd apps/backend
+# PDFs are printed by Playwright's Chromium. A Playwright version bump expects a
+# new browser build that `pnpm install` does not download, and every PDF then
+# fails with "Executable doesn't exist". This is a no-op when it is current.
+npx playwright install chromium
+
 npx prisma db push --accept-data-loss
 npx prisma generate
 npm run build
